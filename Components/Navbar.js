@@ -1,7 +1,9 @@
 import styled from 'styled-components';
 import Link from 'next/link'
+import {useState} from 'react'
 
 function NavBar ({active}) {
+    let [navbarOpen, setNavbarOpen] = useState(false);
     return (
         <Navbar>
             <NavbarHead>
@@ -11,6 +13,13 @@ function NavBar ({active}) {
                     </NavbarHeadItem>
                 </Link>
             </NavbarHead>
+
+            <NavbarButton>
+                <NavbarButtonInput defaultValue={navbarOpen} type="checkbox"></NavbarButtonInput>
+                <NavbarButtonSpan></NavbarButtonSpan>
+                <NavbarButtonSpan></NavbarButtonSpan>
+                <NavbarButtonSpan></NavbarButtonSpan>
+            </NavbarButton>
 
             <NavbarMain>
                 <Link href="/about" as="/about/f">
@@ -46,14 +55,66 @@ export default NavBar;
 const Navbar = styled.nav`
     width: 100%;
     padding: 1rem 3rem;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    justify-items: center;
     align-items: center;
     background-color: black;
+    position: relative;
+    
+    @media (min-width: 768px) {
+        & {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+`;
+
+const NavbarButton = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index:3;
+    position: relative;
+    width: 40px;
+    height: 100%;
+
+    & input:checked ~ span:nth-child(2) {
+        transform: rotate(45deg) translateY(15px) translateX(9px);;
+    }
+    
+    & input:checked ~ span:nth-child(3) {
+        display: none;
+    }
+    
+    & input:checked ~ span:nth-child(4) {
+        transform: rotate(-45deg) translateY(-13px) translateX(7px);;
+    }
+    @media (min-width: 768px) {
+        & {
+            display: none;
+        }
+    }
+`;
+
+const NavbarButtonInput = styled.input`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity:0;
+    cursor: pointer;
+`;
+
+const NavbarButtonSpan = styled.span`
+    width: 100%;
+    height: 10%;
+    background-color: var(--pink);
+    transition: .5s;
 `;
 
 const NavbarHead = styled.div`
-    width: 60%;
+    justify-self: start;
 `;
 
 const Items = styled.p`
@@ -69,9 +130,21 @@ const NavbarHeadItem = styled(Items)`
 
 const NavbarMain = styled.div`
     display: flex;
-    width: 40%;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    @media (max-width: 768px) {
+        & {
+            top: -999px;
+            left: 0;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            padding: 3rem 0;
+            background-color: var(--dark);
+        }
+    }
 `;
 
 const ItemsActive = styled(Items)`
