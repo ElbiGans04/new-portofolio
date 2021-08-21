@@ -14,3 +14,9 @@ a {
 * {
   box-sizing: border-box;
 }
+
+:root {
+  --pink : #FFA7C4;
+  --dark : #282C35;
+}
+
