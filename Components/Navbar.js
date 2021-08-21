@@ -15,14 +15,14 @@ function NavBar ({active}) {
             </NavbarHead>
 
             <NavbarButton>
-                <NavbarButtonInput defaultValue={navbarOpen} type="checkbox"></NavbarButtonInput>
+                <NavbarButtonInput defaultValue={navbarOpen} onClick={() => setNavbarOpen(state => !state)} type="checkbox"></NavbarButtonInput>
                 <NavbarButtonSpan></NavbarButtonSpan>
                 <NavbarButtonSpan></NavbarButtonSpan>
                 <NavbarButtonSpan></NavbarButtonSpan>
             </NavbarButton>
 
-            <NavbarMain>
-                <Link href="/about" as="/about/f">
+            <NavbarMain style={navbarOpen ? {top: 0} : {}}>
+                <Link href="/about">
                     <ItemsActive>
                             About
                     </ItemsActive>
@@ -59,7 +59,6 @@ const Navbar = styled.nav`
     grid-template-columns: 2fr 1fr;
     justify-items: center;
     align-items: center;
-    background-color: black;
     position: relative;
     
     @media (min-width: 768px) {
@@ -69,7 +68,24 @@ const Navbar = styled.nav`
     }
 `;
 
-const NavbarButton = styled.div`
+const Items = styled.p`
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+`;
+
+const NavbarHead = styled.div`
+    justify-self: start;
+`;
+
+
+const NavbarHeadItem = styled(Items)`
+    color: var(--pink);
+    font-size: 2rem;
+`;
+
+const NavbarButton = styled.div` 
+    justify-self: end;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -78,17 +94,19 @@ const NavbarButton = styled.div`
     width: 40px;
     height: 100%;
 
+
     & input:checked ~ span:nth-child(2) {
-        transform: rotate(45deg) translateY(15px) translateX(9px);;
-    }
+        transform: rotate(45deg) translateY(10px) translateX(15px);;
+    };
     
     & input:checked ~ span:nth-child(3) {
-        display: none;
-    }
+        opacity: 0;
+    };
     
     & input:checked ~ span:nth-child(4) {
-        transform: rotate(-45deg) translateY(-13px) translateX(7px);;
-    }
+        transform: rotate(-45deg) translateY(-6px) translateX(10px);;
+    };
+    
     @media (min-width: 768px) {
         & {
             display: none;
@@ -110,29 +128,16 @@ const NavbarButtonSpan = styled.span`
     width: 100%;
     height: 10%;
     background-color: var(--pink);
-    transition: .5s;
+    transition: var(--transition);
 `;
 
-const NavbarHead = styled.div`
-    justify-self: start;
-`;
-
-const Items = styled.p`
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
-`;
-
-const NavbarHeadItem = styled(Items)`
-    color: var(--pink);
-    font-size: 2rem;
-`;
 
 const NavbarMain = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    transition: var(--transition);
     @media (max-width: 768px) {
         & {
             top: -999px;

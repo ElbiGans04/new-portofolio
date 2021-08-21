@@ -18,5 +18,6 @@ a {
 :root {
   --pink : #FFA7C4;
   --dark : #282C35;
+  --transition: .5s;
 }
 
