@@ -19,6 +19,20 @@ export default function Home() {
   )
 }
 
+function calcute(value, number) {
+	let regex = value.match(/\d/g);
+  let typeVal = value.match(/\D/g);
+  let result = '';
+
+  regex.forEach((val, idx) => {
+    result += `${val}`
+  });
+
+  result = parseInt(result) - number;
+
+	return `${result < 1 ? 1 : result}${typeVal.join('')}`
+
+}
 
 const Container = styled.div`
   background-color: var(--dark);
@@ -35,6 +49,18 @@ const Text = styled.h1`
   font-size: ${({size}) => size || '1rem'};
   margin: ${ ({margin}) => margin || '0 0 0 0'};
   color: white;
+
+  @media (max-width: 768px) {
+    & {
+      font-size :  ${({size}) => calcute(size, 0.5)};
+    }
+  }
+
+  @media (max-width: 576px) {
+    & {
+      font-size :  ${({size}) => calcute(size, 1.5)};
+    }
+  }
   
   & span {
     color: var(--pink);

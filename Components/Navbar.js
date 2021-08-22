@@ -23,9 +23,12 @@ function NavBar ({active}) {
 
             <NavbarMain style={navbarOpen ? {top: 0} : {}}>
                 <Link href="/about">
-                    <ItemsActive>
+                    {/* <ItemsActive>
                             About
-                    </ItemsActive>
+                    </ItemsActive> */}
+                    <Items>
+                        About
+                    </Items>
                 </Link>
                 <Link href="/contact">
                     <Items>
@@ -53,6 +56,7 @@ export default NavBar;
 
 // Styled Component
 const Navbar = styled.nav`
+    z-index: 2;
     width: 100%;
     padding: 2rem 3rem;
     display: grid;
@@ -89,7 +93,7 @@ const NavbarButton = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    z-index:3;
+    z-index: 3;
     position: relative;
     width: 40px;
     height: 100%;

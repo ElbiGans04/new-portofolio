@@ -1,4 +1,5 @@
 .profile {
     border-radius: 50%;
     border: .3rem solid var(--pink)!important;
+    z-index: 1;
 }
