@@ -54,7 +54,7 @@ export default NavBar;
 // Styled Component
 const Navbar = styled.nav`
     width: 100%;
-    padding: 1rem 3rem;
+    padding: 2rem 3rem;
     display: grid;
     grid-template-columns: 2fr 1fr;
     justify-items: center;
