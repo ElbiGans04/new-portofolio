@@ -30,9 +30,9 @@ function NavBar ({active}) {
 
             <NavbarMain style={navbarOpen ? {top: 0} : {}}>
                 {
-                    urlComponents.map((value) => {
+                    urlComponents.map((value, index) => {
                         return (
-                            <Link href={value.url}>
+                            <Link href={value.url} key={index}>
                                 {
                                     value.url === active ? <ItemsActive>{value.name}</ItemsActive> : <Items>{value.name}</Items>
                                 }
@@ -152,8 +152,6 @@ const NavbarMain = styled.div`
 `;
 
 const ItemsActive = styled(Items)`
-    background-color: var(--pink);
-    padding: .8rem;
-    border-radius: .8rem;
-    color: var(--dark)
+    border-bottom: .1rem solid var(--pink);
+    padding: 0 0 0.3rem 0;
 `;
