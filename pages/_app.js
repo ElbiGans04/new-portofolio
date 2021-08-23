@@ -1,9 +1,12 @@
 import '../styles/reset.css'
 import '../styles/globals.css'
+import Layout from '../Components/Layout'
 
 function MyApp({ Component, pageProps }) {
   return (
-    <Component {...pageProps} />
+    <Layout>
+      <Component {...pageProps} />
+    </Layout>
   )
 }
 

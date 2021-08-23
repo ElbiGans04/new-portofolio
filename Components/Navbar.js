@@ -15,7 +15,7 @@ function NavBar ({active}) {
             </NavbarHead>
 
             <NavbarButton>
-                <NavbarButtonInput defaultValue={navbarOpen} onClick={() => setNavbarOpen(state => !state)} type="checkbox"></NavbarButtonInput>
+                <NavbarButtonInput checked={navbarOpen} onChange={() => setNavbarOpen(state => !state)} type="checkbox"></NavbarButtonInput>
                 <NavbarButtonSpan></NavbarButtonSpan>
                 <NavbarButtonSpan></NavbarButtonSpan>
                 <NavbarButtonSpan></NavbarButtonSpan>
