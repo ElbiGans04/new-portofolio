@@ -2,6 +2,13 @@ import styled from 'styled-components';
 import Link from 'next/link'
 import {useState} from 'react'
 
+const urlComponents = [
+    {name: 'About', url: '/about'},
+    {name: 'Contacts', url: '/contacts'},
+    {name: 'Projects', url: '/Projects'},
+    {name: 'Tools', url: '/tools'},
+]
+
 function NavBar ({active}) {
     let [navbarOpen, setNavbarOpen] = useState(false);
     return (
@@ -22,29 +29,17 @@ function NavBar ({active}) {
             </NavbarButton>
 
             <NavbarMain style={navbarOpen ? {top: 0} : {}}>
-                <Link href="/about">
-                    {/* <ItemsActive>
-                            About
-                    </ItemsActive> */}
-                    <Items>
-                        About
-                    </Items>
-                </Link>
-                <Link href="/contact">
-                    <Items>
-                        Contact
-                    </Items>
-                </Link>
-                <Link href="/projects">
-                    <Items>
-                        Projects
-                    </Items>
-                </Link>
-                <Link href="/tools">
-                    <Items>
-                        Tools
-                    </Items>
-                </Link>
+                {
+                    urlComponents.map((value) => {
+                        return (
+                            <Link href={value.url}>
+                                {
+                                    value.url === active ? <ItemsActive>{value.name}</ItemsActive> : <Items>{value.name}</Items>
+                                }
+                            </Link>
+                        )
+                    })
+                }
             </NavbarMain>
         </Navbar>
     );
