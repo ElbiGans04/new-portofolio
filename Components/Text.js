@@ -11,7 +11,7 @@ function calcute(value, number) {
 const Text = styled.h1`
   font-size: ${({size}) => `${size}rem` || '1rem'};
   margin: ${ ({margin}) => margin || '0 0 0 0'};
-  color: white;
+  color: ${({color}) => color || 'white'};
   text-align: center;
 
   @media (max-width: 768px) {

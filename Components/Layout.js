@@ -18,7 +18,7 @@ export default Layout;
 
 const Container = styled.div`
   background-color: var(--dark);
-  height: 100vh;
+  min-height: 100vh;
 `;
 
 const Main = styled.main`
@@ -26,7 +26,7 @@ const Main = styled.main`
   display: grid;
   justify-items: center;
   align-items: center;
-
+  padding: 0 2rem;
   @media (max-width: 768px) {
     & {
       padding: 0 1rem;

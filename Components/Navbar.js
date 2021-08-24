@@ -5,7 +5,7 @@ import {useState} from 'react'
 const urlComponents = [
     {name: 'About', url: '/about'},
     {name: 'Contacts', url: '/contacts'},
-    {name: 'Projects', url: '/Projects'},
+    {name: 'Projects', url: '/projects'},
     {name: 'Tools', url: '/tools'},
 ]
 
