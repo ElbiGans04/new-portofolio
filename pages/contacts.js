@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import styled from 'styled-components'
-import {IoLogoGithub, IoLogoFacebook, IoMail} from 'react-icons/io5'
+import {IoLogoGithub, IoLogoFacebook, IoMail, IoLogoLinkedin} from 'react-icons/io5'
 import Text from '../Components/Text'
 function Contacts () {
     return (
@@ -23,6 +23,9 @@ function Contacts () {
                 </a>
                 <a href="mailto:rhafaelbijaksana04@gmail.com">
                     <IoMail color="white" size="2rem" title="email account"/>
+                </a>
+                <a href="https://www.linkedin.com/in/rhafael-bijaksana">
+                    <IoLogoLinkedin color="white" size="2rem" title="linkedin account"/>
                 </a>
             </ContainerIcon>
 
