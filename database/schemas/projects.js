@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import tool from './tool';
+import image from './image';
 
 const projectSchema = new mongoose.Schema({
     title: {
@@ -19,10 +20,7 @@ const projectSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    images: {
-        type: String,
-        required: true,
-    },
+    images: [image],
     description: {
         type: String,
         required: true,
