@@ -1,16 +1,19 @@
 import styled from 'styled-components'
 import NavBar from './Navbar'
 import { useRouter } from 'next/router'
+import ErrorBoundary from './ErrorBoundary'
 
 
 function Layout ({children}) {
     const {route} = useRouter();
 
     return (
-    <Container>
-      <NavBar active={route}></NavBar>
-      <Main>{children}</Main>
-    </Container>
+      <ErrorBoundary>
+        <Container>
+          <NavBar active={route}></NavBar>
+          <Main>{children}</Main>
+        </Container>
+      </ErrorBoundary>
     )
 };
 

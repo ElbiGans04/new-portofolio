@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Text from "../Components/Text";
 import styled from "styled-components";
-import { useEffect, useReducer} from "react";
+import React, { useEffect, useReducer } from "react";
 
 const listActions = [
   {
@@ -36,66 +36,45 @@ function Projects() {
     status: "iddle",
     projects: [],
     activeActions: ["A1", "ASC"],
+    error: false,
   });
-
-//   const fetchData = useCallback(() => {
-//     async function getData () {
-//         try {
-//           // ubah state
-//           dispatch({ type: "fetchData" });
-    
-//           const fetchProjects = await (await fetch("/api/projects?type=A1&order=ASC")).json();
-//           console.log(fetchProjects);
-    
-//           // ubah state setelah finish
-//           dispatch({
-//             type: "projects",
-//             payload: { projects: fetchProjects.data },
-//           });
-//         } catch (err) {
-//           alert(err);
-//         }
-//     }
-//     console.log("recreate")
-//     getData()
-//   }, []);
   
-  
-  useEffect(() => {      
-    
+  useEffect(() => {
     // Mencegah kondisi balapan
-    if (state.status === 'iddle') {
-        // Mencegah react menyetel state ketika sudah pindah halaman
-        let didCancel = false;
-        async function getData () {
-            try {
-              // ubah state
-              dispatch({ type: "fetchData" });
-        
-              const fetchProjects = await (await fetch(`/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`)).json();
-              console.log(fetchProjects);
-        
-              // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
-              if (!didCancel) {
-                dispatch({
-                  type: "projects",
-                  payload: { projects: fetchProjects.data },
-                });
-              }
+    if (state.status === "iddle") {
+      // Mencegah react menyetel state ketika sudah pindah halaman
+      let didCancel = false;
+      async function getData() {
+        try {
+          // ubah state
+          dispatch({ type: "initial" });
 
-            } catch (err) {
-              alert("error");
-              console.error(err);
-            }
-        }
-        
-        
-        getData();
+          throw new Error('ffff')
 
-        // Setel true variabel did cancel
-        return () => {
-          didCancel = true;
+          const fetchProjects = await (
+            await fetch(
+              `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`
+            )
+          ).json();
+
+          // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
+          if (!didCancel) {
+            dispatch({
+              type: "projects",
+              payload: { projects: fetchProjects.data },
+            });
+          }
+        } catch (err) {
+          if (!didCancel) dispatch({ type: "error" });
         }
+      }
+
+      getData();
+
+      // Setel true variabel did cancel
+      return () => {
+        didCancel = true;
+      };
     }
   }, [state.activeActions]);
 
@@ -120,62 +99,68 @@ function Projects() {
 
     dispatch({ type: "action", payload: { actions: newActiveActions } });
   };
-
+  
   return (
     <Container>
       <Head>
         <title>Projects I've made</title>
       </Head>
-      <Text size={3}>
-        <span>Projects</span>
-      </Text>
-      <ContainerActions>
-        {listActions.map((value, index) => {
-          if (
-            value.value === state.activeActions[0] ||
-            value.value === state.activeActions[1]
-          ) {
-            return (
-              <ActionActive
-                className={
-                  state.status === "loading" ? "cursor-notAllowed" : ""
-                }
-                disabled={state.status === "loading" ? true : false}
-                key={index}
-                onClick={(event) =>
-                  handleAction(event, value.type, value.value)
-                }
-              >
-                <Text size={1.2}>{value.text}</Text>
-              </ActionActive>
-            );
-          } else {
-            return (
-              <Action
-                className={
-                  state.status === "loading" ? "cursor-notAllowed" : ""
-                }
-                disabled={state.status === "loading" ? true : false}
-                key={index}
-                key={index}
-                onClick={(event) =>
-                  handleAction(event, value.type, value.value)
-                }
-              >
-                <Text size={1.2}>{value.text}</Text>
-              </Action>
-            );
-          }
-        })}
-      </ContainerActions>
-      {state.status === "loading" ? (
-        <div className="loader"></div>
+      {state.error === true ? (
+        <h1>Error</h1>
       ) : (
-        <ContainerProjects>
-          {state.projects.map((value, index) => {
-            return <Test key={index} />;
-          })}
-        </ContainerProjects>
+        <React.Fragment>
+          <Text size={3}>
+            <span>Projects</span>
+          </Text>
+          <ContainerActions>
+            {listActions.map((value, index) => {
+              if (
+                value.value === state.activeActions[0] ||
+                value.value === state.activeActions[1]
+              ) {
+                return (
+                  <ActionActive
+                    className={
+                      state.status === "loading" ? "cursor-notAllowed" : ""
+                    }
+                    disabled={state.status === "loading" ? true : false}
+                    key={index}
+                    onClick={(event) =>
+                      handleAction(event, value.type, value.value)
+                    }
+                  >
+                    <Text size={1.2}>{value.text}</Text>
+                  </ActionActive>
+                );
+              } else {
+                return (
+                  <Action
+                    className={
+                      state.status === "loading" ? "cursor-notAllowed" : ""
+                    }
+                    disabled={state.status === "loading" ? true : false}
+                    key={index}
+                    key={index}
+                    onClick={(event) =>
+                      handleAction(event, value.type, value.value)
+                    }
+                  >
+                    <Text size={1.2}>{value.text}</Text>
+                  </Action>
+                );
+              }
+            })}
+          </ContainerActions>
+          {state.status === "loading" ? (
+            <div className="loader"></div>
+          ) : (
+            <ContainerProjects>
+              {state.projects.map((value, index) => {
+                return <Test key={index} />;
+              })}
+            </ContainerProjects>
+          )}
+        </React.Fragment>
       )}
     </Container>
   );
@@ -185,12 +170,14 @@ export default Projects;
 
 function reducer(state, action) {
   switch (action.type) {
-    case "fetchData":
+    case "initial":
       return { ...state, status: "loading" };
     case "projects":
       return { ...state, projects: action.payload.projects, status: "iddle" };
     case "action":
       return { ...state, activeActions: action.payload.actions };
+    case "error":
+      return { ...state, error: true };
     default:
       return { ...state };
   }
