@@ -32,9 +32,9 @@ function NavBar ({active}) {
                 {
                     urlComponents.map((value, index) => {
                         return (
-                            <Link href={value.url} key={index}>
+                            <Link href={value.url} passHref key={index}>
                                 {
-                                    value.url === active ? <ItemsActive>{value.name}</ItemsActive> : <Items>{value.name}</Items>
+                                    value.url === active ? <ItemsActive  onClick={() => setNavbarOpen(false)}>{value.name}</ItemsActive> : <Items  onClick={() => setNavbarOpen(false)}>{value.name}</Items>
                                 }
                             </Link>
                         )
@@ -67,7 +67,8 @@ const Navbar = styled.nav`
     }
 `;
 
-const Items = styled.p`
+const Items = styled.a`
+    text-decoration: none;
     color: white;
     cursor: pointer;
     font-weight: bold;
