@@ -62,8 +62,11 @@ function Projects() {
   
   
   useEffect(() => {      
-      // Mencegah kondisi balapan
-      if (state.status === 'iddle') {
+    
+    // Mencegah kondisi balapan
+    if (state.status === 'iddle') {
+        // Mencegah react menyetel state ketika sudah pindah halaman
+        let didCancel = false;
         async function getData () {
             try {
               // ubah state
@@ -72,17 +75,27 @@ function Projects() {
               const fetchProjects = await (await fetch(`/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`)).json();
               console.log(fetchProjects);
         
-              // ubah state setelah finish
-              dispatch({
-                type: "projects",
-                payload: { projects: fetchProjects.data },
-              });
+              // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
+              if (!didCancel) {
+                dispatch({
+                  type: "projects",
+                  payload: { projects: fetchProjects.data },
+                });
+              }
+
             } catch (err) {
-              alert(err);
+              alert("error");
+              console.error(err);
             }
         }
+        
+        
+        getData();
 
-        getData()
+        // Setel true variabel did cancel
+        return () => {
+          didCancel = true;
+        }
     }
   }, [state.activeActions]);
 

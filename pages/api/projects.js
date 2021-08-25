@@ -11,6 +11,9 @@ export default async function handler(req, res) {
         try {
           const projects = await Project.find({}) /* find all the data in our database */
           res.status(200).json({ success: true, data: projects })
+          // setTimeout(() => {
+
+          // }, 5000)
         } catch (error) {
           res.status(400).json({ success: false })
         }
