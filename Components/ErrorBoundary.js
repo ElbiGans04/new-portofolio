@@ -1,5 +1,6 @@
 import React from 'react';
 import ErrorComponent from './Error'
+import styled from 'styled-components'
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -19,7 +20,11 @@ class ErrorBoundary extends React.Component {
     render() {
       if (this.state.hasError) {
         // You can render any custom fallback UI
-        return (<ErrorComponent></ErrorComponent>)
+        return (
+          <ErrorContainer>
+            <ErrorComponent></ErrorComponent>
+          </ErrorContainer>
+        )
       }
   
       return this.props.children; 
@@ -28,3 +33,10 @@ class ErrorBoundary extends React.Component {
 
   export default ErrorBoundary;
 
+const ErrorContainer = styled.div`
+  height: 100vh;
+  background-color: var(--dark);
+  display: grid;
+  justify-items: center;
+  align-items: center;
+`;
