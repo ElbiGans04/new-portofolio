@@ -10,10 +10,11 @@ export default async function handler(req, res) {
       case 'GET':
         try {
           const projects = await Project.find({}) /* find all the data in our database */
-          res.status(200).json({ success: true, data: projects })
-          // setTimeout(() => {
+          // res.status(200).json({ success: true, data: projects })
+          setTimeout(() => {
+            res.status(200).json({ success: true, data: projects })
 
-          // }, 5000)
+          }, 3000)
         } catch (error) {
           res.status(400).json({ success: false })
         }

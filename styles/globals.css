@@ -23,6 +23,7 @@ a {
 
 .cursor-notAllowed {
   cursor: not-allowed!important;
+  opacity: .8;
 }
 
 /* Loader */

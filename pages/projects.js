@@ -33,15 +33,17 @@ const listActions = [
 
 function Projects() {
   const [state, dispatch] = useReducer(reducer, {
+    // status : iddle, loding, error
     status: "iddle",
     projects: [],
     activeActions: ["A1", "ASC"],
-    error: false,
+    refetch: false,
   });
+
   
   useEffect(() => {
     // Mencegah kondisi balapan
-    if (state.status === "iddle") {
+    if (state.status !== "loading") {
       // Mencegah react menyetel state ketika sudah pindah halaman
       let didCancel = false;
       async function getData() {
@@ -49,13 +51,13 @@ function Projects() {
           // ubah state
           dispatch({ type: "initial" });
 
-          throw new Error('ffff')
-
           const fetchProjects = await (
             await fetch(
               `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`
             )
           ).json();
+
+          console.log(fetchProjects, didCancel)
 
           // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
           if (!didCancel) {
@@ -68,15 +70,15 @@ function Projects() {
           if (!didCancel) dispatch({ type: "error" });
         }
       }
-
+      
       getData();
-
+      
       // Setel true variabel did cancel
       return () => {
         didCancel = true;
       };
     }
-  }, [state.activeActions]);
+  }, [state.activeActions, state.refetch]);
 
   const handleAction = (e, typeButton, buttonValue) => {
     let validValue = false;
@@ -89,7 +91,7 @@ function Projects() {
     }
 
     // Untuk sementara kita abaikan dulu jika tidak valid
-    if (!validValue || !validType) alert("Error");
+    if (!validValue || !validType) alert("Error invalid value");
 
     // Setel state terbaru
     const newActiveActions = [...state.activeActions];
@@ -105,15 +107,11 @@ function Projects() {
       <Head>
         <title>Projects I've made</title>
       </Head>
-      {state.error === true ? (
-        <h1>Error</h1>
-      ) : (
-        <React.Fragment>
-          <Text size={3}>
-            <span>Projects</span>
-          </Text>
-          <ContainerActions>
-            {listActions.map((value, index) => {
+      <Text size={3}>
+          <span>Projects</span>
+        </Text>
+        <ContainerActions>
+          {listActions.map((value, index) => {
               if (
                 value.value === state.activeActions[0] ||
                 value.value === state.activeActions[1]
@@ -121,9 +119,9 @@ function Projects() {
                 return (
                   <ActionActive
                     className={
-                      state.status === "loading" ? "cursor-notAllowed" : ""
+                      state.status !== 'iddle' ? "cursor-notAllowed" : ""
                     }
-                    disabled={state.status === "loading" ? true : false}
+                    disabled={state.status !== 'iddle' ? true : false}
                     key={index}
                     onClick={(event) =>
                       handleAction(event, value.type, value.value)
@@ -136,9 +134,9 @@ function Projects() {
                 return (
                   <Action
                     className={
-                      state.status === "loading" ? "cursor-notAllowed" : ""
+                      state.status !== 'iddle' ? "cursor-notAllowed" : ""
                     }
-                    disabled={state.status === "loading" ? true : false}
+                    disabled={state.status !== 'iddle' ? true : false}
                     key={index}
                     key={index}
                     onClick={(event) =>
@@ -149,8 +147,14 @@ function Projects() {
                   </Action>
                 );
               }
-            })}
-          </ContainerActions>
+          })}
+        </ContainerActions>
+
+      {/* Error handling */}
+      {state.status === 'error' ? (
+        <Action onClick={() => dispatch({type: 'refetch'})}><Text size={1.2}><span>Click here to refresh</span></Text></Action>
+      ) : (
+        <React.Fragment>
           {state.status === "loading" ? (
             <div className="loader"></div>
           ) : (
@@ -173,11 +177,13 @@ function reducer(state, action) {
     case "initial":
       return { ...state, status: "loading" };
     case "projects":
-      return { ...state, projects: action.payload.projects, status: "iddle" };
+      return { ...state, projects: action.payload.projects, status: "iddle", refetch: false };
     case "action":
-      return { ...state, activeActions: action.payload.actions };
+      return { ...state, activeActions: action.payload.actions, refetch: false };
     case "error":
-      return { ...state, error: true };
+      return { ...state, status: 'error', refetch: false };
+    case "refetch":
+      return { ...state, refetch: true };
     default:
       return { ...state };
   }
@@ -210,7 +216,7 @@ const Action = styled.button`
   font-weight: bold;
   color: white;
   border: 0.2rem solid var(--pink);
-  padding: 0.5rem;
+  padding: 0.8rem;
   margin: 0 0.8rem;
   cursor: pointer;
 
