@@ -10,11 +10,11 @@ export default async function handler(req, res) {
       case 'GET':
         try {
           const projects = await Project.find({}) /* find all the data in our database */
-          // res.status(200).json({ success: true, data: projects })
-          setTimeout(() => {
-            res.status(200).json({ success: true, data: projects })
+          res.status(200).json({ success: true, data: projects })
+          // setTimeout(() => {
+          //   res.status(200).json({ success: true, data: projects })
 
-          }, 3000)
+          // }, 3000)
         } catch (error) {
           res.status(400).json({ success: false })
         }
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       case 'POST':
         try {
           const pet = await Project.create(
-            {...req.body, tools: [{name:req.body.tools}]}
+            {...req.body, tools: [{name:req.body.tools}], images: [{src: req.body.images}]}
           ) /* create a new model in the database */
           res.status(201).json({ success: true, data: pet })
         } catch (error) {

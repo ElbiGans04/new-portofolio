@@ -1,7 +1,10 @@
 import Head from "next/head";
 import Text from "../Components/Text";
-import styled from "styled-components";
-import React, { useEffect, useReducer } from "react";
+import styled, {createGlobalStyle} from "styled-components";
+import React, { useEffect, useReducer, useState, useRef } from "react";
+import Image from 'next/image'
+import projectsStyled from '../styles/projects.module.css'
+import {CSSTransition} from 'react-transition-group'
 
 const listActions = [
   {
@@ -31,6 +34,7 @@ const listActions = [
   },
 ];
 
+
 function Projects() {
   const [state, dispatch] = useReducer(reducer, {
     // status : iddle, loding, error
@@ -39,6 +43,8 @@ function Projects() {
     activeActions: ["A1", "ASC"],
     refetch: false,
   });
+  const [modal, setModal] = useState(false);
+  const nodeRef = useRef(null);
 
   
   useEffect(() => {
@@ -56,8 +62,6 @@ function Projects() {
               `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`
             )
           ).json();
-
-          console.log(fetchProjects, didCancel)
 
           // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
           if (!didCancel) {
@@ -103,70 +107,147 @@ function Projects() {
   };
   
   return (
-    <Container>
-      <Head>
-        <title>Projects I've made</title>
-      </Head>
-      <Text size={3}>
-          <span>Projects</span>
-        </Text>
-        <ContainerActions>
-          {listActions.map((value, index) => {
-              if (
-                value.value === state.activeActions[0] ||
-                value.value === state.activeActions[1]
-              ) {
-                return (
-                  <ActionActive
-                    className={
-                      state.status !== 'iddle' ? "cursor-notAllowed" : ""
-                    }
-                    disabled={state.status !== 'iddle' ? true : false}
-                    key={index}
-                    onClick={(event) =>
-                      handleAction(event, value.type, value.value)
-                    }
-                  >
-                    <Text size={1.2}>{value.text}</Text>
-                  </ActionActive>
-                );
-              } else {
-                return (
-                  <Action
-                    className={
-                      state.status !== 'iddle' ? "cursor-notAllowed" : ""
-                    }
-                    disabled={state.status !== 'iddle' ? true : false}
-                    key={index}
-                    key={index}
-                    onClick={(event) =>
-                      handleAction(event, value.type, value.value)
-                    }
-                  >
-                    <Text size={1.2}>{value.text}</Text>
-                  </Action>
-                );
-              }
-          })}
-        </ContainerActions>
+    <React.Fragment>
+      { modal && <GlobalStyle /> }
+      <Container>
+        <Head>
+          <title>Projects I've made</title>
+        </Head>
+        <Text size={3}>
+            <span>Projects</span>
+          </Text>
+          <ContainerActions>
+            {listActions.map((value, index) => {
+                if (
+                  value.value === state.activeActions[0] ||
+                  value.value === state.activeActions[1]
+                ) {
+                  return (
+                    <ActionActive
+                      className={
+                        state.status !== 'iddle' ? "cursor-notAllowed" : ""
+                      }
+                      disabled={state.status !== 'iddle' ? true : false}
+                      key={index}
+                      onClick={(event) =>
+                        handleAction(event, value.type, value.value)
+                      }
+                    >
+                      <Text size={1.2}>{value.text}</Text>
+                    </ActionActive>
+                  );
+                } else {
+                  return (
+                    <Action
+                      className={
+                        state.status !== 'iddle' ? "cursor-notAllowed" : ""
+                      }
+                      disabled={state.status !== 'iddle' ? true : false}
+                      key={index}
+                      key={index}
+                      onClick={(event) =>
+                        handleAction(event, value.type, value.value)
+                      }
+                    >
+                      <Text size={1.2}>{value.text}</Text>
+                    </Action>
+                  );
+                }
+            })}
+          </ContainerActions>
 
-      {/* Error handling */}
-      {state.status === 'error' ? (
-        <Action onClick={() => dispatch({type: 'refetch'})}><Text size={1.2}><span>Click here to refresh</span></Text></Action>
-      ) : (
-        <React.Fragment>
-          {state.status === "loading" ? (
-            <div className="loader"></div>
-          ) : (
-            <ContainerProjects>
-              {state.projects.map((value, index) => {
-                return <Test key={index} />;
-              })}
-            </ContainerProjects>
-          )}
-        </React.Fragment>
-      )}
-    </Container>
+          <CSSTransition nodeRef={nodeRef} classNames="modal" in={modal} timeout={500}>
+            <Modal ref={nodeRef}>
+              <ModalMain>
+                <ModalAction>
+                  <ModalClose onClick={() => setModal(false)}>
+                    <span></span>
+                    <span></span>
+                  </ModalClose>
+                </ModalAction>
+                <ModalContent>
+                  <ModalImage>
+                    <ModalImageContent>
+                      <Image className={projectsStyled.project} src="/images/Screenshot (1).png" layout="fill"></Image>
+                    </ModalImageContent>
+                    <ModalImageCount>
+                      <ModalImageCountCount></ModalImageCountCount>
+                      <ModalImageCountCount></ModalImageCountCount>
+                      <ModalImageCountCount></ModalImageCountCount>
+                    </ModalImageCount>
+                  </ModalImage>
+                  <ModalContentContent>
+                      <Text align="start" minSize={1.5} size={2}><span>Elbi Library</span></Text>
+                      <ModalContentContentList>
+                        <ModalContentContentListTitle>
+                          <Text align="start" fontWeight="bold">Development Date Process</Text>
+                          <Text align="start" fontWeight="bold">Tools</Text>
+                          <Text align="start" fontWeight="bold">Project Type</Text>
+                        </ModalContentContentListTitle>
+                        <ModalContentContentListValue>
+                          <Text align="start" fontWeight="normal">{":"}&nbsp;18-08-2020 - 18-01-2021</Text>
+                          <Text align="start" fontWeight="normal">{":"}&nbsp;Express Javascript React</Text>
+                          <Text align="start" fontWeight="normal">{":"}&nbsp;Work Project</Text>
+                        </ModalContentContentListValue>
+                      </ModalContentContentList>
+                        <Text margin="2rem 0 0 0" align="start" textIndent="2rem" fontWeight="normal" lineHeight="1.5rem" >
+                          This application is called elbi library, the purpose of making this application is because it is 
+                          for school exams. This application uses javascript as fullstack language, express as backend framework 
+                        and next js as
+                          This application is called elbi library, the purpose of making this application is because it is 
+                          for school exams. This application uses javascript as fullstack language, express as backend framework 
+                        and next js as
+                          This application is called elbi library, the purpose of making this application is because it is 
+                          for school exams. This application uses javascript as fullstack language, express as backend framework 
+                        and next js as
+                          This application is called elbi library, the purpose of making this application is because it is 
+                          for school exams. This application uses javascript as fullstack language, express as backend framework 
+                        and next js as
+                          This application is called elbi library, the purpose of making this application is because it is 
+                          for school exams. This application uses javascript as fullstack language, express as backend framework 
+                        and next js as. <span>click here to go to this website</span>
+                        </Text>
+                  </ModalContentContent>
+                </ModalContent>
+              </ModalMain>
+            </Modal>
+            {/* <h1 ref={nodeRef} style={{transition: '.3s'}}>WWW</h1> */}
+          </CSSTransition>
+
+          <button onClick={() => setModal((state) => !state)}>Jajal modal</button>
+
+        {/* Error handling */}
+        {state.status === 'error' ? (
+          <>
+            <Text size={1.5}><span>There is an error in the page :(</span></Text>
+            <Action onClick={() => dispatch({type: 'refetch'})}><Text size={1.2}><span>Click here to refresh</span></Text></Action>
+          </>
+        ) : (
+          <React.Fragment>
+            {state.status === "loading" ? (
+              <div className="loader"></div>
+            ) : (
+              <ContainerProjects>
+                {state.projects.map((value, index) => {
+                  return (
+                  <Project key={index} 
+                    className={state.status !== 'iddle' ? "cursor-notAllowed" : ""} 
+                    disabled={state.status === 'iddle' ? false : true} onClick={(event) => console.log(state.projects[index])}>
+                    <ProjectImageContainer>
+                      <Image className={projectsStyled.project} src={value.images[0].src} layout="fill" ></Image>
+                    </ProjectImageContainer>
+                    <ProjectTextContainer>
+                      <Text size={1.3} margin="0 "><span>{changeFirstWord(value.title)}</span></Text>
+                      <Text margin=".3rem 0 0 0 ">{changeFirstWord(value.typeProject)}</Text>
+                    </ProjectTextContainer>
+                  </Project>)
+                })}
+              </ContainerProjects>
+            )}
+          </React.Fragment>
+        )}
+      </Container>
+    </ React.Fragment>
   );
 }
 
@@ -187,7 +268,18 @@ function reducer(state, action) {
     default:
       return { ...state };
   }
+};
+
+function changeFirstWord(word) {
+  if (typeof word !== "string") return;
+  return `${word.slice(0,1).toUpperCase()}${word.slice(1)}`
 }
+
+const GlobalStyle = createGlobalStyle`
+  body {
+    overflow: hidden!important;
+  }
+`
 
 const Container = styled.div`
   display: grid;
@@ -238,11 +330,184 @@ const ContainerProjects = styled.div`
   width: 100%;
   align-items: center;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 0.5rem;
+  gap: 3rem 1rem;
+
+  @media (max-width: 768px) {
+    & {
+      width: 90%;
+    }
+  }
 `;
 
-const Test = styled.div`
-  background-color: red;
+const Project = styled.div`
+  width: 100%;
+  display: grid;
+  position: relative;
+  height: 250px;
+  grid-template-rows: 2fr 1fr;
+  // box-shadow: 2px 2px 9px rgb(0 0 0 / 30%);
+  box-shadow: 2px 7px 12px rgb(0 0 0 / 30%);
+  justify-items: center;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+
+  // img {
+  //   object-fit: contain!important;
+  // }
+`;
+
+const ProjectImageContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--dark2);
+`;
+const ProjectTextContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: start;
+  padding: .8rem;
+`;
+
+const Modal = styled.div`
+  position: fixed;
+  background-color: var(--dark2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(31,33,39, 0.8);
+  transition: var(--transition);
+  box-sizing: border-box;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  top: 50%;
+  left: 50%;
+  margin-top: -.5px;
+  margin-left: -.5px;
+`;
+const ModalMain = styled.div`
+  position: relative;
+  width: 90%;
+  height: 90%;
+  box-sizing: border-box;
+  background-color: var(--dark);
+  box-shadow: 5px 12px 17px rgb(0 0 0 / 30%);
+  overflow: auto;
+  &::-webkit-scrollbar {
+    width: 7px;
+  }
+  
+  /* Track */
+  &::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+  }
+  
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background: var(--pink);
+    border-radius: 10px;
+  }
+`;
+
+const ModalAction = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 10%;
+  box-sizing: border-box;
+  padding: .5rem;
+`;
+
+const ModalClose = styled.div`
+  width: 40px;
+  height: 100%; 
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  cursor: pointer;
+
+  & span {
+    width: 100%;
+    height: 25%;
+    background-color: var(--pink);
+  };
+
+  & span:first-child {
+    transform: translate(0px, 17px) rotate(45deg);
+  }
+  & span:last-child {
+    transform: translate(0px, -6px) rotate(-45deg);
+  }
+`;
+
+const ModalContent = styled.div`
+  width: 100%;
+  height: 90%;
+  @media (max-width: 768px) {
+    & {
+      padding: 1rem;
+    }
+  }
+  // display: grid;
+  // grid-template-rows: 2fr 1fr;
+  // overflow: auto;
+`;
+const ModalImage = styled.div`
+  height: 375px;
+`;
+const ModalImageContent = styled.div`
+  background-color: var(--dark2);
+  position: relative;
+  height: 350px;
+`;
+const ModalImageCount = styled.div`
+  position: relative;
+  width: 100%;
+  height: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+const ModalImageCountCount = styled.span`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--pink);
+  margin: 0 .3rem;
+`;
+const ModalContentContent = styled.div`
+  margin: 2rem 0 0 0;
+  padding: 2rem;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    & {
+      padding: 1rem;
+    }
+  }
+`;
+const ModalContentContentList = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   height: 100px;
+  margin-top: 1rem;
+`;
+const ModalContentContentListTitle = styled.div`
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  align-items: center;
+  justify-content: start;
+`;
+const ModalContentContentListValue = styled.div`
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  justify-content: start;
+  align-items: center;
 `;
