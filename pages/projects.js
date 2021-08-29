@@ -166,16 +166,7 @@ function Projects() {
                   </ModalClose>
                 </ModalAction>
                 <ModalContent>
-                  <ModalImage>
-                    <ModalImageContent>
-                      <Image className={projectsStyled.project} src="/images/Screenshot (1).png" layout="fill"></Image>
-                    </ModalImageContent>
-                    <ModalImageCount>
-                      <ModalImageCountCount></ModalImageCountCount>
-                      <ModalImageCountCount></ModalImageCountCount>
-                      <ModalImageCountCount></ModalImageCountCount>
-                    </ModalImageCount>
-                  </ModalImage>
+                  <ImageSlider showModal={modal}></ImageSlider>
                   <ModalContentContent>
                       <Text align="start" minSize={1.5} size={2}><span>Elbi Library</span></Text>
                       <ModalContentContentList>
@@ -249,9 +240,83 @@ function Projects() {
       </Container>
     </ React.Fragment>
   );
-}
+};
 
 export default Projects;
+
+function ImageSlider ({showModal}) {
+  const [slide, setSlide] = useState({slide: 0, translateX: 0});
+  const nodeRef = useRef(null)
+
+  function changeImage(event, index) {
+    const modal = event.target.parentElement.parentElement;
+    const {width: modalWidth} = modal.getBoundingClientRect();
+    
+    setSlide({ slide: index, translateX: (index * -modalWidth)})
+  }
+  
+  function changeImageAction(event, action) {
+    const modal = event.target.parentElement.parentElement;
+    const {width: modalWidth} = modal.getBoundingClientRect();
+    
+    const result = action === 0 ? ((slide.slide - 1) < 0 ? 2 : (slide.slide - 1) ) : ((slide.slide + 1) > 2 ? 0 : (slide.slide + 1));
+    setSlide({ slide: result, translateX: (result * -modalWidth)})
+  }
+
+  useEffect(() => {
+    if (showModal) {
+      let interval = setInterval(() => {
+        console.log(showModal)
+        const modal = nodeRef.current;
+        const {width: modalWidth} = modal?.getBoundingClientRect();
+        setSlide((state) => {
+          const result = ((state.slide + 1) > 2 ? 0 : (state.slide + 1));
+          return { slide: result, translateX: (result * -modalWidth)}
+        })
+      }, 3000);
+  
+      
+      return () => {
+        clearInterval(interval)
+        console.log("unmount")
+      }
+    }
+  }, [showModal])
+
+  return (
+    <ModalImage ref={nodeRef}>
+        <ModalImageActions>
+          <ModalImageAction onClick={event => changeImageAction(event, 0)}>
+            <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
+            <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
+          </ModalImageAction>
+          <ModalImageAction onClick={event => changeImageAction(event, 1)}>
+            <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
+            <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
+          </ModalImageAction>
+        </ModalImageActions>
+      <ModalImageContent translateX={slide.translateX} >
+        <ModalImageContentContent>
+          <Image className={projectsStyled.project} src="/images/Screenshot (1).png" layout="fill"></Image>
+        </ModalImageContentContent>
+        <ModalImageContentContent>
+          <Image className={projectsStyled.project} src="/images/profile.jpg" layout="fill"></Image>
+        </ModalImageContentContent>
+        <ModalImageContentContent>
+          <Image className={projectsStyled.project} src="/images/Screenshot (2).png" layout="fill"></Image>
+        </ModalImageContentContent>
+      </ModalImageContent>
+      <ModalImageCount>
+        <ModalImageCountCount opacity={slide.slide === 0 ? '1' : '0.5'} onClick={event => changeImage(event, 0)}></ModalImageCountCount>
+        <ModalImageCountCount opacity={slide.slide === 1 ? '1' : '0.5'} onClick={event => changeImage(event, 1)}></ModalImageCountCount>
+        <ModalImageCountCount opacity={slide.slide === 2 ? '1' : '0.5'}onClick={event => changeImage(event, 2)}></ModalImageCountCount>
+      </ModalImageCount>
+    </ModalImage>
+  )
+}
+
+
+
 
 function reducer(state, action) {
   switch (action.type) {
@@ -461,11 +526,53 @@ const ModalContent = styled.div`
 `;
 const ModalImage = styled.div`
   height: 375px;
+  overflow: hidden;
+  position: relative;
+
+  &:hover div:first-child {
+    opacity: 1;
+  }
+`;
+const ModalImageActions = styled.div`
+  transition: var(--transition);
+  opacity: 0;
+  width: 100%;
+  height: 350px;
+  position: absolute;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+`;
+const ModalImageAction = styled.div`
+  width: 10%;
+  height: 100%;
+  background-color: rgba(31,33,39,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+`;
+const ModalImageActionSpan = styled.span`
+  width: 32px;
+  height: 4px;
+  background-color: var(--pink);
+  cursor: pointer;
+  transform: ${ ({transform}) => transform || '' };
 `;
 const ModalImageContent = styled.div`
-  background-color: var(--dark2);
   position: relative;
   height: 350px;
+  white-space: nowrap;
+  transition: var(--transition);
+  transform: translateX(${({translateX}) => translateX ? `${translateX}px`: '0px'});
+`;
+const ModalImageContentContent = styled.div`
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: inline-block;
+  background-color: var(--dark2);
 `;
 const ModalImageCount = styled.div`
   position: relative;
@@ -481,6 +588,7 @@ const ModalImageCountCount = styled.span`
   border-radius: 50%;
   background-color: var(--pink);
   margin: 0 .3rem;
+  opacity: ${({opacity}) => opacity || '1'}
 `;
 const ModalContentContent = styled.div`
   margin: 2rem 0 0 0;
@@ -498,6 +606,7 @@ const ModalContentContentList = styled.div`
   grid-template-columns: 1fr 1fr;
   height: 100px;
   margin-top: 1rem;
+  gap: .5rem;
 `;
 const ModalContentContentListTitle = styled.div`
   display: grid;
