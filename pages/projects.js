@@ -5,6 +5,7 @@ import React, { useEffect, useReducer, useState, useRef } from "react";
 import Image from 'next/image'
 import projectsStyled from '../styles/projects.module.css'
 import {CSSTransition} from 'react-transition-group'
+import {IoStopCircleOutline, IoPlayCircleOutline} from 'react-icons/io5'
 
 const listActions = [
   {
@@ -246,6 +247,7 @@ export default Projects;
 
 function ImageSlider ({showModal}) {
   const [slide, setSlide] = useState({slide: 0, translateX: 0});
+  const [play, setPlay] = useState(true);
   const nodeRef = useRef(null)
 
   function changeImage(event, index) {
@@ -264,7 +266,7 @@ function ImageSlider ({showModal}) {
   }
 
   useEffect(() => {
-    if (showModal) {
+    if (showModal && play) {
       let interval = setInterval(() => {
         console.log(showModal)
         const modal = nodeRef.current;
@@ -281,16 +283,21 @@ function ImageSlider ({showModal}) {
         console.log("unmount")
       }
     }
-  }, [showModal])
+  }, [showModal, play])
 
   return (
     <ModalImage ref={nodeRef}>
         <ModalImageActions>
-          <ModalImageAction onClick={event => changeImageAction(event, 0)}>
+          <ModalImageAction onClick={event => changeImageAction(event, 0)} title="prev image">
             <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
             <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
           </ModalImageAction>
-          <ModalImageAction onClick={event => changeImageAction(event, 1)}>
+          <ModalImageAction backgroundColor='transparent' onDoubleClick={() => setPlay(state => !state)} >
+            {
+              !play ? <IoPlayCircleOutline color="var(--pink)" size="4rem" title="move image automatic"></IoPlayCircleOutline> : <IoStopCircleOutline color="var(--pink)" size="4rem" title="stop move image automatic"></IoStopCircleOutline>
+            }
+          </ModalImageAction>
+          <ModalImageAction onClick={event => changeImageAction(event, 1)} title="next image">
             <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
             <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
           </ModalImageAction>
@@ -544,10 +551,11 @@ const ModalImageActions = styled.div`
   align-items: center;
   z-index: 2;
 `;
+
 const ModalImageAction = styled.div`
   width: 10%;
   height: 100%;
-  background-color: rgba(31,33,39,0.8);
+  background-color: ${({backgroundColor}) => backgroundColor || 'rgba(31,33,39,0.8)'};
   display: flex;
   justify-content: center;
   align-items: center;
