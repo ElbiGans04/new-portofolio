@@ -1,11 +1,11 @@
 import Head from "next/head";
 import Text from "../Components/Text";
-import styled, {createGlobalStyle} from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import React, { useEffect, useReducer, useState, useRef } from "react";
-import Image from 'next/image'
-import projectsStyled from '../styles/projects.module.css'
-import {CSSTransition} from 'react-transition-group'
-import {IoStopCircleOutline, IoPlayCircleOutline} from 'react-icons/io5'
+import Image from "next/image";
+import projectsStyled from "../styles/projects.module.css";
+import { CSSTransition } from "react-transition-group";
+import { IoStopCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
 
 const listActions = [
   {
@@ -35,7 +35,6 @@ const listActions = [
   },
 ];
 
-
 function Projects() {
   const [state, dispatch] = useReducer(reducer, {
     // status : iddle, loding, error
@@ -44,10 +43,13 @@ function Projects() {
     activeActions: ["A1", "ASC"],
     refetch: false,
   });
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState({open: false, index: 0});
   const nodeRef = useRef(null);
 
-  
+  const project = state.projects[modal?.index];
+  const disabled = state.status !== "iddle" ? true : false;
+  const className = state.status !== "iddle" ? "cursor-notAllowed" : ""
+
   useEffect(() => {
     // Mencegah kondisi balapan
     if (state.status !== "loading") {
@@ -55,8 +57,11 @@ function Projects() {
       let didCancel = false;
       async function getData() {
         try {
-          // ubah state
-          dispatch({ type: "initial" });
+
+          if (!didCancel) {
+            // ubah state
+            dispatch({ type: "initial" });
+          }
 
           const fetchProjects = await (
             await fetch(
@@ -75,9 +80,9 @@ function Projects() {
           if (!didCancel) dispatch({ type: "error" });
         }
       }
-      
+
       getData();
-      
+
       // Setel true variabel did cancel
       return () => {
         didCancel = true;
@@ -106,113 +111,124 @@ function Projects() {
 
     dispatch({ type: "action", payload: { actions: newActiveActions } });
   };
-  
+
   return (
     <React.Fragment>
-      { modal && <GlobalStyle /> }
+      {modal.open && <GlobalStyle />}
       <Container>
         <Head>
           <title>Projects I've made</title>
         </Head>
         <Text size={3}>
-            <span>Projects</span>
-          </Text>
-          <ContainerActions>
-            {listActions.map((value, index) => {
-                if (
-                  value.value === state.activeActions[0] ||
-                  value.value === state.activeActions[1]
-                ) {
-                  return (
-                    <ActionActive
-                      className={
-                        state.status !== 'iddle' ? "cursor-notAllowed" : ""
-                      }
-                      disabled={state.status !== 'iddle' ? true : false}
-                      key={index}
-                      onClick={(event) =>
-                        handleAction(event, value.type, value.value)
-                      }
-                    >
-                      <Text size={1.2}>{value.text}</Text>
-                    </ActionActive>
-                  );
-                } else {
-                  return (
-                    <Action
-                      className={
-                        state.status !== 'iddle' ? "cursor-notAllowed" : ""
-                      }
-                      disabled={state.status !== 'iddle' ? true : false}
-                      key={index}
-                      key={index}
-                      onClick={(event) =>
-                        handleAction(event, value.type, value.value)
-                      }
-                    >
-                      <Text size={1.2}>{value.text}</Text>
-                    </Action>
-                  );
-                }
-            })}
-          </ContainerActions>
+          <span>Projects</span>
+        </Text>
+        <ContainerActions>
+          {listActions.map((value, index) => {
+            if (
+              value.value === state.activeActions[0] ||
+              value.value === state.activeActions[1]
+            ) {
+              return (
+                <ActionActive
+                  className={className}
+                  disabled={disabled}
+                  key={index}
+                  onClick={(event) =>
+                    handleAction(event, value.type, value.value)
+                  }
+                >
+                  <Text size={1.2}>{value.text}</Text>
+                </ActionActive>
+              );
+            } else {
+              return (
+                <Action
+                  className={className}
+                  disabled={disabled}
+                  key={index}
+                  onClick={(event) =>
+                    handleAction(event, value.type, value.value)
+                  }
+                >
+                  <Text size={1.2}>{value.text}</Text>
+                </Action>
+              );
+            }
+          })}
+        </ContainerActions>
 
-          <CSSTransition nodeRef={nodeRef} classNames="modal" in={modal} timeout={500}>
-            <Modal ref={nodeRef}>
-              <ModalMain>
-                <ModalAction>
-                  <ModalClose onClick={() => setModal(false)}>
-                    <span></span>
-                    <span></span>
-                  </ModalClose>
-                </ModalAction>
-                <ModalContent>
-                  <ImageSlider showModal={modal}></ImageSlider>
-                  <ModalContentContent>
-                      <Text align="start" minSize={1.5} size={2}><span>Elbi Library</span></Text>
-                      <ModalContentContentList>
-                        <ModalContentContentListTitle>
-                          <Text align="start" fontWeight="bold">Development Date Process</Text>
-                          <Text align="start" fontWeight="bold">Tools</Text>
-                          <Text align="start" fontWeight="bold">Project Type</Text>
-                        </ModalContentContentListTitle>
-                        <ModalContentContentListValue>
-                          <Text align="start" fontWeight="normal">{":"}&nbsp;18-08-2020 - 18-01-2021</Text>
-                          <Text align="start" fontWeight="normal">{":"}&nbsp;Express Javascript React</Text>
-                          <Text align="start" fontWeight="normal">{":"}&nbsp;Work Project</Text>
-                        </ModalContentContentListValue>
-                      </ModalContentContentList>
-                        <Text margin="2rem 0 0 0" align="start" textIndent="2rem" fontWeight="normal" lineHeight="1.5rem" >
-                          This application is called elbi library, the purpose of making this application is because it is 
-                          for school exams. This application uses javascript as fullstack language, express as backend framework 
-                        and next js as
-                          This application is called elbi library, the purpose of making this application is because it is 
-                          for school exams. This application uses javascript as fullstack language, express as backend framework 
-                        and next js as
-                          This application is called elbi library, the purpose of making this application is because it is 
-                          for school exams. This application uses javascript as fullstack language, express as backend framework 
-                        and next js as
-                          This application is called elbi library, the purpose of making this application is because it is 
-                          for school exams. This application uses javascript as fullstack language, express as backend framework 
-                        and next js as
-                          This application is called elbi library, the purpose of making this application is because it is 
-                          for school exams. This application uses javascript as fullstack language, express as backend framework 
-                        and next js as. <span>click here to go to this website</span>
-                        </Text>
-                  </ModalContentContent>
-                </ModalContent>
-              </ModalMain>
-            </Modal>
-            {/* <h1 ref={nodeRef} style={{transition: '.3s'}}>WWW</h1> */}
-          </CSSTransition>
+        <CSSTransition
+          nodeRef={nodeRef}
+          classNames="modal"
+          in={modal.open}
+          timeout={500}
+        >
+          <Modal ref={nodeRef}>
+            <ModalMain>
+              <ModalAction>
+                <ModalClose onClick={() => setModal({open: false, index: 0})}>
+                  <span></span>
+                  <span></span>
+                </ModalClose>
+              </ModalAction>
+              <ModalContent>
+                <ImageSlider showModal={modal.open}></ImageSlider>
+                <ModalContentContent>
+                  <Text align="start" minSize={1.5} size={2}>
+                    <span>{changeFirstWord(project?.title)}</span>
+                  </Text>
+                  <ModalContentContentList>
+                    <ModalContentContentListTitle>
+                      <Text align="start" fontWeight="bold">
+                        Development Date Process
+                      </Text>
+                      <Text align="start" fontWeight="bold">
+                        Tools
+                      </Text>
+                      <Text align="start" fontWeight="bold">
+                        Project Type
+                      </Text>
+                    </ModalContentContentListTitle>
+                    <ModalContentContentListValue>
+                      <Text align="start" fontWeight="normal">
+                        {":"}&nbsp;{getFullDate(project?.startDate)}{" - "}{getFullDate(project?.endDate)}
+                      </Text>
+                      <Text align="start" fontWeight="normal">
+                        {":"}&nbsp; {getTool(project?.tools)}
+                      </Text>
+                      <Text align="start" fontWeight="normal">
+                        {":"}&nbsp;{changeFirstWord(project?.typeProject)}
+                      </Text>
+                    </ModalContentContentListValue>
+                  </ModalContentContentList>
+                  <Text
+                    margin="2rem 0 0 0"
+                    align="start"
+                    textIndent="2rem"
+                    fontWeight="normal"
+                    lineHeight="1.5rem"
+                  >
+                    {project?.description}. <span>click here to go to this website</span>
+                  </Text>
+                </ModalContentContent>
+              </ModalContent>
+            </ModalMain>
+          </Modal>
+          {/* <ModalComponent open={modal.open} project={state.projects[modal.index]} ref={nodeRef} setModal={setModal} /> */}
+        </CSSTransition>
 
-          <button onClick={() => setModal((state) => !state)}>Jajal modal</button>
 
         {/* Error handling */}
-        {state.status === 'error' ? (
+        {state.status === "error" ? (
           <>
-            <Text size={1.5}><span>There is an error in the page :(</span></Text>
-            <Action onClick={() => dispatch({type: 'refetch'})}><Text size={1.2}><span>Click here to refresh</span></Text></Action>
+            <Text size={1.5}>
+              <span>Failed to retrieve data:(</span>
+            </Text>
+            <Action onClick={() => dispatch({ type: "refetch" })}>
+              <Text size={1.2}>
+                <span>Click here to try to retrieve data again</span>
+              </Text>
+            </Action>
           </>
         ) : (
           <React.Fragment>
@@ -222,136 +238,220 @@ function Projects() {
               <ContainerProjects>
                 {state.projects.map((value, index) => {
                   return (
-                  <Project key={index} 
-                    className={state.status !== 'iddle' ? "cursor-notAllowed" : ""} 
-                    disabled={state.status === 'iddle' ? false : true} onClick={(event) => console.log(state.projects[index])}>
-                    <ProjectImageContainer>
-                      <Image className={projectsStyled.project} src={value.images[0].src} layout="fill" ></Image>
-                    </ProjectImageContainer>
-                    <ProjectTextContainer>
-                      <Text size={1.3} margin="0 "><span>{changeFirstWord(value.title)}</span></Text>
-                      <Text margin=".3rem 0 0 0 ">{changeFirstWord(value.typeProject)}</Text>
-                    </ProjectTextContainer>
-                  </Project>)
+                    <Project
+                      onClick={() => {
+                        setModal({open: true, index});
+                      }}
+                      key={index}
+                      className={className}
+                      disabled={disabled}
+                    >
+                      <ProjectImageContainer>
+                        <Image
+                          className={projectsStyled.project}
+                          src={value.images[0].src}
+                          layout="fill"
+                        ></Image>
+                      </ProjectImageContainer>
+                      <ProjectTextContainer>
+                        <Text size={1.3} margin="0 ">
+                          <span>{changeFirstWord(value.title)}</span>
+                        </Text>
+                        <Text margin=".3rem 0 0 0 ">
+                          {changeFirstWord(value.typeProject)}
+                        </Text>
+                      </ProjectTextContainer>
+                    </Project>
+                  );
                 })}
               </ContainerProjects>
             )}
           </React.Fragment>
         )}
       </Container>
-    </ React.Fragment>
+    </React.Fragment>
   );
-};
+}
 
 export default Projects;
 
-function ImageSlider ({showModal}) {
-  const [slide, setSlide] = useState({slide: 0, translateX: 0});
+
+function ImageSlider({ showModal }) {
+  const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const [play, setPlay] = useState(true);
-  const nodeRef = useRef(null)
+  const nodeRef = useRef(null);
 
   function changeImage(event, index) {
     const modal = event.target.parentElement.parentElement;
-    const {width: modalWidth} = modal.getBoundingClientRect();
-    
-    setSlide({ slide: index, translateX: (index * -modalWidth)})
+    const { width: modalWidth } = modal.getBoundingClientRect();
+
+    setSlide({ slide: index, translateX: index * -modalWidth });
   }
-  
+
   function changeImageAction(event, action) {
     const modal = event.target.parentElement.parentElement;
-    const {width: modalWidth} = modal.getBoundingClientRect();
-    
-    const result = action === 0 ? ((slide.slide - 1) < 0 ? 2 : (slide.slide - 1) ) : ((slide.slide + 1) > 2 ? 0 : (slide.slide + 1));
-    setSlide({ slide: result, translateX: (result * -modalWidth)})
+    const { width: modalWidth } = modal.getBoundingClientRect();
+
+    const result =
+      action === 0
+        ? slide.slide - 1 < 0
+          ? 2
+          : slide.slide - 1
+        : slide.slide + 1 > 2
+        ? 0
+        : slide.slide + 1;
+    setSlide({ slide: result, translateX: result * -modalWidth });
   }
 
   useEffect(() => {
     if (showModal && play) {
       let interval = setInterval(() => {
-        console.log(showModal)
+        console.log(showModal);
         const modal = nodeRef.current;
-        const {width: modalWidth} = modal?.getBoundingClientRect();
+        const { width: modalWidth } = modal?.getBoundingClientRect();
         setSlide((state) => {
-          const result = ((state.slide + 1) > 2 ? 0 : (state.slide + 1));
-          return { slide: result, translateX: (result * -modalWidth)}
-        })
+          const result = state.slide + 1 > 2 ? 0 : state.slide + 1;
+          return { slide: result, translateX: result * -modalWidth };
+        });
       }, 3000);
-  
-      
+
       return () => {
-        clearInterval(interval)
-        console.log("unmount")
-      }
+        clearInterval(interval);
+      };
     }
-  }, [showModal, play])
+  }, [showModal, play]);
 
   return (
     <ModalImage ref={nodeRef}>
-        <ModalImageActions>
-          <ModalImageAction onClick={event => changeImageAction(event, 0)} title="prev image">
-            <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
-            <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
-          </ModalImageAction>
-          <ModalImageAction backgroundColor='transparent' onDoubleClick={() => setPlay(state => !state)} >
-            {
-              !play ? <IoPlayCircleOutline color="var(--pink)" size="4rem" title="move image automatic"></IoPlayCircleOutline> : <IoStopCircleOutline color="var(--pink)" size="4rem" title="stop move image automatic"></IoStopCircleOutline>
-            }
-          </ModalImageAction>
-          <ModalImageAction onClick={event => changeImageAction(event, 1)} title="next image">
-            <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
-            <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
-          </ModalImageAction>
-        </ModalImageActions>
-      <ModalImageContent translateX={slide.translateX} >
+      <ModalImageActions>
+        <ModalImageAction
+          onClick={(event) => changeImageAction(event, 0)}
+          title="prev image"
+        >
+          <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
+          <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
+        </ModalImageAction>
+        <ModalImageAction
+          backgroundColor="transparent"
+          onDoubleClick={() => setPlay((state) => !state)}
+        >
+          {!play ? (
+            <IoPlayCircleOutline
+              color="var(--pink)"
+              size="4rem"
+              title="move image automatic"
+            ></IoPlayCircleOutline>
+          ) : (
+            <IoStopCircleOutline
+              color="var(--pink)"
+              size="4rem"
+              title="stop move image automatic"
+            ></IoStopCircleOutline>
+          )}
+        </ModalImageAction>
+        <ModalImageAction
+          onClick={(event) => changeImageAction(event, 1)}
+          title="next image"
+        >
+          <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
+          <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
+        </ModalImageAction>
+      </ModalImageActions>
+      <ModalImageContent translateX={slide.translateX}>
         <ModalImageContentContent>
-          <Image className={projectsStyled.project} src="/images/Screenshot (1).png" layout="fill"></Image>
+          <Image
+            className={projectsStyled.project}
+            src="/images/Screenshot (1).png"
+            layout="fill"
+          ></Image>
         </ModalImageContentContent>
         <ModalImageContentContent>
-          <Image className={projectsStyled.project} src="/images/profile.jpg" layout="fill"></Image>
+          <Image
+            className={projectsStyled.project}
+            src="/images/profile.jpg"
+            layout="fill"
+          ></Image>
         </ModalImageContentContent>
         <ModalImageContentContent>
-          <Image className={projectsStyled.project} src="/images/Screenshot (2).png" layout="fill"></Image>
+          <Image
+            className={projectsStyled.project}
+            src="/images/Screenshot (2).png"
+            layout="fill"
+          ></Image>
         </ModalImageContentContent>
       </ModalImageContent>
       <ModalImageCount>
-        <ModalImageCountCount opacity={slide.slide === 0 ? '1' : '0.5'} onClick={event => changeImage(event, 0)}></ModalImageCountCount>
-        <ModalImageCountCount opacity={slide.slide === 1 ? '1' : '0.5'} onClick={event => changeImage(event, 1)}></ModalImageCountCount>
-        <ModalImageCountCount opacity={slide.slide === 2 ? '1' : '0.5'}onClick={event => changeImage(event, 2)}></ModalImageCountCount>
+        <ModalImageCountCount
+          opacity={slide.slide === 0 ? "1" : "0.5"}
+          onClick={(event) => changeImage(event, 0)}
+        ></ModalImageCountCount>
+        <ModalImageCountCount
+          opacity={slide.slide === 1 ? "1" : "0.5"}
+          onClick={(event) => changeImage(event, 1)}
+        ></ModalImageCountCount>
+        <ModalImageCountCount
+          opacity={slide.slide === 2 ? "1" : "0.5"}
+          onClick={(event) => changeImage(event, 2)}
+        ></ModalImageCountCount>
       </ModalImageCount>
     </ModalImage>
-  )
+  );
 }
-
-
-
 
 function reducer(state, action) {
   switch (action.type) {
     case "initial":
       return { ...state, status: "loading" };
     case "projects":
-      return { ...state, projects: action.payload.projects, status: "iddle", refetch: false };
+      return {
+        ...state,
+        projects: action.payload.projects,
+        status: "iddle",
+        refetch: false,
+      };
     case "action":
-      return { ...state, activeActions: action.payload.actions, refetch: false };
+      return {
+        ...state,
+        activeActions: action.payload.actions,
+        refetch: false,
+      };
     case "error":
-      return { ...state, status: 'error', refetch: false };
+      return { ...state, status: "error", refetch: false };
     case "refetch":
       return { ...state, refetch: true };
     default:
       return { ...state };
   }
-};
+}
 
 function changeFirstWord(word) {
   if (typeof word !== "string") return;
-  return `${word.slice(0,1).toUpperCase()}${word.slice(1)}`
+  return `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`;
+}
+
+function getFullDate (data) {
+  const date = new Date(data);
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+}
+
+function getTool (data) {
+  if(data) {
+    let result = ``;
+    data.forEach((value, index) => {
+      result += `${changeFirstWord(value.name)}`
+      if (value.description) result += ` as ${value.description}`
+      if ( index !== (data.length - 1)) result += `,`
+    })
+  
+    return result
+  }
 }
 
 const GlobalStyle = createGlobalStyle`
   body {
     overflow: hidden!important;
   }
-`
+`;
 
 const Container = styled.div`
   display: grid;
@@ -403,6 +503,7 @@ const ContainerProjects = styled.div`
   align-items: center;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 3rem 1rem;
+  padding-bottom: 3rem;
 
   @media (max-width: 768px) {
     & {
@@ -443,7 +544,7 @@ const ProjectTextContainer = styled.div`
   flex-direction: column;
   justify-content: flex-end;
   align-items: start;
-  padding: .8rem;
+  padding: 0.8rem;
 `;
 
 const Modal = styled.div`
@@ -452,7 +553,7 @@ const Modal = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(31,33,39, 0.8);
+  background-color: rgba(31, 33, 39, 0.8);
   transition: var(--transition);
   box-sizing: border-box;
   opacity: 0;
@@ -460,8 +561,8 @@ const Modal = styled.div`
   height: 1px;
   top: 50%;
   left: 50%;
-  margin-top: -.5px;
-  margin-left: -.5px;
+  margin-top: -0.5px;
+  margin-left: -0.5px;
 `;
 const ModalMain = styled.div`
   position: relative;
@@ -474,13 +575,13 @@ const ModalMain = styled.div`
   &::-webkit-scrollbar {
     width: 7px;
   }
-  
+
   /* Track */
   &::-webkit-scrollbar-track {
     box-shadow: inset 0 0 5px grey;
     border-radius: 10px;
   }
-  
+
   /* Handle */
   &::-webkit-scrollbar-thumb {
     background: var(--pink);
@@ -495,12 +596,12 @@ const ModalAction = styled.div`
   width: 100%;
   height: 10%;
   box-sizing: border-box;
-  padding: .5rem;
+  padding: 0.5rem;
 `;
 
 const ModalClose = styled.div`
   width: 40px;
-  height: 100%; 
+  height: 100%;
   display: grid;
   grid-template-rows: 1fr 1fr;
   cursor: pointer;
@@ -509,7 +610,7 @@ const ModalClose = styled.div`
     width: 100%;
     height: 25%;
     background-color: var(--pink);
-  };
+  }
 
   & span:first-child {
     transform: translate(0px, 17px) rotate(45deg);
@@ -555,7 +656,8 @@ const ModalImageActions = styled.div`
 const ModalImageAction = styled.div`
   width: 10%;
   height: 100%;
-  background-color: ${({backgroundColor}) => backgroundColor || 'rgba(31,33,39,0.8)'};
+  background-color: ${({ backgroundColor }) =>
+    backgroundColor || "rgba(31,33,39,0.8)"};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -566,14 +668,16 @@ const ModalImageActionSpan = styled.span`
   height: 4px;
   background-color: var(--pink);
   cursor: pointer;
-  transform: ${ ({transform}) => transform || '' };
+  transform: ${({ transform }) => transform || ""};
 `;
 const ModalImageContent = styled.div`
   position: relative;
   height: 350px;
   white-space: nowrap;
   transition: var(--transition);
-  transform: translateX(${({translateX}) => translateX ? `${translateX}px`: '0px'});
+  transform: translateX(
+    ${({ translateX }) => (translateX ? `${translateX}px` : "0px")}
+  );
 `;
 const ModalImageContentContent = styled.div`
   width: 100%;
@@ -595,8 +699,8 @@ const ModalImageCountCount = styled.span`
   height: 10px;
   border-radius: 50%;
   background-color: var(--pink);
-  margin: 0 .3rem;
-  opacity: ${({opacity}) => opacity || '1'}
+  margin: 0 0.3rem;
+  opacity: ${({ opacity }) => opacity || "1"};
 `;
 const ModalContentContent = styled.div`
   margin: 2rem 0 0 0;
@@ -614,7 +718,7 @@ const ModalContentContentList = styled.div`
   grid-template-columns: 1fr 1fr;
   height: 100px;
   margin-top: 1rem;
-  gap: .5rem;
+  gap: 0.5rem;
 `;
 const ModalContentContentListTitle = styled.div`
   display: grid;
