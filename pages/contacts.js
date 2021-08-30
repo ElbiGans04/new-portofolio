@@ -2,9 +2,10 @@ import Head from 'next/head'
 import styled from 'styled-components'
 import {IoLogoGithub, IoLogoFacebook, IoMail, IoLogoLinkedin} from 'react-icons/io5'
 import Text from '../Components/Text'
+import Container from "../Components/Container";
 function Contacts () {
     return (
-        <>
+        <Container>
             <Head>
                 <title>Let's Connect with me</title>
             </Head>
@@ -12,7 +13,7 @@ function Contacts () {
                 <span>Contacts</span>
             </Text>
             <Text size={2} margin="1rem 0 0 0">
-                interested in me? Please contact me 
+                You can reach out via email at <span>rhafaelbijaksana04@gmail.com</span>, or via socials below:
             </Text>
             <ContainerIcon>
                 <a href="https://github.com/ElbiGans04">
@@ -29,7 +30,7 @@ function Contacts () {
                 </a>
             </ContainerIcon>
 
-        </>
+        </Container>
     )
 }
 
