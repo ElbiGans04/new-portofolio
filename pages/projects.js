@@ -119,7 +119,7 @@ function Projects() {
         <Head>
           <title>Projects I've made</title>
         </Head>
-        <Text size={3}>
+        <Text minSize={2} size={3}>
           <span>Projects</span>
         </Text>
         <ContainerActions>
@@ -172,7 +172,7 @@ function Projects() {
                 </ModalClose>
               </ModalAction>
               <ModalContent>
-                <ImageSlider showModal={modal.open}></ImageSlider>
+                <ImageSlider showModal={modal.open} project={project}></ImageSlider>
                 <ModalContentContent>
                   <Text align="start" minSize={1.5} size={2}>
                     <span>{changeFirstWord(project?.title)}</span>
@@ -276,35 +276,39 @@ function Projects() {
 export default Projects;
 
 
-function ImageSlider({ showModal }) {
+function ImageSlider({ showModal, project }) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const [play, setPlay] = useState(true);
   const nodeRef = useRef(null);
 
   function changeImage(event, index) {
-    const modal = event.target.parentElement.parentElement;
-    const { width: modalWidth } = modal.getBoundingClientRect();
-
-    setSlide({ slide: index, translateX: index * -modalWidth });
+    if (project.images.length > 1) {
+      const modal = event.target.parentElement.parentElement;
+      const { width: modalWidth } = modal.getBoundingClientRect();
+  
+      setSlide({ slide: index, translateX: index * -modalWidth });
+    }
   }
 
   function changeImageAction(event, action) {
-    const modal = event.target.parentElement.parentElement;
-    const { width: modalWidth } = modal.getBoundingClientRect();
-
-    const result =
-      action === 0
-        ? slide.slide - 1 < 0
-          ? 2
-          : slide.slide - 1
-        : slide.slide + 1 > 2
-        ? 0
-        : slide.slide + 1;
-    setSlide({ slide: result, translateX: result * -modalWidth });
+    if (project.images.length > 1) {
+      const modal = event.target.parentElement.parentElement;
+      const { width: modalWidth } = modal.getBoundingClientRect();
+  
+      const result =
+        action === 0
+          ? slide.slide - 1 < 0
+            ? 2
+            : slide.slide - 1
+          : slide.slide + 1 > 2
+          ? 0
+          : slide.slide + 1;
+      setSlide({ slide: result, translateX: result * -modalWidth });
+    }
   }
 
   useEffect(() => {
-    if (showModal && play) {
+    if (showModal && play && project.images.length > 1) {
       let interval = setInterval(() => {
         console.log(showModal);
         const modal = nodeRef.current;
@@ -358,41 +362,31 @@ function ImageSlider({ showModal }) {
         </ModalImageAction>
       </ModalImageActions>
       <ModalImageContent translateX={slide.translateX}>
-        <ModalImageContentContent>
-          <Image
-            className={projectsStyled.project}
-            src="/images/Screenshot (1).png"
-            layout="fill"
-          ></Image>
-        </ModalImageContentContent>
-        <ModalImageContentContent>
-          <Image
-            className={projectsStyled.project}
-            src="/images/profile.jpg"
-            layout="fill"
-          ></Image>
-        </ModalImageContentContent>
-        <ModalImageContentContent>
-          <Image
-            className={projectsStyled.project}
-            src="/images/Screenshot (2).png"
-            layout="fill"
-          ></Image>
-        </ModalImageContentContent>
+        {
+          project?.images?.map((value, index) => {
+            return (
+              <ModalImageContentContent key={index}>
+                <Image
+                  className={projectsStyled.project}
+                  src={value.src}
+                  layout="fill"
+                ></Image>
+              </ModalImageContentContent>      
+            )
+          })
+        }
       </ModalImageContent>
       <ModalImageCount>
-        <ModalImageCountCount
-          opacity={slide.slide === 0 ? "1" : "0.5"}
-          onClick={(event) => changeImage(event, 0)}
-        ></ModalImageCountCount>
-        <ModalImageCountCount
-          opacity={slide.slide === 1 ? "1" : "0.5"}
-          onClick={(event) => changeImage(event, 1)}
-        ></ModalImageCountCount>
-        <ModalImageCountCount
-          opacity={slide.slide === 2 ? "1" : "0.5"}
-          onClick={(event) => changeImage(event, 2)}
-        ></ModalImageCountCount>
+        {
+          project?.images?.map((value, index) => {
+            return (
+              <ModalImageCountCount
+                opacity={slide.slide === 0 ? "1" : "0.5"}
+                onClick={(event) => changeImage(event, index)}
+              ></ModalImageCountCount>
+            )
+          })
+        }
       </ModalImageCount>
     </ModalImage>
   );
@@ -460,33 +454,45 @@ const Container = styled.div`
   gap: 3rem;
 `;
 const ContainerActions = styled.div`
-  display: grid;
   width: 80%;
+  
+  display: flex;
+  justify-content: center;
   align-items: center;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.5rem;
-
-  // display: flex;
-  // width: 80%;
-  // justify-content: center;
-  // align-items: center;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    & {
+      display: grid;
+      align-items: center;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.5rem;
+    }
+  }
   // // grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   // // gap: .8rem;
 `;
 
 const Action = styled.button`
   background-color: var(--dark);
-  border-radius: 2rem;
-  font-weight: bold;
+  border-radius: .8rem;
+  // font-weight: bold;
   color: white;
-  border: 0.2rem solid var(--pink);
+  border: 0.1rem solid var(--pink);
   padding: 0.8rem;
-  margin: 0 0.8rem;
+  margin: .8rem;
   cursor: pointer;
 
-  &[data-loading="true"] {
+  @media (max-width: 768px) {
     & {
-      cursor: not-allowed;
+      background-color: var(--dark);
+      border-radius: 2rem;
+      font-weight: bold;
+      color: white;
+      border: 0.2rem solid var(--pink);
+      padding: 0.8rem;
+      margin: 0 0.8rem;
+      cursor: pointer;
     }
   }
 `;
