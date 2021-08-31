@@ -19,12 +19,17 @@ const projectSchema = new mongoose.Schema({
     typeProject: {
         type: String,
         required: true,
+        index: true
     },
     images: [image],
     description: {
         type: String,
         required: true,
     },
+    url: {
+        type: String,
+        required: true
+    }
 });
 
 

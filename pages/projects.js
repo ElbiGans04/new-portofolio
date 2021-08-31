@@ -6,7 +6,8 @@ import Image from "next/image";
 import projectsStyled from "../styles/projects.module.css";
 import { CSSTransition } from "react-transition-group";
 import { IoStopCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
-import changeFirstName from '../lib/module/upperFirstWord'
+import upperFirstWord from '../lib/module/upperFirstWord'
+import Paragraph from '../Components/Paragraph'
 
 const listActions = [
   {
@@ -89,7 +90,7 @@ function Projects() {
         didCancel = true;
       };
     }
-  }, [state.activeActions, state.refetch]);
+  }, [state.activeActions, state.refetch, ]);
 
   const handleAction = (e, typeButton, buttonValue) => {
     let validValue = false;
@@ -120,7 +121,8 @@ function Projects() {
         <Head>
           <title>Projects I've made</title>
         </Head>
-        <Heading>Projects</Heading>
+
+        {/* Action Components */}
         <ContainerActions>
           {listActions.map((value, index) => {
             if (
@@ -136,7 +138,7 @@ function Projects() {
                     handleAction(event, value.type, value.value)
                   }
                 >
-                  <Text size={1.2}>{value.text}</Text>
+                  <Heading size={1.2}>{value.text}</Heading>
                 </ActionActive>
               );
             } else {
@@ -149,13 +151,16 @@ function Projects() {
                     handleAction(event, value.type, value.value)
                   }
                 >
-                  <Text size={1.2}>{value.text}</Text>
+                  <Heading size={1.2}>{value.text}</Heading>
                 </Action>
               );
             }
           })}
         </ContainerActions>
+        {/* End of Action Components */}
 
+
+        {/* Modal */}
         <CSSTransition
           nodeRef={nodeRef}
           classNames="modal"
@@ -173,60 +178,59 @@ function Projects() {
               <ModalContent>
                 <ImageSlider showModal={modal.open} project={project}></ImageSlider>
                 <ModalContentContent>
-                  <Text align="start" minSize={1.5} size={2}>
-                    <span>{changeFirstWord(project?.title)}</span>
-                  </Text>
+                  <Heading align="start" minSize={1.5} size={2}>
+                    <span>{upperFirstWord(project?.title)}</span>
+                  </Heading>
                   <ModalContentContentList>
                     <ModalContentContentListTitle>
-                      <Text align="start" fontWeight="bold">
+                      <Heading align="start" fontWeight="bold">
                         Development Date Process
-                      </Text>
-                      <Text align="start" fontWeight="bold">
+                      </Heading>
+                      <Heading align="start" fontWeight="bold">
                         Tools
-                      </Text>
-                      <Text align="start" fontWeight="bold">
+                      </Heading>
+                      <Heading align="start" fontWeight="bold">
                         Project Type
-                      </Text>
+                      </Heading>
                     </ModalContentContentListTitle>
                     <ModalContentContentListValue>
-                      <Text align="start" fontWeight="normal">
+                      <Heading align="start" fontWeight="normal">
                         {":"}&nbsp;{getFullDate(project?.startDate)}{" - "}{getFullDate(project?.endDate)}
-                      </Text>
-                      <Text align="start" fontWeight="normal">
+                      </Heading>
+                      <Heading align="start" fontWeight="normal">
                         {":"}&nbsp; {getTool(project?.tools)}
-                      </Text>
-                      <Text align="start" fontWeight="normal">
-                        {":"}&nbsp;{changeFirstWord(project?.typeProject)}
-                      </Text>
+                      </Heading>
+                      <Heading align="start" fontWeight="normal">
+                        {":"}&nbsp;{upperFirstWord(project?.typeProject)}
+                      </Heading>
                     </ModalContentContentListValue>
                   </ModalContentContentList>
-                  <Text
+                  <Paragraph
                     margin="2rem 0 0 0"
                     align="start"
                     textIndent="2rem"
                     fontWeight="normal"
                     lineHeight="1.5rem"
                   >
-                    {project?.description}. <span>click here to go to this website</span>
-                  </Text>
+                    {project?.description}. {project?.url && <goTo href={project?.url}>click here to go to this website</goTo >}
+                  </Paragraph>
                 </ModalContentContent>
               </ModalContent>
             </ModalMain>
           </Modal>
-          {/* <ModalComponent open={modal.open} project={state.projects[modal.index]} ref={nodeRef} setModal={setModal} /> */}
         </CSSTransition>
-
+        {/* end of Modal */}
 
         {/* Error handling */}
         {state.status === "error" ? (
           <>
-            <Text size={1.5}>
+            <Heading size={1.5}>
               <span>Failed to retrieve data:(</span>
-            </Text>
+            </Heading>
             <Action onClick={() => dispatch({ type: "refetch" })}>
-              <Text size={1.2}>
+              <Heading size={1.2}>
                 <span>Click here to try to retrieve data again</span>
-              </Text>
+              </Heading>
             </Action>
           </>
         ) : (
@@ -253,12 +257,12 @@ function Projects() {
                         ></Image>
                       </ProjectImageContainer>
                       <ProjectTextContainer>
-                        <Text size={1.3} margin="0 ">
-                          <span>{changeFirstWord(value.title)}</span>
-                        </Text>
-                        <Text margin=".3rem 0 0 0 ">
-                          {changeFirstWord(value.typeProject)}
-                        </Text>
+                        <Heading size={1.3} margin="0 ">
+                          <span>{upperFirstWord(value.title)}</span>
+                        </Heading>
+                        <Heading margin=".3rem 0 0 0 ">
+                          {upperFirstWord(value.typeProject)}
+                        </Heading>
                       </ProjectTextContainer>
                     </Project>
                   );
@@ -426,7 +430,7 @@ function getTool (data) {
   if(data) {
     let result = ``;
     data.forEach((value, index) => {
-      result += `${changeFirstWord(value.name)}`
+      result += `${upperFirstWord(value.name)}`
       if (value.description) result += ` as ${value.description}`
       if ( index !== (data.length - 1)) result += `,`
     })
@@ -441,6 +445,11 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+const goTo = styled.a`
+  text-decoration: none;
+  color: var(--pink);
+`;
+
 const Container = styled.div`
   display: grid;
   width: 100%;
@@ -449,7 +458,6 @@ const Container = styled.div`
 `;
 const ContainerActions = styled.div`
   width: 80%;
-  
   display: flex;
   justify-content: center;
   align-items: center;
@@ -540,10 +548,9 @@ const ProjectTextContainer = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: start;
+  display: grid;
+  justify-items: flex-start;
+  align-items: center;
   padding: 0.8rem;
 `;
 
@@ -701,11 +708,18 @@ const ModalImageCountCount = styled.span`
   background-color: var(--pink);
   margin: 0 0.3rem;
   opacity: ${({ opacity }) => opacity || "1"};
+  & h1 {
+    text-align: center;
+  }
 `;
 const ModalContentContent = styled.div`
-  margin: 2rem 0 0 0;
+  // margin: 2rem 0 0 0;
   padding: 2rem;
   overflow: hidden;
+
+  & h1 {
+    text-align: start;
+  }
 
   @media (max-width: 768px) {
     & {
@@ -724,11 +738,11 @@ const ModalContentContentListTitle = styled.div`
   display: grid;
   grid-template-rows: repeat(3, 1fr);
   align-items: center;
-  justify-content: start;
+  justify-items: start;
 `;
 const ModalContentContentListValue = styled.div`
   display: grid;
   grid-template-rows: 1fr 1fr 1fr;
-  justify-content: start;
+  justify-items: start;
   align-items: center;
 `;
