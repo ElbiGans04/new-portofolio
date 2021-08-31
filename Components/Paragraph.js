@@ -1,13 +1,29 @@
 import styled from 'styled-components';
-import Text from './Text'
+import resize from '../lib/module/resize'
 
-const Paragraph = styled(Text)`
-  line-height: 2rem;
+const Paragraph = styled.p`
+  color: white;
+  text-align: ${({align}) => align || 'center'};
+  font-weight: ${({fontWeight}) => fontWeight || ''};
+  text-indent: ${({textIndent}) => textIndent || ''};
+  line-height: ${({lineHeight}) => lineHeight || ''};
+
 
   @media (max-width: 768px) {
     & {
-      line-height: 1.5rem;
+      font-size :  ${({size, minSize}) => resize(size, 0.5, minSize)};
     }
+  }
+
+  @media (max-width: 576px) {
+    & {
+      font-size :  ${({size, minSize}) => resize(size, 1.5, minSize)};
+    }
+  }
+
+  & span {
+    color: var(--pink);
+    font-weight: ${({fontWeight}) => fontWeight || 'bold'};
   }
 `;
 

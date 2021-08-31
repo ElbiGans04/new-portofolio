@@ -1,11 +1,12 @@
 import Head from "next/head";
-import Text from "../Components/Text";
+import Heading from "../Components/Heading";
 import styled, { createGlobalStyle } from "styled-components";
 import React, { useEffect, useReducer, useState, useRef } from "react";
 import Image from "next/image";
 import projectsStyled from "../styles/projects.module.css";
 import { CSSTransition } from "react-transition-group";
 import { IoStopCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
+import changeFirstName from '../lib/module/upperFirstWord'
 
 const listActions = [
   {
@@ -119,9 +120,7 @@ function Projects() {
         <Head>
           <title>Projects I've made</title>
         </Head>
-        <Text minSize={2} size={3}>
-          <span>Projects</span>
-        </Text>
+        <Heading>Projects</Heading>
         <ContainerActions>
           {listActions.map((value, index) => {
             if (
@@ -416,11 +415,6 @@ function reducer(state, action) {
     default:
       return { ...state };
   }
-}
-
-function changeFirstWord(word) {
-  if (typeof word !== "string") return;
-  return `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`;
 }
 
 function getFullDate (data) {

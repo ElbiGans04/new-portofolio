@@ -1,17 +1,24 @@
-import styled from 'styled-components'
+import styled, {keyframes} from 'styled-components'
 import NavBar from './Navbar'
-import { useRouter } from 'next/router'
+import Router , { useRouter } from 'next/router'
 import ErrorBoundary from './ErrorBoundary'
+import upperFirstWord from '../lib/module/upperFirstWord'
+import Heading from './Heading'
 
 
 function Layout ({children}) {
     const {route} = useRouter();
+    const pageActive = upperFirstWord(route.slice(1));
 
     return (
       <ErrorBoundary>
         <Container>
+          <ProgressBar></ProgressBar>
           <NavBar active={route}></NavBar>
-          <Main>{children}</Main>
+          <Main>
+            {pageActive && <Heading size={3} minSize={2}><span>{pageActive}</span></Heading>}
+            {children}
+          </Main>
         </Container>
       </ErrorBoundary>
     )
@@ -19,19 +26,50 @@ function Layout ({children}) {
 
 export default Layout;
 
+const animation = keyframes`
+  from {
+    width: 0px;
+  }
+
+  to {
+    width: 100%;
+  }
+`;
+const animation2 = keyframes`
+  from {
+    width: 0px;
+  }
+
+  to {
+    width: 80%;
+  }
+`;
+const ProgressBar = styled.div`
+  position: fixed;
+  width: 0%;
+  height: 10px;
+  background-color: var(--pink);
+  z-index: 9999;
+  animation-name: ${animation2};
+  animation-duration: 5s;
+  animation-iteration-count: 1;
+`;
+
 const Container = styled.div`
   background-color: var(--dark);
   min-height: 100vh;
 `;
 
 const Main = styled.main`
-  margin-top: 3rem;
   display: grid;
   justify-items: center;
   align-items: center;
   padding: 0 2rem;
+  margin-top: 2rem;
+  gap: 2rem;
   @media (max-width: 768px) {
     & {
+      margin-top: 1rem;
       padding: 0 1rem;
     }
   }

@@ -1,20 +1,18 @@
 import Head from 'next/head'
 import styled from 'styled-components'
 import {IoLogoGithub, IoLogoFacebook, IoMail, IoLogoLinkedin} from 'react-icons/io5'
-import Text from '../Components/Text'
+import Heading from '../Components/Heading'
 import Container from "../Components/Container";
+import Paragraph from "../Components/Paragraph";
 function Contacts () {
     return (
         <Container>
             <Head>
                 <title>Let's Connect with me</title>
             </Head>
-            <Text size={3}>
-                <span>Contacts</span>
-            </Text>
-            <Text size={2} margin="1rem 0 0 0">
+            <Paragraph lineHeight="1.5rem" size={1.5}>
                 You can reach out via email at <span>rhafaelbijaksana04@gmail.com</span>, or via socials below:
-            </Text>
+            </Paragraph>
             <ContainerIcon>
                 <a href="https://github.com/ElbiGans04">
                     <IoLogoGithub color="white" size="2rem" title="github account"/>

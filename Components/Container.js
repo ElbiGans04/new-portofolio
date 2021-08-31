@@ -1,11 +1,11 @@
 import styled from 'styled-components'
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: grid;
+  justify-items: center;
   align-items: center;
   width: 70%;
+  gap: 1rem;
 
   @media (max-width: 768px) {
     & {

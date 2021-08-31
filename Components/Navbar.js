@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled ,{createGlobalStyle} from 'styled-components';
 import Link from 'next/link'
 import {useState} from 'react'
 
@@ -13,6 +13,7 @@ function NavBar ({active}) {
     let [navbarOpen, setNavbarOpen] = useState(false);
     return (
         <Navbar>
+            {navbarOpen && <GlobalStyle></GlobalStyle>}
             <NavbarHead>
                 <Link href="/">
                     <NavbarHeadItem>
@@ -50,6 +51,11 @@ export default NavBar;
 
 
 // Styled Component
+const GlobalStyle = createGlobalStyle`
+  body {
+    overflow: hidden!important;
+  }
+`;
 const Navbar = styled.nav`
     z-index: 2;
     width: 100%;
@@ -153,6 +159,5 @@ const NavbarMain = styled.div`
 `;
 
 const ItemsActive = styled(Items)`
-    border-bottom: .1rem solid var(--pink);
-    padding: 0 0 0.3rem 0;
+    color: var(--pink)
 `;

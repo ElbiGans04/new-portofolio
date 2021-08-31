@@ -3,7 +3,7 @@ import Image from 'next/image'
 import React from 'react'
 import styleIndex from '../styles/index.module.css'
 import styled from 'styled-components'
-import Text from '../Components/Text'
+import Heading from '../Components/Heading'
 
 export default function Home() {
   return (
@@ -13,8 +13,8 @@ export default function Home() {
         </Head>
         <Image className={styleIndex.profile} width="300" height="300" src="/images/profile.jpg"></Image>
         <TextParent> 
-          <Text size={3}>Hello, i'm <span>Rhafael Bijaksana</span></Text>
-          <Text size={2} margin="1rem 0 0 0">I'm a <span>Fullstack Developer</span></Text>
+          <Heading size={3}>Hello, i'm <span>Rhafael Bijaksana</span></Heading>
+          <Heading size={2} margin="1rem 0 0 0">I'm a <span>Fullstack Developer</span></Heading>
         </TextParent>
       </React.Fragment>
   )
@@ -23,9 +23,10 @@ export default function Home() {
 
 
 const TextParent = styled.div`
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  display: grid;
+  justify-items: center;
   align-items: center;
-  justify-content: center;
   margin-top: 1.5rem;
+  gap: 1rem;
 `;
