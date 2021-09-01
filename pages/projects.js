@@ -617,21 +617,23 @@ const ModalAction = styled.div`
 const ModalClose = styled.div`
   width: 40px;
   height: 100%;
-  display: grid;
-  grid-template-rows: 1fr 1fr;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   cursor: pointer;
 
   & span {
     width: 100%;
-    height: 25%;
+    height: 4px;
     background-color: var(--pink);
   }
 
   & span:first-child {
-    transform: translate(0px, 17px) rotate(45deg);
+    transform: translate(-3px,1px) rotate(45deg)
   }
   & span:last-child {
-    transform: translate(0px, -6px) rotate(-45deg);
+    transform: translate(-4px,-4px) rotate(-45deg)
   }
 `;
 
@@ -721,7 +723,7 @@ const ModalImageCountCount = styled.span`
   }
 `;
 const ModalContentContent = styled.div`
-  // margin: 2rem 0 0 0;
+  min-height: 300px;
   padding: 2rem;
   overflow: hidden;
 
@@ -738,9 +740,10 @@ const ModalContentContent = styled.div`
 const ModalContentContentList = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: 100px;
   margin-top: 1rem;
   gap: 0.5rem;
+  height: 100%;
+  
 `;
 const ModalContentContentListTitle = styled.div`
   display: grid;
