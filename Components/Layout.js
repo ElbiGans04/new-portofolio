@@ -64,13 +64,12 @@ const Main = styled.main`
   display: grid;
   justify-items: center;
   align-items: center;
-  padding: 0 2rem;
-  margin-top: 2rem;
+  padding: 2rem;
   gap: 2rem;
   @media (max-width: 768px) {
     & {
       margin-top: 1rem;
-      padding: 0 1rem;
+      padding: 1rem;
     }
   }
 `;
