@@ -334,40 +334,44 @@ function ImageSlider({ showModal, project }) {
 
   return (
     <ModalImage ref={nodeRef}>
-      <ModalImageActions>
-        <ModalImageAction
-          onClick={(event) => changeImageAction(event, 0)}
-          title="prev image"
-        >
-          <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
-          <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
-        </ModalImageAction>
-        <ModalImageAction
-          backgroundColor="transparent"
-          onDoubleClick={() => setPlay((state) => !state)}
-        >
-          {!play ? (
-            <IoPlayCircleOutline
-              color="var(--pink)"
-              size="4rem"
-              title="move image automatic"
-            ></IoPlayCircleOutline>
-          ) : (
-            <IoStopCircleOutline
-              color="var(--pink)"
-              size="4rem"
-              title="stop move image automatic"
-            ></IoStopCircleOutline>
-          )}
-        </ModalImageAction>
-        <ModalImageAction
-          onClick={(event) => changeImageAction(event, 1)}
-          title="next image"
-        >
-          <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
-          <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
-        </ModalImageAction>
-      </ModalImageActions>
+      {
+        project?.images?.length > 1 && (
+          <ModalImageActions>
+            <ModalImageAction
+              onClick={(event) => changeImageAction(event, 0)}
+              title="prev image"
+            >
+              <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
+              <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
+            </ModalImageAction>
+            <ModalImageAction
+              backgroundColor="transparent"
+              onDoubleClick={() => setPlay((state) => !state)}
+            >
+              {!play ? (
+                <IoPlayCircleOutline
+                  color="var(--pink)"
+                  size="4rem"
+                  title="move image automatic"
+                ></IoPlayCircleOutline>
+              ) : (
+                <IoStopCircleOutline
+                  color="var(--pink)"
+                  size="4rem"
+                  title="stop move image automatic"
+                ></IoStopCircleOutline>
+              )}
+            </ModalImageAction>
+            <ModalImageAction
+              onClick={(event) => changeImageAction(event, 1)}
+              title="next image"
+            >
+              <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
+              <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
+            </ModalImageAction>
+          </ModalImageActions>
+        )
+      }
       <ModalImageContent translateX={slide.translateX}>
         {
           project?.images?.map((value, index) => {

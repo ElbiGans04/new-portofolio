@@ -73,6 +73,10 @@ const projectSchema = new mongoose.Schema({
         // const typeProject2 = new TypeProject({_id: 'A2', name: 'Work Project'});
         // await typeProject2.save();
 
+
+
+
+        
         const result = await Projects.find({}, {}, {sort: {title: -1}}).populate('projects');
         console.log(result);
         
