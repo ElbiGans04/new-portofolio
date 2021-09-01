@@ -12,17 +12,17 @@ import Paragraph from '../Components/Paragraph'
 const listActions = [
   {
     text: "All",
-    value: "A1",
+    value: "ALL",
     type: "project-type",
   },
   {
     text: "Personal Projects",
-    value: "A2",
+    value: "A1",
     type: "project-type",
   },
   {
     text: "Work Projects",
-    value: "A3",
+    value: "A2",
     type: "project-type",
   },
   {
@@ -38,16 +38,18 @@ const listActions = [
 ];
 
 function Projects() {
+  // React hooks
   const [state, dispatch] = useReducer(reducer, {
     // status : iddle, loding, error
     status: "iddle",
     projects: [],
-    activeActions: ["A1", "ASC"],
+    activeActions: ["ALL", "ASC"],
     refetch: false,
   });
   const [modal, setModal] = useState({open: false, index: 0});
   const nodeRef = useRef(null);
 
+  // Variabel Biasa
   const project = state.projects[modal?.index];
   const disabled = state.status !== "iddle" ? true : false;
   const className = state.status !== "iddle" ? "cursor-notAllowed" : ""
@@ -70,6 +72,8 @@ function Projects() {
               `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`
             )
           ).json();
+
+          // console.log(fetchProjects)
 
           // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
           if (!didCancel) {
@@ -103,7 +107,7 @@ function Projects() {
     }
 
     // Untuk sementara kita abaikan dulu jika tidak valid
-    if (!validValue || !validType) alert("Error invalid value");
+    if (!validValue || !validType) return alert("Error invalid value");
 
     // Setel state terbaru
     const newActiveActions = [...state.activeActions];
@@ -201,7 +205,7 @@ function Projects() {
                         {":"}&nbsp; {getTool(project?.tools)}
                       </Heading>
                       <Heading align="start" fontWeight="normal">
-                        {":"}&nbsp;{upperFirstWord(project?.typeProject)}
+                        {":"}&nbsp;{upperFirstWord(project?.typeProject.name)}
                       </Heading>
                     </ModalContentContentListValue>
                   </ModalContentContentList>
@@ -258,10 +262,10 @@ function Projects() {
                       </ProjectImageContainer>
                       <ProjectTextContainer>
                         <Heading size={1.3} margin="0 ">
-                          <span>{upperFirstWord(value.title)}</span>
+                          <span>{upperFirstWord(value?.title)}</span>
                         </Heading>
                         <Heading margin=".3rem 0 0 0 ">
-                          {upperFirstWord(value.typeProject)}
+                          {upperFirstWord(value?.typeProject.name)}
                         </Heading>
                       </ProjectTextContainer>
                     </Project>
@@ -432,7 +436,7 @@ function getTool (data) {
     data.forEach((value, index) => {
       result += `${upperFirstWord(value.name)}`
       if (value.description) result += ` as ${value.description}`
-      if ( index !== (data.length - 1)) result += `,`
+      if ( index !== (data.length - 1)) result += `, `
     })
   
     return result

@@ -1,11 +1,13 @@
 import mongoose from 'mongoose';
-import tool from './tool';
-import image from './image';
+import toolSchema from './tool';
+import imageSchema from './image';
+import typeProjectSchema from './typeProject';
 
 const projectSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
+        index: true,
     },
     startDate: {
         type: Date,
@@ -15,20 +17,15 @@ const projectSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    tools: [tool],
-    typeProject: {
-        type: String,
-        required: true,
-        index: true
-    },
-    images: [image],
+    tools: [toolSchema],
+    typeProject: { type: String, ref: 'typeProjects' },
+    images: [imageSchema],
     description: {
         type: String,
         required: true,
     },
     url: {
         type: String,
-        required: true
     }
 });
 
