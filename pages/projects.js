@@ -656,6 +656,12 @@ const ModalImage = styled.div`
 
   &:hover div:first-child {
     opacity: 1;
+  };
+
+  @media (max-width: 768px) {
+    & {
+      height: 275px;
+    }
   }
 `;
 const ModalImageActions = styled.div`
@@ -695,6 +701,12 @@ const ModalImageContent = styled.div`
   transform: translateX(
     ${({ translateX }) => (translateX ? `${translateX}px` : "0px")}
   );
+
+  @media (max-width: 768px) {
+    & {
+      height: 250px;
+    }
+  }
 `;
 const ModalImageContentContent = styled.div`
   width: 100%;
@@ -742,9 +754,15 @@ const ModalContentContentList = styled.div`
   grid-template-columns: 1fr 1fr;
   margin-top: 1rem;
   gap: 0.5rem;
-  height: 100%;
-  
+  height: 100px;
+
+  @media (max-width: 576px) {
+    & {
+      height: 200px;
+    }
+  }
 `;
+
 const ModalContentContentListTitle = styled.div`
   display: grid;
   grid-template-rows: repeat(3, 1fr);
