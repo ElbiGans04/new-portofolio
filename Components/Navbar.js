@@ -92,7 +92,7 @@ const NavbarHeadItem = styled(Items)`
 
 const NavbarButton = styled.div` 
     justify-self: end;
-    display: flex;
+    display: none;
     flex-direction: column;
     justify-content: space-between;
     z-index: 3;
@@ -113,9 +113,9 @@ const NavbarButton = styled.div`
         transform: rotate(-45deg) translateY(-6px) translateX(10px);;
     };
     
-    @media (min-width: 768px) {
+    @media (max-width: 768px) {
         & {
-            display: none;
+            display: flex;
         }
     }
 `;
