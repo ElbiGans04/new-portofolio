@@ -68,7 +68,7 @@ const projectSchema = new mongoose.Schema({
         const Projects = mongoose.model('Projects', projectSchema);
 
         // const typeProject = new TypeProject({_id: 'A1', name: 'Personal Project'});
-        // await typeProject.save();
+        // await typeProject.ddsave();
 
         // const typeProject2 = new TypeProject({_id: 'A2', name: 'Work Project'});
         // await typeProject2.save();
