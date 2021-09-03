@@ -6,8 +6,9 @@ import Image from "next/image";
 import projectsStyled from "../styles/projects.module.css";
 import { CSSTransition } from "react-transition-group";
 import { IoStopCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
-import upperFirstWord from '../lib/module/upperFirstWord'
-import Paragraph from '../Components/Paragraph'
+import upperFirstWord from "../lib/module/upperFirstWord";
+import Paragraph from "../Components/Paragraph";
+import Modal from "../Components/Modal";
 
 const listActions = [
   {
@@ -46,13 +47,13 @@ function Projects() {
     activeActions: ["ALL", "ASC"],
     refetch: false,
   });
-  const [modal, setModal] = useState({open: false, index: 0});
+  const [modal, setModal] = useState({ open: false, index: 0 });
   const nodeRef = useRef(null);
 
   // Variabel Biasa
   const project = state.projects[modal?.index];
   const disabled = state.status !== "iddle" ? true : false;
-  const className = state.status !== "iddle" ? "cursor-notAllowed" : ""
+  const className = state.status !== "iddle" ? "cursor-notAllowed" : "";
 
   useEffect(() => {
     // Mencegah kondisi balapan
@@ -61,7 +62,6 @@ function Projects() {
       let didCancel = false;
       async function getData() {
         try {
-
           if (!didCancel) {
             // ubah state
             dispatch({ type: "initial" });
@@ -94,7 +94,7 @@ function Projects() {
         didCancel = true;
       };
     }
-  }, [state.activeActions, state.refetch, ]);
+  }, [state.activeActions, state.refetch]);
 
   const handleAction = (e, typeButton, buttonValue) => {
     let validValue = false;
@@ -163,7 +163,6 @@ function Projects() {
         </ContainerActions>
         {/* End of Action Components */}
 
-
         {/* Modal */}
         <CSSTransition
           nodeRef={nodeRef}
@@ -171,56 +170,53 @@ function Projects() {
           in={modal.open}
           timeout={500}
         >
-          <Modal ref={nodeRef}>
-            <ModalMain>
-              <ModalAction>
-                <ModalClose onClick={() => setModal({open: false, index: 0})}>
-                  <span></span>
-                  <span></span>
-                </ModalClose>
-              </ModalAction>
-              <ModalContent>
-                <ImageSlider showModal={modal.open} project={project}></ImageSlider>
-                <ModalContentContent>
-                  <Heading align="start" minSize={1.5} size={2}>
-                    <span>{upperFirstWord(project?.title)}</span>
+          <Modal ref={nodeRef} updateState={setModal} defaultState={{open: false, index: 0}}>
+            <ImageSlider showModal={modal.open} project={project}></ImageSlider>
+            <ModalContentContent>
+              <Heading align="start" minSize={1.5} size={2}>
+                <span>{upperFirstWord(project?.title)}</span>
+              </Heading>
+              <ModalContentContentList>
+                <ModalContentContentListTitle>
+                  <Heading align="start" fontWeight="bold">
+                    Development Date Process
                   </Heading>
-                  <ModalContentContentList>
-                    <ModalContentContentListTitle>
-                      <Heading align="start" fontWeight="bold">
-                        Development Date Process
-                      </Heading>
-                      <Heading align="start" fontWeight="bold">
-                        Tools
-                      </Heading>
-                      <Heading align="start" fontWeight="bold">
-                        Project Type
-                      </Heading>
-                    </ModalContentContentListTitle>
-                    <ModalContentContentListValue>
-                      <Heading align="start" fontWeight="normal">
-                        {":"}&nbsp;{getFullDate(project?.startDate)}{" - "}{getFullDate(project?.endDate)}
-                      </Heading>
-                      <Heading align="start" fontWeight="normal">
-                        {":"}&nbsp; {getTool(project?.tools)}
-                      </Heading>
-                      <Heading align="start" fontWeight="normal">
-                        {":"}&nbsp;{upperFirstWord(project?.typeProject.name)}
-                      </Heading>
-                    </ModalContentContentListValue>
-                  </ModalContentContentList>
-                  <Paragraph
-                    margin="2rem 0 0 0"
-                    align="start"
-                    textIndent="2rem"
-                    fontWeight="normal"
-                    lineHeight="1.5rem"
-                  >
-                    {project?.description}. {project?.url && <goTo href={project?.url}>click here to go to this website</goTo >}
-                  </Paragraph>
-                </ModalContentContent>
-              </ModalContent>
-            </ModalMain>
+                  <Heading align="start" fontWeight="bold">
+                    Tools
+                  </Heading>
+                  <Heading align="start" fontWeight="bold">
+                    Project Type
+                  </Heading>
+                </ModalContentContentListTitle>
+                <ModalContentContentListValue>
+                  <Heading align="start" fontWeight="normal">
+                    {":"}&nbsp;{getFullDate(project?.startDate)}
+                    {" - "}
+                    {getFullDate(project?.endDate)}
+                  </Heading>
+                  <Heading align="start" fontWeight="normal">
+                    {":"}&nbsp; {getTool(project?.tools)}
+                  </Heading>
+                  <Heading align="start" fontWeight="normal">
+                    {":"}&nbsp;{upperFirstWord(project?.typeProject.name)}
+                  </Heading>
+                </ModalContentContentListValue>
+              </ModalContentContentList>
+              <Paragraph
+                margin="2rem 0 0 0"
+                align="start"
+                textIndent="2rem"
+                fontWeight="normal"
+                lineHeight="1.5rem"
+              >
+                {project?.description}.{" "}
+                {project?.url && (
+                  <goTo href={project?.url}>
+                    click here to go to this website
+                  </goTo>
+                )}
+              </Paragraph>
+            </ModalContentContent>
           </Modal>
         </CSSTransition>
         {/* end of Modal */}
@@ -247,7 +243,7 @@ function Projects() {
                   return (
                     <Project
                       onClick={() => {
-                        setModal({open: true, index});
+                        setModal({ open: true, index });
                       }}
                       key={index}
                       className={className}
@@ -282,7 +278,6 @@ function Projects() {
 
 export default Projects;
 
-
 function ImageSlider({ showModal, project }) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const [play, setPlay] = useState(true);
@@ -292,7 +287,7 @@ function ImageSlider({ showModal, project }) {
     if (project.images.length > 1) {
       const modal = event.target.parentElement.parentElement;
       const { width: modalWidth } = modal.getBoundingClientRect();
-  
+
       setSlide({ slide: index, translateX: index * -modalWidth });
     }
   }
@@ -301,7 +296,7 @@ function ImageSlider({ showModal, project }) {
     if (project.images.length > 1) {
       const modal = event.target.parentElement.parentElement;
       const { width: modalWidth } = modal.getBoundingClientRect();
-  
+
       const result =
         action === 0
           ? slide.slide - 1 < 0
@@ -334,70 +329,64 @@ function ImageSlider({ showModal, project }) {
 
   return (
     <ModalImage ref={nodeRef}>
-      {
-        project?.images?.length > 1 && (
-          <ModalImageActions>
-            <ModalImageAction
-              onClick={(event) => changeImageAction(event, 0)}
-              title="prev image"
-            >
-              <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
-              <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
-            </ModalImageAction>
-            <ModalImageAction
-              backgroundColor="transparent"
-              onDoubleClick={() => setPlay((state) => !state)}
-            >
-              {!play ? (
-                <IoPlayCircleOutline
-                  color="var(--pink)"
-                  size="4rem"
-                  title="move image automatic"
-                ></IoPlayCircleOutline>
-              ) : (
-                <IoStopCircleOutline
-                  color="var(--pink)"
-                  size="4rem"
-                  title="stop move image automatic"
-                ></IoStopCircleOutline>
-              )}
-            </ModalImageAction>
-            <ModalImageAction
-              onClick={(event) => changeImageAction(event, 1)}
-              title="next image"
-            >
-              <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
-              <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
-            </ModalImageAction>
-          </ModalImageActions>
-        )
-      }
+      {project?.images?.length > 1 && (
+        <ModalImageActions>
+          <ModalImageAction
+            onClick={(event) => changeImageAction(event, 0)}
+            title="prev image"
+          >
+            <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
+            <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
+          </ModalImageAction>
+          <ModalImageAction
+            backgroundColor="transparent"
+            onDoubleClick={() => setPlay((state) => !state)}
+          >
+            {!play ? (
+              <IoPlayCircleOutline
+                color="var(--pink)"
+                size="4rem"
+                title="move image automatic"
+              ></IoPlayCircleOutline>
+            ) : (
+              <IoStopCircleOutline
+                color="var(--pink)"
+                size="4rem"
+                title="stop move image automatic"
+              ></IoStopCircleOutline>
+            )}
+          </ModalImageAction>
+          <ModalImageAction
+            onClick={(event) => changeImageAction(event, 1)}
+            title="next image"
+          >
+            <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
+            <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
+          </ModalImageAction>
+        </ModalImageActions>
+      )}
       <ModalImageContent translateX={slide.translateX}>
-        {
-          project?.images?.map((value, index) => {
-            return (
-              <ModalImageContentContent key={index}>
-                <Image
-                  className={projectsStyled.project}
-                  src={value.src}
-                  layout="fill"
-                ></Image>
-              </ModalImageContentContent>      
-            )
-          })
-        }
+        {project?.images?.map((value, index) => {
+          return (
+            <ModalImageContentContent key={index}>
+              <Image
+                className={projectsStyled.project}
+                src={value.src}
+                layout="fill"
+              ></Image>
+            </ModalImageContentContent>
+          );
+        })}
       </ModalImageContent>
       <ModalImageCount>
-        {
-          project?.images?.map((value, index) => {
-            return (
-              <ModalImageCountCount
-                opacity={slide.slide === 0 ? "1" : "0.5"}
-                onClick={(event) => changeImage(event, index)}
-              ></ModalImageCountCount>
-            )
-          })
-        }
+        {project?.images?.map((value, index) => {
+          return (
+            <ModalImageCountCount
+              opacity={slide.slide === 0 ? "1" : "0.5"}
+              onClick={(event) => changeImage(event, index)}
+            ></ModalImageCountCount>
+          );
+        })}
       </ModalImageCount>
     </ModalImage>
   );
@@ -429,21 +418,21 @@ function reducer(state, action) {
   }
 }
 
-function getFullDate (data) {
+function getFullDate(data) {
   const date = new Date(data);
-  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 }
 
-function getTool (data) {
-  if(data) {
+function getTool(data) {
+  if (data) {
     let result = ``;
     data.forEach((value, index) => {
-      result += `${upperFirstWord(value.name)}`
-      if (value.description) result += ` as ${value.description}`
-      if ( index !== (data.length - 1)) result += `, `
-    })
-  
-    return result
+      result += `${upperFirstWord(value.name)}`;
+      if (value.description) result += ` as ${value.description}`;
+      if (index !== data.length - 1) result += `, `;
+    });
+
+    return result;
   }
 }
 
@@ -470,7 +459,7 @@ const ContainerActions = styled.div`
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  
+
   @media (max-width: 768px) {
     & {
       display: grid;
@@ -485,12 +474,12 @@ const ContainerActions = styled.div`
 
 const Action = styled.button`
   background-color: var(--dark);
-  border-radius: .8rem;
+  border-radius: 0.8rem;
   // font-weight: bold;
   color: white;
   border: 0.1rem solid var(--pink);
   padding: 0.8rem;
-  margin: .8rem;
+  margin: 0.8rem;
   cursor: pointer;
 
   @media (max-width: 768px) {
@@ -562,93 +551,6 @@ const ProjectTextContainer = styled.div`
   padding: 0.8rem;
 `;
 
-const Modal = styled.div`
-  position: fixed;
-  background-color: var(--dark2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(31, 33, 39, 0.8);
-  transition: var(--transition);
-  box-sizing: border-box;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
-  top: 50%;
-  left: 50%;
-  margin-top: -0.5px;
-  margin-left: -0.5px;
-`;
-const ModalMain = styled.div`
-  position: relative;
-  width: 90%;
-  height: 90%;
-  box-sizing: border-box;
-  background-color: var(--dark);
-  box-shadow: 5px 12px 17px rgb(0 0 0 / 30%);
-  overflow: auto;
-  &::-webkit-scrollbar {
-    width: 7px;
-  }
-
-  /* Track */
-  &::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 5px grey;
-    border-radius: 10px;
-  }
-
-  /* Handle */
-  &::-webkit-scrollbar-thumb {
-    background: var(--pink);
-    border-radius: 10px;
-  }
-`;
-
-const ModalAction = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  width: 100%;
-  height: 10%;
-  box-sizing: border-box;
-  padding: 0.5rem;
-`;
-
-const ModalClose = styled.div`
-  width: 40px;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  cursor: pointer;
-
-  & span {
-    width: 100%;
-    height: 4px;
-    background-color: var(--pink);
-  }
-
-  & span:first-child {
-    transform: translate(-3px,1px) rotate(45deg)
-  }
-  & span:last-child {
-    transform: translate(-4px,-4px) rotate(-45deg)
-  }
-`;
-
-const ModalContent = styled.div`
-  width: 100%;
-  height: 90%;
-  @media (max-width: 768px) {
-    & {
-      padding: 1rem;
-    }
-  }
-  // display: grid;
-  // grid-template-rows: 2fr 1fr;
-  // overflow: auto;
-`;
 const ModalImage = styled.div`
   height: 375px;
   overflow: hidden;
@@ -656,7 +558,7 @@ const ModalImage = styled.div`
 
   &:hover div:first-child {
     opacity: 1;
-  };
+  }
 
   @media (max-width: 768px) {
     & {
@@ -664,6 +566,7 @@ const ModalImage = styled.div`
     }
   }
 `;
+
 const ModalImageActions = styled.div`
   transition: var(--transition);
   opacity: 0;
