@@ -206,9 +206,6 @@ function Delete() {
 const Container = styled.div`
   width: 80%;
   min-height: 50vh;
-  display: grid;
-  grid-template-rows: 1fr 3fr;
-  gap: 1rem;
 
   @media (max-width: 768px) {
     & {
@@ -220,9 +217,9 @@ const Container = styled.div`
 const ContainerButtons = styled.div`
   display: flex;
   width: 100%;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
-  padding: 0.5rem;
+  padding: 1rem;
 `;
 
 const ContainerTable = styled.div`
