@@ -113,7 +113,8 @@ function Row({ project, setModal }) {
         <RowDetails ref={ref}>
           <RowDetailsContent colSpan="4">
             <RowDetailsContentContent>
-              <div>Start of date project</div>
+              <h1>Hello World</h1>
+              {/* <div>Start of date project</div>
               <div>{": "}13/02/2021</div>
               <div>End of date project</div>
               <div>{": "}09/12/2012</div>
@@ -122,7 +123,7 @@ function Row({ project, setModal }) {
               <div>Url</div>
               <div>{": "}https://facebook.com</div>
               <div>Description</div>
-              <div>{": "}this is a project that i make for people can know about corona</div>
+              <div>{": "}this is a project that i make for people can know about corona</div> */}
             </RowDetailsContentContent>
           </RowDetailsContent>
         </RowDetails>  
@@ -282,26 +283,26 @@ const Table = styled.table`
 
 const RowDetails = styled.tr`
   border: none!important;
-  transition: var(--transition);
-  font-size: 0;
-  height: 0;
+  line-height: 0;
+  height: 100%;
 `;
 
 const RowDetailsContent = styled.td`
+  height: 100%;
   padding: 0!important;
-  transition: var(--transition);
 `;
 
 const RowDetailsContentContent = styled.div`
   width: 100%;
   height: 0px;
-  overflow: hidden;
   transition: var(--transition);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  justify-items: start;
-  align-items: center;
+  padding: 0;
+  overflow: hidden;
+  // display: grid;
+  // grid-template-columns: 1fr 1fr;
+  // gap: 1rem;
+  // justify-items: start;
+  // align-items: center;
 `;
 
 const TdActions = styled.div`

@@ -71,22 +71,13 @@ a {
 
 /* Modal For Row details */
 
-.row-details-enter-active, .row-details-enter-done {
-  font-size: 1rem!important;
-  height: 100%!important;
-}
-
-.row-details-enter-active td , .row-details-enter-done td {
-  padding: 1rem!important;
+.row-details-enter, .row-details-enter-active, .row-details-enter-done {
+  line-height: inherit;
 }
 
 .row-details-enter-active td div, .row-details-enter-done td div{
   height: 100%!important;
-}
-
-.row-details-exit-active td div , .row-details-exit-done td div {
-  padding: 0;
-  border-bottom: none;
+  padding: 1rem!important;
 }
 
 /* End of modal for row detail */
