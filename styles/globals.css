@@ -69,6 +69,28 @@ a {
   z-index: -9999!important;
 }
 
+/* Modal For Row details */
+
+.row-details-enter-active, .row-details-enter-done {
+  font-size: 1rem!important;
+  height: 100%!important;
+}
+
+.row-details-enter-active td , .row-details-enter-done td {
+  padding: 1rem!important;
+}
+
+.row-details-enter-active td div, .row-details-enter-done td div{
+  height: 100%!important;
+}
+
+.row-details-exit-active td div , .row-details-exit-done td div {
+  padding: 0;
+  border-bottom: none;
+}
+
+/* End of modal for row detail */
+
 /* Loader */
 /* https://projects.lukehaas.me/css-loaders/ , Loader #3 */
 .loader {

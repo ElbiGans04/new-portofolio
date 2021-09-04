@@ -7,8 +7,8 @@ import {
   IoPencilSharp,
 } from "react-icons/io5";
 import Modal from "../Components/Modal";
-import { useState, useRef } from "react";
-import { CSSTransition } from "react-transition-group";
+import React, { useState, useRef } from "react";
+import { CSSTransition, Transition } from "react-transition-group";
 import Heading from "../Components/Heading";
 import Input from "../Components/Input";
 import Label from "../Components/Label";
@@ -44,61 +44,8 @@ function Admin() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>
-                <Button title="see details of project">
-                  <IoAddOutline />
-                </Button>
-              </td>
-              <td>Elbi library</td>
-              <td>Personal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal project
-              Personal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal project
-              Personal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal project
-              Personal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal projectPersonal project
-              </td>
-              <td>
-                <TdActions>
-                  <Button
-                    onClick={() => setModal({ open: true, content: Delete })}
-                    title="delete the project"
-                  >
-                    <IoTrashBinOutline></IoTrashBinOutline>
-                  </Button>
-                  <Button
-                    onClick={() => setModal({ open: true, content: Update })}
-                    title="update the project"
-                  >
-                    <IoPencilSharp></IoPencilSharp>
-                  </Button>
-                </TdActions>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <Button title="see details of project">
-                  <IoAddOutline />
-                </Button>
-              </td>
-              <td>Elbi library</td>
-              <td>Personal project</td>
-              <td>
-                <TdActions>
-                  <Button
-                    onClick={() => setModal({ open: true, content: Delete })}
-                    title="delete the project"
-                  >
-                    <IoTrashBinOutline></IoTrashBinOutline>
-                  </Button>
-                  <Button
-                    onClick={() => setModal({ open: true, content: Update })}
-                    title="update the project"
-                  >
-                    <IoPencilSharp></IoPencilSharp>
-                  </Button>
-                </TdActions>
-              </td>
-            </tr>
+            <Row setModal={setModal} />
+            <Row setModal={setModal} />
           </tbody>
         </Table>
       </ContainerTable>
@@ -120,6 +67,67 @@ function Admin() {
       </CSSTransition>
       {/* End of modal page */}
     </Container>
+  );
+}
+
+function Row({ project, setModal }) {
+  const [details, setDetails] = useState(false);
+  const ref = useRef(null);
+  console.log(ref)
+  return (
+    <React.Fragment>
+      <tr>
+        <td>
+          <Button
+            title="see details of project"
+            onClick={() => setDetails((state) => !state)}
+          >
+            <IoAddOutline />
+          </Button>
+        </td>
+        <td>Elbi library</td>
+        <td>Personal project</td>
+        <td>
+          <TdActions>
+            <Button
+              onClick={() => setModal({ open: true, content: Delete })}
+              title="delete the project"
+            >
+              <IoTrashBinOutline></IoTrashBinOutline>
+            </Button>
+            <Button
+              onClick={() => setModal({ open: true, content: Update })}
+              title="update the project"
+            >
+              <IoPencilSharp></IoPencilSharp>
+            </Button>
+          </TdActions>
+        </td>
+      </tr>
+      <CSSTransition 
+        nodeRef={ref}
+        classNames="row-details"
+        in={details}
+        timeout={500}
+        >
+        <RowDetails ref={ref}>
+          <RowDetailsContent colSpan="4">
+            <RowDetailsContentContent>
+              <div>Start of date project</div>
+              <div>{": "}13/02/2021</div>
+              <div>End of date project</div>
+              <div>{": "}09/12/2012</div>
+              <div>Tools</div>
+              <div>{": "}Express React</div>
+              <div>Url</div>
+              <div>{": "}https://facebook.com</div>
+              <div>Description</div>
+              <div>{": "}this is a project that i make for people can know about corona</div>
+            </RowDetailsContentContent>
+          </RowDetailsContent>
+        </RowDetails>  
+      </CSSTransition>
+    </React.Fragment>
   );
 }
 
@@ -240,14 +248,15 @@ const Table = styled.table`
   }
 
   & tbody tr {
-    border-bottom: 2px solid rgba(0, 0, 0, .2);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
   }
 
   & tbody tr:last-child {
-    border-bottom : none;
+    border-bottom: none;
   }
 
-  & th, & td {
+  & th,
+  & td {
     padding: 1rem;
     color: white;
     text-align: center;
@@ -260,8 +269,6 @@ const Table = styled.table`
     font-size: 1.5rem;
   }
 
-
-
   @media (max-width: 768px) {
     & {
       width: 200%;
@@ -273,6 +280,29 @@ const Table = styled.table`
   }
 `;
 
+const RowDetails = styled.tr`
+  border: none!important;
+  transition: var(--transition);
+  font-size: 0;
+  height: 0;
+`;
+
+const RowDetailsContent = styled.td`
+  padding: 0!important;
+  transition: var(--transition);
+`;
+
+const RowDetailsContentContent = styled.div`
+  width: 100%;
+  height: 0px;
+  overflow: hidden;
+  transition: var(--transition);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  justify-items: start;
+  align-items: center;
+`;
 
 const TdActions = styled.div`
   display: flex;
