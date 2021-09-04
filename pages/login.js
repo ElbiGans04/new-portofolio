@@ -1,6 +1,8 @@
 import useUser from '../lib/hooks/useUser'
 import Head from 'next/head'
 import styled from 'styled-components'
+import Input from '../Components/Input'
+import Label from '../Components/Label'
 
 export default function login () {
     const {mutateUser} = useUser({redirectTo: '/admin', redirectIfFound: true});
@@ -83,36 +85,6 @@ const FormRow = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-`;
-
-const Label = styled.label`
-    color: var(--pink);
-    font-weight: bold;
-    font-size: 1.3rem;
-    @media (max-width: 576px) {
-        & {
-            font-size: 1rem;
-        }
-    }
-`;
-
-const Input = styled.input`
-    appearance: none;
-    box-sizing: border-box;
-    padding: .5rem;
-    border-radius: .5rem;
-    &:focus {
-        border: 3px solid var(--pink);
-        outline: none;
-    }
-
-    @media (max-width: 576px) {
-        & {
-            padding: .3rem;
-            border-radius: .3rem;
-            width: 50%;
-        }
-    }
 `;
 
 const Button = styled.button`
