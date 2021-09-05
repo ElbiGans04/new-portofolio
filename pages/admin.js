@@ -73,7 +73,7 @@ function Admin() {
 function Row({ project, setModal }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
-  console.log(ref)
+  
   return (
     <React.Fragment>
       <tr>
@@ -113,8 +113,8 @@ function Row({ project, setModal }) {
         <RowDetails ref={ref}>
           <RowDetailsContent colSpan="4">
             <RowDetailsContentContent>
-              <h1>Hello World</h1>
-              {/* <div>Start of date project</div>
+              {/* <h1>Hello World</h1> */}
+              <div>Start of date project</div>
               <div>{": "}13/02/2021</div>
               <div>End of date project</div>
               <div>{": "}09/12/2012</div>
@@ -123,7 +123,7 @@ function Row({ project, setModal }) {
               <div>Url</div>
               <div>{": "}https://facebook.com</div>
               <div>Description</div>
-              <div>{": "}this is a project that i make for people can know about corona</div> */}
+              <div>{": "}this is a project that i make for people can know about corona</div>
             </RowDetailsContentContent>
           </RowDetailsContent>
         </RowDetails>  
@@ -283,26 +283,30 @@ const Table = styled.table`
 
 const RowDetails = styled.tr`
   border: none!important;
+  transition: var(--transition);
   line-height: 0;
-  height: 100%;
+  height: 0%;
+  font-size: 0;
 `;
 
 const RowDetailsContent = styled.td`
-  height: 100%;
   padding: 0!important;
+  overflow: hidden;
+  transition: var(--transition);
+  height: 0%;
 `;
 
 const RowDetailsContentContent = styled.div`
+  display: grid;
+  justify-items: start;
+  align-items: center;
+  grid-template-columns: 1fr 1fr;
   width: 100%;
-  height: 0px;
+  height: 100%;
   transition: var(--transition);
   padding: 0;
   overflow: hidden;
-  // display: grid;
-  // grid-template-columns: 1fr 1fr;
-  // gap: 1rem;
-  // justify-items: start;
-  // align-items: center;
+  text-align: start;
 `;
 
 const TdActions = styled.div`
@@ -336,10 +340,14 @@ const ModalContentAdd = styled.div`
   display: grid;
   width: 100%;
   height: 100%;
-  padding: 2rem;
   justify-items: center;
-  align-items: center;
   gap: 2rem;
+  align-items: center;
+  @media (min-width: 768px) {
+    & {
+      padding: 2rem;
+    }
+  }
 `;
 
 const ModalContentAddContent = styled.div`
