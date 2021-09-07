@@ -24,7 +24,7 @@ const storage = Multer.diskStorage({
 });
 
 const multer = Multer({storage: storage, limits: {
-  fileSize: 400000,
+  fileSize: 1000000,
   files: 5,
 }})
 
