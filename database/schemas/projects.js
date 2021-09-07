@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import toolSchema from './tool';
+import toolSchema from './tools';
 import imageSchema from './image';
 import typeProjectSchema from './typeProject';
 
