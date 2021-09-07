@@ -73,7 +73,7 @@ function Admin() {
 function Row({ project, setModal }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
-  
+
   return (
     <React.Fragment>
       <tr>
@@ -104,12 +104,12 @@ function Row({ project, setModal }) {
           </TdActions>
         </td>
       </tr>
-      <CSSTransition 
+      <CSSTransition
         nodeRef={ref}
         classNames="row-details"
         in={details}
         timeout={500}
-        >
+      >
         <RowDetails ref={ref}>
           <RowDetailsContent colSpan="4">
             <RowDetailsContentContent>
@@ -123,10 +123,13 @@ function Row({ project, setModal }) {
               <div>Url</div>
               <div>{": "}https://facebook.com</div>
               <div>Description</div>
-              <div>{": "}this is a project that i make for people can know about corona</div>
+              <div>
+                {": "}this is a project that i make for people can know about
+                corona
+              </div>
             </RowDetailsContentContent>
           </RowDetailsContent>
-        </RowDetails>  
+        </RowDetails>
       </CSSTransition>
     </React.Fragment>
   );
@@ -147,62 +150,90 @@ function Add() {
       <ModalContentAddContent>
         <ModalContentAddContentRow>
           <Label htmlFor="title">Title: </Label>
-          <Input type="text" id="title" required></Input>
+          <Input type="text" id="title" placeholder="enter the project title" name="title" required></Input>
         </ModalContentAddContentRow>
 
         <ModalContentAddContentRow>
           <Label htmlFor="startDate">Date start of development: </Label>
-          <Input type="date" id="startDate" required></Input>
+          <Input type="date" id="startDate" placeholder="enter the start date of development" name="startDate" required></Input>
         </ModalContentAddContentRow>
 
         <ModalContentAddContentRow>
           <Label htmlFor="endDate">Date end of development:</Label>
-          <Input id="endDate" type="date" required></Input>
+          <Input id="endDate" type="date" placeholder="enter the end date of development" name='endDate'  required></Input>
         </ModalContentAddContentRow>
 
         <ModalContentAddContentRow>
           <Label htmlFor="files">Images:</Label>
-          <Input id="files" type="file" required></Input>
+          <InputCollections type="file" name="image"></InputCollections>
         </ModalContentAddContentRow>
 
         <ModalContentAddContentRow>
           <Label htmlFor="url">Url of website:</Label>
-          <Input type="text" id="url" required></Input>
+          <Input type="text" id="url" placeholder="enter url" name="url" required></Input>
         </ModalContentAddContentRow>
 
         <ModalContentAddContentRow>
           <Label htmlFor="description">Description :</Label>
-          <Input type="text" id="description" required></Input>
+          <Input type="text" id="description" name="description" placeholder="enter description of project" required></Input>
         </ModalContentAddContentRow>
 
         <ModalContentAddContentRow>
           <Label>type of project :</Label>
-          <ContainerInput>
-            <Input
-              name="type"
-              type="radio"
-              id="work"
-              value="work"
-              required
-            ></Input>
-            <Label htmlFor="work">Work project</Label>
-            <Input
-              name="type"
-              type="radio"
-              id="personal"
-              value="personal"
-              required
-            ></Input>
-            <Label htmlFor="work">Personal Project</Label>
-          </ContainerInput>
+          <ContainerCheckbox>
+            <div>
+              <Input
+                name="type"
+                type="radio"
+                id="work"
+                value="work"
+                required
+              ></Input>
+              <Label htmlFor="work">Work project</Label>
+            </div>
+            <div>
+              <Input
+                name="type"
+                type="radio"
+                id="personal"
+                value="personal"
+                required
+              ></Input>
+              <Label htmlFor="work">Personal Project</Label>
+            </div>
+          </ContainerCheckbox>
         </ModalContentAddContentRow>
 
         <ModalContentAddContentRow>
           <Label htmlFor="tool">tool :</Label>
-          <Input type="text" id="tool" required></Input>
+          <InputCollections type="select" name="tool"></InputCollections>
         </ModalContentAddContentRow>
       </ModalContentAddContent>
+      <ModalContentAddFooter>
+        <Button>
+          ADD Project
+        </Button>
+      </ModalContentAddFooter>
     </ModalContentAdd>
+  );
+}
+
+function InputCollections(props) {
+  const [inputCount, setInputCount ] = useState(1);
+  const collectionInput = [];
+  for (let i = 0; i < inputCount; i++) { 
+    const element = props.type === 'select' ? <select {...props}></select> : <Input {...props}/>;
+    collectionInput.push(element);
+  }
+  return (
+    <ContainerInputs>
+      <Button onClick={() => setInputCount(state => state + 1)}>
+        <IoAddOutline />
+      </Button>
+      {
+        collectionInput
+      }
+    </ContainerInputs>
   );
 }
 
@@ -282,7 +313,7 @@ const Table = styled.table`
 `;
 
 const RowDetails = styled.tr`
-  border: none!important;
+  border: none !important;
   transition: var(--transition);
   line-height: 0;
   height: 0%;
@@ -290,7 +321,7 @@ const RowDetails = styled.tr`
 `;
 
 const RowDetailsContent = styled.td`
-  padding: 0!important;
+  padding: 0 !important;
   overflow: hidden;
   transition: var(--transition);
   height: 0%;
@@ -351,7 +382,7 @@ const ModalContentAdd = styled.div`
 `;
 
 const ModalContentAddContent = styled.div`
-  width: 50%;
+  width: 60%;
   height: 100%;
 
   @media (max-width: 992px) {
@@ -367,16 +398,54 @@ const ModalContentAddContent = styled.div`
   }
 `;
 
-const ModalContentAddContentRow = styled.div`
+const ModalContentAddFooter = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 0.8rem;
+  padding: 1rem;
 `;
 
-const ContainerInput = styled.div`
+const ModalContentAddContentRow = styled.div`
+  display: grid;
+  justify-items: space-between;
+  align-items: center;
+  grid-template-columns: 1fr 1fr;
+  padding: 0.8rem;
+  gap: 0.8rem;
+`;
+
+const ContainerCheckbox = styled.div`
+  width: 100%;
   display: grid;
   justify-items: center;
   align-items: center;
   grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 0.8rem;
+
+  & label {
+    font-size: 1rem;
+    font-weight: normal;
+  }
+`;
+
+const ContainerInputs = styled.div`
+  width: 100%;
+  position: relative;
+  display: grid;
+  gap: .5rem;
+
+  & button {
+    transition: var(--transition);
+    opacity: 0;
+    position: absolute;
+    left: -40px;
+    width: 30px;
+    height: 30px;
+    top: 50%;
+    margin-top: -15px;
+  }
+
+  &:hover button {
+    opacity: 1;
+  }
 `;
