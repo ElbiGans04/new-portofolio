@@ -17,7 +17,7 @@ const projectSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    tools: [toolSchema],
+    tools: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tools' }],
     typeProject: { type: String, ref: 'typeProjects' },
     images: [imageSchema],
     description: {
