@@ -44,18 +44,15 @@ function runMiddleware(req, res, fn) {
 
 export default async function handler(req, res) {
   const { method } = req;
-  req.body = !req.body ? {} : req.body;
-  console.log(req.body)
-  // const {
-  //   title = "",
-  //   startDate = Date.now(),
-  //   endDate = Date.now(),
-  //   tools = [],
-  //   typeProject = 'A1',
-  //   images = [],
-  //   description = '',
-  //   url = ''
-  // } = req.body;
+  const {
+    title = "",
+    startDate = Date.now(),
+    endDate = Date.now(),
+    tools = [],
+    typeProject = 'A1',
+    description = '',
+    url = ''
+  } = !req.body ? {} : req.body;
   try {
     await dbConnect();
 
@@ -81,7 +78,10 @@ export default async function handler(req, res) {
         break;
       case "POST":
         await runMiddleware(req, res, multer.array('images', 5));
+
         console.log(req.files)
+
+        
         res.send("OK")
         break;
       default:

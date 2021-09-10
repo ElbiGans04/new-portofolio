@@ -4,7 +4,6 @@ const Input = styled.input`
     box-sizing: border-box;
     padding: .5rem;
     border-radius: .5rem;
-    margin: .5rem;
     &:focus {
         border: 3px solid var(--pink);
         outline: none;

@@ -8,7 +8,8 @@ import Heading from './Heading'
 
 function Layout ({children}) {
     const {route} = useRouter();
-    const pageActive = upperFirstWord(route.slice(1));
+    const url = route.split('/');
+    const pageActive = upperFirstWord(url[url.length - 1]);
 
     return (
       <ErrorBoundary>

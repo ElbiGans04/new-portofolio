@@ -5,7 +5,7 @@ import Input from '../Components/Input'
 import Label from '../Components/Label'
 
 export default function login () {
-    const {mutateUser} = useUser({redirectTo: '/admin', redirectIfFound: true});
+    const {mutateUser} = useUser({redirectTo: '/admin/projects', redirectIfFound: true});
     
     async function onSubmit (event) {
         try {

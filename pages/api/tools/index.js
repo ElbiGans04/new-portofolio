@@ -1,5 +1,5 @@
-import dbConnect from "../../database/connection";
-import Tools from "../../database/schemas/tools";
+import dbConnect from "../../../database/connection";
+import Tools from "../../../database/schemas/tools";
 
 export default async function Handler (req, res) {
     try {
@@ -10,17 +10,22 @@ export default async function Handler (req, res) {
         switch (method) {
             case 'GET': 
                 const results = await Tools.find();
-                res.json({results});
+
+                res.json({data: results});
                 break;
             case 'POST':
                 const {name, as = ''} = req.body;
     
-                if (!name) throw {code: 400, message: 'name field not present'}
+                if (!name) throw {error: {code: 400, title: 'name field not present'}}
 
                 const tool = new Tools({name, as})
                 await tool.save();
 
                 res.status(201).json({meta: {message: 'tool has created'}})
+                break;
+            case 'DELETE': 
+                await Tools.deleteMany({});
+                res.status(200).json({meta: {message: 'tools has deleted'}})
                 break;
                 
             default: 
@@ -28,9 +33,9 @@ export default async function Handler (req, res) {
                 break;
         }
     } catch (err) {
-        const error = new Error(err.message || 'internal server error');
-        const code = err.code || 500;
+        const error = new Error(err.error.title || 'internal server error');
+        const code = err.error.code || 500;
         console.log(error)
-        res.status(code).json({error: {title: err.message}})
+        res.status(code).json({error: {title: err.error.title}})
     }
 }

@@ -15,20 +15,25 @@ export default async function Handler (req, res) {
                 result = await Tools.findById(userID);
                 
                 // Jika tidak ada
-                if (!result) throw {code: 404, message: 'tool not found'};
+                if (!result) throw {error: {code: 404, title: 'tool not found'}};
                 
-                res.json({result})
+                res.json({data: result})
                 break;
             case 'PUT':
                 result = await Tools.findByIdAndUpdate(userID, {name, as}).setOptions({new: true});
+
+                if (!result) throw {error: {title: 'tool not found', code: 404}};
+        
                 
-                res.json({result})
+                res.json({data: result})
                 break;
 
             case 'DELETE': 
                 result = await Tools.findByIdAndDelete(userID);
+
+                if (!result) throw {error: {title: 'tool not found', code: 404}};
                 
-                res.json({result})
+                res.json({data: result})
                 break;
                 
             default: 
@@ -37,8 +42,8 @@ export default async function Handler (req, res) {
         }
     } catch (err) {
         if (err instanceof Error) console.log(err);
-        const error = new Error(err.message || 'internal server error');
-        const code = err.code || 500;
-        res.status(code).json({error: {title: err.message}})
+        const error = new Error(err.error.title || 'internal server error');
+        const code = err.error.code || 500;
+        res.status(code).json({error: {title: err.error.title}})
     }
 }
