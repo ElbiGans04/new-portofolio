@@ -13,18 +13,17 @@ import {
 
 export default function TableComponent({
   result,
+  columns = [],
   visible: { visibleValue = 0, visibleColumns = [] } = {},
 } = {}) {
   const { data: { data: tools = [{}] } = {}, err } = useSWR(result, fetcher);
-  const filterColumns = Object.keys(tools[0]).filter((column) => {
-    // Temukan column yang diberi batasan
-    const foundColumn = visibleColumns.find((value) => value === column);
-
-    if (foundColumn !== undefined) return visibleValue === 0 ? false : true;
-
-    return visibleValue === 0 ? true : false;
-  });
-
+  const { mainColumns, detailColumns } = filter(
+    tools[0],
+    columns,
+    visibleColumns,
+    visibleValue
+  );
+  console.log(mainColumns, detailColumns);
   // Jika ada error
   if (err) {
     return <h1>Found a error</h1>;
@@ -36,8 +35,8 @@ export default function TableComponent({
         <thead>
           <tr>
             {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
-            {filterColumns.length > 4 && <th></th>}
-            {filterColumns.map((value, index) => {
+            {detailColumns.length > 0 && <th></th>}
+            {mainColumns.map((value, index) => {
               return <th key={index}>{upperFirstWord(value)}</th>;
             })}
             <th></th>
@@ -49,7 +48,12 @@ export default function TableComponent({
               Math.random() * (1 - 100) + 100
             )}${index}`;
             return (
-              <Row key={key} filterColumns={filterColumns} result={value} />
+              <Row
+                key={key}
+                mainColumns={mainColumns}
+                detailColumns={detailColumns}
+                result={value}
+              />
             );
           })}
         </tbody>
@@ -58,17 +62,15 @@ export default function TableComponent({
   );
 }
 
-function Row({ result, filterColumns }) {
+function Row({ result, mainColumns, detailColumns }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
-
-  console.log(result);
 
   return (
     <React.Fragment>
       <tr>
         {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
-        {filterColumns.length > 4 && (
+        {detailColumns.length > 0 && (
           <td>
             <Button
               title="see details of row"
@@ -92,7 +94,7 @@ function Row({ result, filterColumns }) {
         </td>
       </tr>
 
-      {filterColumns.length > 4 && (
+      {detailColumns.length > 0 && (
         <CSSTransition
           nodeRef={ref}
           classNames="row-details"
@@ -126,6 +128,34 @@ function Row({ result, filterColumns }) {
 }
 
 // Module
+function filter(data, columns, visibleColumns, visibleValue) {
+  const results = {
+    mainColumns: [],
+    detailColumns: [],
+  };
+
+  const result = Object.keys(data).filter((column) => {
+    // Temukan column yang diberi batasan
+    const foundColumn = visibleColumns.find((value) => value === column);
+
+    if (foundColumn !== undefined) return visibleValue === 0 ? false : true;
+
+    return visibleValue === 0 ? true : false;
+  });
+
+  if (columns.length === 0 || result.length < 4)
+    results.mainColumns = [...result];
+  else {
+    result.forEach((value) => {
+      for (let column of columns) {
+        if (value === column) results.mainColumns.push(value);
+        else results.detailColumns.push(value);
+      }
+    });
+  }
+
+  return results;
+}
 
 // End of Module
 
