@@ -1,14 +1,26 @@
-import Table from '../../Components/Table'
-import useSWR from 'swr'
-import fetcher from '../../lib/module/fetcher'
-export default function Tools () {
-    const {data, error} = useSWR('/api/tools', fetcher);
+import Table from "../../Components/Table";
+import Head from 'next/head'
 
-    if (error) {
-        return (<h1>Found a error</h1>)
-    }
-
-    return (
-        <Table result={data} />
-    )
+export default function Tools() {
+  return (
+      <>
+        <Head>
+            <title>Tools</title>
+        </Head>
+        <Table
+          result="/api/tools"
+          visible={{
+              visibleValue: 0,
+              visibleColumns: ['_id', '__v']
+          }}
+        />
+      </>
+  );
 }
+{/* <Table
+result="/api/tools"
+columns={{
+    _id: 1,
+    __v: 1
+}}
+/> */}

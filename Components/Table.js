@@ -1,99 +1,133 @@
+import useSWR from "swr";
+import fetcher from "../lib/module/fetcher";
+import upperFirstWord from "../lib/module/upperFirstWord";
 import styled from "styled-components";
 import { CSSTransition } from "react-transition-group";
-import React, { useState, useRef } from 'react'
-import Button from './Button'
+import React, { useState, useRef } from "react";
+import Button from "./Button";
 import {
-    IoTrashBinOutline,
-    IoAddOutline,
-    IoPencilSharp,
-  } from "react-icons/io5";
-  
-export default function TableComponent() {
+  IoTrashBinOutline,
+  IoAddOutline,
+  IoPencilSharp,
+} from "react-icons/io5";
+
+export default function TableComponent({
+  result,
+  visible: { visibleValue = 0, visibleColumns = [] } = {},
+} = {}) {
+  const { data: { data: tools = [{}] } = {}, err } = useSWR(result, fetcher);
+  const filterColumns = Object.keys(tools[0]).filter((column) => {
+    // Temukan column yang diberi batasan
+    const foundColumn = visibleColumns.find((value) => value === column);
+
+    if (foundColumn !== undefined) return visibleValue === 0 ? false : true;
+
+    return visibleValue === 0 ? true : false;
+  });
+
+  // Jika ada error
+  if (err) {
+    return <h1>Found a error</h1>;
+  }
+
   return (
     <ContainerTable>
       <Table>
         <thead>
           <tr>
+            {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
+            {filterColumns.length > 4 && <th></th>}
+            {filterColumns.map((value, index) => {
+              return <th key={index}>{upperFirstWord(value)}</th>;
+            })}
             <th></th>
-            <th>Name</th>
-            <th>Type Project</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <Row />
-          <Row />
+          {tools.map((value, index) => {
+            const key = `${Date.now()}${Math.floor(
+              Math.random() * (1 - 100) + 100
+            )}${index}`;
+            return (
+              <Row key={key} filterColumns={filterColumns} result={value} />
+            );
+          })}
         </tbody>
       </Table>
     </ContainerTable>
   );
 }
 
-function Row({ project}) {
+function Row({ result, filterColumns }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
+
+  console.log(result);
 
   return (
     <React.Fragment>
       <tr>
-        <td>
-          <Button
-            title="see details of project"
-            onClick={() => setDetails((state) => !state)}
-          >
-            <IoAddOutline />
-          </Button>
-        </td>
+        {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
+        {filterColumns.length > 4 && (
+          <td>
+            <Button
+              title="see details of row"
+              onClick={() => setDetails((state) => !state)}
+            >
+              <IoAddOutline />
+            </Button>
+          </td>
+        )}
         <td>Elbi library</td>
         <td>Personal project</td>
         <td>
           <TdActions>
-            <Button
-             
-              title="delete the project"
-            >
+            <Button title="delete the row">
               <IoTrashBinOutline></IoTrashBinOutline>
             </Button>
-            <Button
-
-              title="update the project"
-            >
+            <Button title="update the row">
               <IoPencilSharp></IoPencilSharp>
             </Button>
           </TdActions>
         </td>
       </tr>
-      <CSSTransition
-        nodeRef={ref}
-        classNames="row-details"
-        in={details}
-        timeout={500}
-      >
-        <RowDetails ref={ref}>
-          <RowDetailsContent colSpan="4">
-            <RowDetailsContentContent>
-              {/* <h1>Hello World</h1> */}
-              <div>Start of date project</div>
-              <div>{": "}13/02/2021</div>
-              <div>End of date project</div>
-              <div>{": "}09/12/2012</div>
-              <div>Tools</div>
-              <div>{": "}Express React</div>
-              <div>Url</div>
-              <div>{": "}https://facebook.com</div>
-              <div>Description</div>
-              <div>
-                {": "}this is a project that i make for people can know about
-                corona
-              </div>
-            </RowDetailsContentContent>
-          </RowDetailsContent>
-        </RowDetails>
-      </CSSTransition>
+
+      {filterColumns.length > 4 && (
+        <CSSTransition
+          nodeRef={ref}
+          classNames="row-details"
+          in={details}
+          timeout={500}
+        >
+          <RowDetails ref={ref}>
+            <RowDetailsContent colSpan="4">
+              <RowDetailsContentContent>
+                {/* <h1>Hello World</h1> */}
+                <div>Start of date project</div>
+                <div>{": "}13/02/2021</div>
+                <div>End of date project</div>
+                <div>{": "}09/12/2012</div>
+                <div>Tools</div>
+                <div>{": "}Express React</div>
+                <div>Url</div>
+                <div>{": "}https://facebook.com</div>
+                <div>Description</div>
+                <div>
+                  {": "}this is a project that i make for people can know about
+                  corona
+                </div>
+              </RowDetailsContentContent>
+            </RowDetailsContent>
+          </RowDetails>
+        </CSSTransition>
+      )}
     </React.Fragment>
   );
 }
 
+// Module
+
+// End of Module
 
 // Styled component
 const ContainerTable = styled.div`
