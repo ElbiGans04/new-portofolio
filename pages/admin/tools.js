@@ -1,4 +1,3 @@
-import Table from "../../Components/Table";
 import Head from "next/head";
 import Admin from "../../Components/Admin";
 import { Context } from "../../lib/hooks/toolsContext";
