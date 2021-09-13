@@ -8,8 +8,10 @@ import Heading from './Heading'
 
 function Layout ({children}) {
     const {route} = useRouter();
+    const urlHeadingExplisite = ['/404'];
+    const mustShowHeading = urlHeadingExplisite.find(url => route === url);
     const url = route.split('/');
-    const pageActive = upperFirstWord(url[url.length - 1]);
+    const pageActive = !mustShowHeading && upperFirstWord(url[url.length - 1]);
 
     return (
       <ErrorBoundary>

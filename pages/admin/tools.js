@@ -3,6 +3,7 @@ import Admin from "../../Components/Admin";
 import { Context } from "../../lib/hooks/toolsContext";
 import { useReducer } from "react";
 import {reducer} from '../../lib/hooks/reducer'
+import { CSSTransition } from "react-transition-group";
 
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {
@@ -14,6 +15,7 @@ export default function Tools() {
       visibleColumns: ["_id", "__v"],
     },
   });
+
   return (
     <Context.Provider value={{state, dispatch}}>
       <Head>
@@ -22,29 +24,4 @@ export default function Tools() {
       <Admin />
     </Context.Provider>
   );
-  // return (
-  //     <>
-  //       <Head>
-  //           <title>Tools</title>
-  //       </Head>
-  //       <Table
-  //         url="/api/tools"
-  //         columns={['name']}
-  //         visible={{
-  //             visibleValue: 0,
-  //             visibleColumns: ['_id', '__v']
-  //         }}
-  //       />
-  //     </>
-  // );
 }
-{
-  /* <Table
-result="/api/tools"
-columns={{
-    _id: 1,
-    __v: 1
-}}
-/> */
-}
-

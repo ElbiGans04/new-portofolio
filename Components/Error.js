@@ -25,9 +25,13 @@ grid-template-rows: 2fr 1fr;
 background-color: var(--dark);
 `;
 const ContainerText = styled.div`
-display: flex;
-width: 100%;
-justify-content: center;
-align-items: center;
-flex-direction: column;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  & h1:first-child {
+    margin-bottom: .5rem;
+  }
 `;
