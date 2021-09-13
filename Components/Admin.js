@@ -11,7 +11,7 @@ import Button from './Button'
 import useSWR from "swr";
 import fetcher from "../lib/module/fetcher";
 import upperFirstWord from "../lib/module/upperFirstWord";
-export default function Admin({url = ''} = {}) {
+export default function Admin() {
   return (
     <Container>
       <ContainerButtons>
