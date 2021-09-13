@@ -12,18 +12,18 @@ import {
 } from "react-icons/io5";
 
 export default function TableComponent({
-  result,
+  url,
   columns = [],
   visible: { visibleValue = 0, visibleColumns = [] } = {},
 } = {}) {
-  const { data: { data: tools = [{}] } = {}, err } = useSWR(result, fetcher);
+  const { data: { data: tools = [{}] } = {}, err } = useSWR(url, fetcher);
   const { mainColumns, detailColumns } = filter(
     tools[0],
     columns,
     visibleColumns,
     visibleValue
   );
-  console.log(mainColumns, detailColumns);
+
   // Jika ada error
   if (err) {
     return <h1>Found a error</h1>;
@@ -44,9 +44,8 @@ export default function TableComponent({
         </thead>
         <tbody>
           {tools.map((value, index) => {
-            const key = `${Date.now()}${Math.floor(
-              Math.random() * (1 - 100) + 100
-            )}${index}`;
+            const key = `${Date.now()}${getRandom()}${index}`;
+            console.log(key)
             return (
               <Row
                 key={key}
@@ -65,6 +64,19 @@ export default function TableComponent({
 function Row({ result, mainColumns, detailColumns }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
+  const newResult = Object.entries(result).filter(value => {
+    const key = value[0];
+    if(mainColumns.find(value => key === value)) {
+      return true
+    }
+  });
+  const newResult2 = Object.entries(result).filter(value => {
+    const key = value[0];
+    if(detailColumns.find(value => key === value)) {
+      return true
+    }
+  });
+
 
   return (
     <React.Fragment>
@@ -80,8 +92,15 @@ function Row({ result, mainColumns, detailColumns }) {
             </Button>
           </td>
         )}
-        <td>Elbi library</td>
-        <td>Personal project</td>
+        {/*  Lakukan looping */}
+        {
+          newResult.map((value, index) => {
+            return (
+              <td key={`${Date.now()}`}>{upperFirstWord(value[1])}</td>
+            )
+          })
+        }
+
         <td>
           <TdActions>
             <Button title="delete the row">
@@ -104,20 +123,16 @@ function Row({ result, mainColumns, detailColumns }) {
           <RowDetails ref={ref}>
             <RowDetailsContent colSpan="4">
               <RowDetailsContentContent>
-                {/* <h1>Hello World</h1> */}
-                <div>Start of date project</div>
-                <div>{": "}13/02/2021</div>
-                <div>End of date project</div>
-                <div>{": "}09/12/2012</div>
-                <div>Tools</div>
-                <div>{": "}Express React</div>
-                <div>Url</div>
-                <div>{": "}https://facebook.com</div>
-                <div>Description</div>
-                <div>
-                  {": "}this is a project that i make for people can know about
-                  corona
-                </div>
+                {
+                  newResult2.map((value, index) => {
+                    return (
+                      <React.Fragment>
+                        <div>{upperFirstWord(value[0])}{" : "}</div>
+                        <div>{upperFirstWord(value[1])}</div>
+                      </React.Fragment>
+                    )
+                  })
+                }
               </RowDetailsContentContent>
             </RowDetailsContent>
           </RowDetails>
@@ -143,7 +158,8 @@ function filter(data, columns, visibleColumns, visibleValue) {
     return visibleValue === 0 ? true : false;
   });
 
-  if (columns.length === 0 || result.length < 4)
+  // if (columns.length === 0 || (result.length < 4 ))
+  if (columns.length === 0)
     results.mainColumns = [...result];
   else {
     result.forEach((value) => {
@@ -154,7 +170,12 @@ function filter(data, columns, visibleColumns, visibleValue) {
     });
   }
 
+
   return results;
+}
+
+function getRandom () {
+  return Math.floor( Math.random() * (1 - 100) + 100)
 }
 
 // End of Module
@@ -164,6 +185,9 @@ const ContainerTable = styled.div`
   width: 100%;
   height: 100%;
   overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Table = styled.table`
@@ -227,7 +251,7 @@ const RowDetailsContent = styled.td`
 
 const RowDetailsContentContent = styled.div`
   display: grid;
-  justify-items: start;
+  justify-items: center;
   align-items: center;
   grid-template-columns: 1fr 1fr;
   width: 100%;
@@ -235,7 +259,7 @@ const RowDetailsContentContent = styled.div`
   transition: var(--transition);
   padding: 0;
   overflow: hidden;
-  text-align: start;
+  text-align: center;
 `;
 
 const TdActions = styled.div`

@@ -8,7 +8,8 @@ export default function Tools() {
             <title>Tools</title>
         </Head>
         <Table
-          result="/api/tools"
+          url="/api/tools"
+          columns={['name']}
           visible={{
               visibleValue: 0,
               visibleColumns: ['_id', '__v']
