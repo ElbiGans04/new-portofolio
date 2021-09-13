@@ -33,7 +33,7 @@ export default function Admin() {
           Add Project
         </Button>
       </ContainerButtons>
-      <Table />
+      <Table url="/api/projects" />
 
       {/* Modal Page */}
       <CSSTransition
@@ -165,6 +165,7 @@ function Delete() {
 const Container = styled.div`
   width: 80%;
   min-height: 50vh;
+  overflow: hidden;
 
   @media (max-width: 768px) {
     & {

@@ -16,7 +16,7 @@ export default function TableComponent({
   columns = [],
   visible: { visibleValue = 0, visibleColumns = [] } = {},
 } = {}) {
-  const { data: { data: tools = [{}] } = {}, err } = useSWR(url, fetcher);
+  const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
   const { mainColumns, detailColumns, mainRows, detailRows } = filter(
     tools,
     columns,
@@ -37,23 +37,12 @@ export default function TableComponent({
             {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
             {detailColumns.length > 0 && <th></th>}
             {mainColumns.map((value, index) => {
-              return <th key={index}>{upperFirstWord(value)}</th>;
+              return <th key={getRandom(index)}>{upperFirstWord(value)}</th>;
             })}
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {/* {tools.map((value, index) => {
-            const key = `${Date.now()}${getRandom()}${index}`;
-            return (
-              <Row
-                key={key}
-                detailColumns={detailColumns}
-                mainRows={mainRows}
-                detailRows={detailRows}
-              />
-            );
-          })} */}
           {
             mainRows.map((mainRow, index) => {
               return <Row key={getRandom(index)} detailColumns={detailColumns} detailRow={detailRows[index]} mainRow={mainRow} />
@@ -118,10 +107,10 @@ function Row({ detailRow, mainRow, detailColumns }) {
                 {
                   detailColumns.map((detailColumn, index) => {
                     return (
-                      <React.Fragment>
+                      <RowDetailsContentContentContent key={getRandom(index)}>
                         <div>{upperFirstWord(detailColumn)}</div>
                         <div>{upperFirstWord(detailRow[index])}</div>
-                      </React.Fragment>
+                      </RowDetailsContentContentContent>
                     )
                   })
                 }
@@ -143,54 +132,51 @@ function filter(data, columns, visibleColumns, visibleValue) {
     detailRows: []
   };
 
-  const result = Object.keys(data[0]).filter((column) => {
-    // Temukan column yang diberi batasan
-    const foundColumn = visibleColumns.find((value) => value === column);
-
-    if (foundColumn !== undefined) return visibleValue === 0 ? false : true;
-
-    return visibleValue === 0 ? true : false;
-  });
-
-  // if (columns.length === 0 || (result.length < 4 ))
-  if (columns.length === 0)
-    results.mainColumns = [...result];
-  else {
-    result.forEach((value) => {
-      for (let column of columns) {
-        if (value === column) results.mainColumns.push(value);
-        else results.detailColumns.push(value);
-      }
+  if (data.length > 0) {
+    const result = Object.keys(data[0]).filter((column) => {
+      // Temukan column yang diberi batasan
+      const foundColumn = visibleColumns.find((value) => value === column);
+  
+      if (foundColumn !== undefined) return visibleValue === 0 ? false : true;
+  
+      return visibleValue === 0 ? true : false;
+    });
+  
+    // if (columns.length === 0 || (result.length < 4 ))
+    if (columns.length === 0)
+      results.mainColumns = [...result];
+    else {
+      result.forEach((value) => {
+        for (let column of columns) {
+          if (value === column) results.mainColumns.push(value);
+          else results.detailColumns.push(value);
+        }
+      });
+    }
+  
+    // Isi dengan nilai
+    data.forEach(row => {
+      // Ubah Object menjadi array
+      const columns = Object.entries(row);
+  
+  
+      // Opsi one
+      let passColumns = [];
+      let passDetails = [];
+  
+      // Lakukan Filtering
+      columns.forEach(column => {
+        const ifMatch = results.mainColumns.find(matchColumn => matchColumn === column[0]);
+        if (ifMatch !== undefined) passColumns.push(column[1]);
+  
+        const ifMatch2 = results.detailColumns.find(matchColumn => matchColumn === column[0]);
+        if (ifMatch2 !== undefined) passDetails.push(column[1])
+      });
+  
+      results.mainRows.push(passColumns);
+      results.detailRows.push(passDetails);
     });
   }
-
-  // Isi dengan nilai
-  data.forEach(row => {
-    // Ubah Object menjadi array
-    const columns = Object.entries(row);
-
-
-    // Opsi one
-    let passColumns = [];
-    let passDetails = [];
-
-    // Lakukan Filtering
-    columns.forEach(column => {
-      const ifMatch = results.mainColumns.find(matchColumn => matchColumn === column[0]);
-      if (ifMatch !== undefined) passColumns.push(column[1]);
-
-      const ifMatch2 = results.detailColumns.find(matchColumn => matchColumn === column[0]);
-      if (ifMatch2 !== undefined) passDetails.push(column[1])
-    });
-
-    results.mainRows.push(passColumns);
-    results.detailRows.push(passDetails);
-
-    // OPSI 2  
-    // // filter setiap columns
-    // results.mainRows.push(columns.filter(column => results.mainColumns.find(matchColumn => matchColumn === column[0])));
-    // results.detailRows.push(columns.filter(column => results.detailColumns.find(matchColumn => matchColumn === column[0])));
-  });
 
 
   return results;
@@ -207,9 +193,6 @@ const ContainerTable = styled.div`
   width: 100%;
   height: 100%;
   overflow: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
 
 const Table = styled.table`
@@ -262,6 +245,10 @@ const RowDetails = styled.tr`
   line-height: 0;
   height: 0%;
   font-size: 0;
+
+  &.row-details-enter-done {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2)!important;
+  }
 `;
 
 const RowDetailsContent = styled.td`
@@ -272,6 +259,18 @@ const RowDetailsContent = styled.td`
 `;
 
 const RowDetailsContentContent = styled.div`
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  transition: var(--transition);
+  padding: 0;
+  overflow: hidden;
+  text-align: center;
+`;
+
+const RowDetailsContentContentContent = styled.div`
   display: grid;
   justify-items: center;
   align-items: center;
