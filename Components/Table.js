@@ -17,11 +17,11 @@ export default function TableComponent({
   visible: { visibleValue = 0, visibleColumns = [] } = {},
 } = {}) {
   const { data: { data: tools = [{}] } = {}, err } = useSWR(url, fetcher);
-  const { mainColumns, detailColumns } = filter(
-    tools[0],
+  const { mainColumns, detailColumns, mainRows, detailRows } = filter(
+    tools,
     columns,
     visibleColumns,
-    visibleValue
+    visibleValue,
   );
 
   // Jika ada error
@@ -43,39 +43,31 @@ export default function TableComponent({
           </tr>
         </thead>
         <tbody>
-          {tools.map((value, index) => {
+          {/* {tools.map((value, index) => {
             const key = `${Date.now()}${getRandom()}${index}`;
-            console.log(key)
             return (
               <Row
                 key={key}
-                mainColumns={mainColumns}
                 detailColumns={detailColumns}
-                result={value}
+                mainRows={mainRows}
+                detailRows={detailRows}
               />
             );
-          })}
+          })} */}
+          {
+            mainRows.map((mainRow, index) => {
+              return <Row key={getRandom(index)} detailColumns={detailColumns} detailRow={detailRows[index]} mainRow={mainRow} />
+            })
+          }
         </tbody>
       </Table>
     </ContainerTable>
   );
 }
 
-function Row({ result, mainColumns, detailColumns }) {
+function Row({ detailRow, mainRow, detailColumns }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
-  const newResult = Object.entries(result).filter(value => {
-    const key = value[0];
-    if(mainColumns.find(value => key === value)) {
-      return true
-    }
-  });
-  const newResult2 = Object.entries(result).filter(value => {
-    const key = value[0];
-    if(detailColumns.find(value => key === value)) {
-      return true
-    }
-  });
 
 
   return (
@@ -94,9 +86,9 @@ function Row({ result, mainColumns, detailColumns }) {
         )}
         {/*  Lakukan looping */}
         {
-          newResult.map((value, index) => {
+          mainRow.map((value, index) => {
             return (
-              <td key={`${Date.now()}`}>{upperFirstWord(value[1])}</td>
+              <td key={getRandom(index)}>{upperFirstWord(value)}</td>
             )
           })
         }
@@ -124,11 +116,11 @@ function Row({ result, mainColumns, detailColumns }) {
             <RowDetailsContent colSpan="4">
               <RowDetailsContentContent>
                 {
-                  newResult2.map((value, index) => {
+                  detailColumns.map((detailColumn, index) => {
                     return (
                       <React.Fragment>
-                        <div>{upperFirstWord(value[0])}{" : "}</div>
-                        <div>{upperFirstWord(value[1])}</div>
+                        <div>{upperFirstWord(detailColumn)}</div>
+                        <div>{upperFirstWord(detailRow[index])}</div>
                       </React.Fragment>
                     )
                   })
@@ -147,9 +139,11 @@ function filter(data, columns, visibleColumns, visibleValue) {
   const results = {
     mainColumns: [],
     detailColumns: [],
+    mainRows: [],
+    detailRows: []
   };
 
-  const result = Object.keys(data).filter((column) => {
+  const result = Object.keys(data[0]).filter((column) => {
     // Temukan column yang diberi batasan
     const foundColumn = visibleColumns.find((value) => value === column);
 
@@ -170,12 +164,40 @@ function filter(data, columns, visibleColumns, visibleValue) {
     });
   }
 
+  // Isi dengan nilai
+  data.forEach(row => {
+    // Ubah Object menjadi array
+    const columns = Object.entries(row);
+
+
+    // Opsi one
+    let passColumns = [];
+    let passDetails = [];
+
+    // Lakukan Filtering
+    columns.forEach(column => {
+      const ifMatch = results.mainColumns.find(matchColumn => matchColumn === column[0]);
+      if (ifMatch !== undefined) passColumns.push(column[1]);
+
+      const ifMatch2 = results.detailColumns.find(matchColumn => matchColumn === column[0]);
+      if (ifMatch2 !== undefined) passDetails.push(column[1])
+    });
+
+    results.mainRows.push(passColumns);
+    results.detailRows.push(passDetails);
+
+    // OPSI 2  
+    // // filter setiap columns
+    // results.mainRows.push(columns.filter(column => results.mainColumns.find(matchColumn => matchColumn === column[0])));
+    // results.detailRows.push(columns.filter(column => results.detailColumns.find(matchColumn => matchColumn === column[0])));
+  });
+
 
   return results;
 }
 
-function getRandom () {
-  return Math.floor( Math.random() * (1 - 100) + 100)
+function getRandom (index) {
+  return `${Date.now()}${Math.floor( Math.random() * (1 - 100) + 100)}${index || 1}`
 }
 
 // End of Module
