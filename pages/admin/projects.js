@@ -5,35 +5,40 @@ import {
   IoAddOutline,
 } from "react-icons/io5";
 import Modal from "../../Components/Modal";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useReducer } from "react";
 import { CSSTransition, Transition } from "react-transition-group";
 import Heading from "../../Components/Heading";
 import Input from "../../Components/Input";
 import Label from "../../Components/Label";
-import Table from '../../Components/Table'
+import Admin from '../../Components/Admin'
 import Button from '../../Components/Button'
+import {reducer} from '../../lib/hooks/reducer'
+import {Context} from '../../lib/hooks/toolsContext'
 
-export default function Admin() {
+export default function Projects() {
   const { user } = useUser({ redirectTo: "/login" });
   const [modal, setModal] = useState({ open: false, content: null });
   const ref = useRef(null);
+  const [state, dispatch] = useReducer(reducer, {
+    modal: false,
+    url: "/api/projects",
+    columns: ["name"],
+    visible: {
+      visibleValue: 0,
+      visibleColumns: ["_id", "__v"],
+    },
+  });
 
   if (!user || user.isLoggedIn === false) {
     return <div className="loader"></div>;
   }
 
   return (
-    <Container>
+    <Context.Provider value={{state, dispatch}}>
       <Head>
         <title>Admin Page</title>
       </Head>
-      <ContainerButtons>
-        <Button onClick={() => setModal({ open: true, content: Add })}>
-          <IoAddOutline />
-          Add Project
-        </Button>
-      </ContainerButtons>
-      <Table url="/api/projects" />
+      <Admin />
 
       {/* Modal Page */}
       <CSSTransition
@@ -51,7 +56,7 @@ export default function Admin() {
         </Modal>
       </CSSTransition>
       {/* End of modal page */}
-    </Container>
+    </Context.Provider>
   );
 }
 
@@ -161,26 +166,6 @@ function Delete() {
 }
 
 // Styled Component
-
-const Container = styled.div`
-  width: 80%;
-  min-height: 50vh;
-  overflow: hidden;
-
-  @media (max-width: 768px) {
-    & {
-      width: 90%;
-    }
-  }
-`;
-
-const ContainerButtons = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 1rem;
-`;
 
 //
 // Modal add content

@@ -3,19 +3,17 @@ import fetcher from "../lib/module/fetcher";
 import upperFirstWord from "../lib/module/upperFirstWord";
 import styled from "styled-components";
 import { CSSTransition } from "react-transition-group";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import Button from "./Button";
 import {
   IoTrashBinOutline,
   IoAddOutline,
   IoPencilSharp,
 } from "react-icons/io5";
+import  {Context} from '../lib/hooks/toolsContext'
 
-export default function TableComponent({
-  url,
-  columns = [],
-  visible: { visibleValue = 0, visibleColumns = [] } = {},
-} = {}) {
+export default function TableComponent() {
+  const { state: {url, columns, visible: {visibleColumns, visibleValue}}, dispatch } = useContext(Context);
   const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
   const { mainColumns, detailColumns, mainRows, detailRows } = filter(
     tools,
