@@ -16,7 +16,7 @@ export default function Admin() {
   return (
     <Container>
       <ContainerButtons>
-        <Button onClick={() => dispatch({type: 'modalAdd/open'})}>
+        <Button onClick={() => dispatch({type: 'modal/open', payload: {modal: 'add'}})}>
           <IoAddOutline />
           Add Entity
         </Button>
@@ -69,7 +69,7 @@ function TableComponent() {
 function Row({ detailRow, mainRow, detailColumns }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
-
+  const { dispatch } = useContext(Context);
 
   return (
     <React.Fragment>
@@ -96,7 +96,7 @@ function Row({ detailRow, mainRow, detailColumns }) {
 
         <td>
           <TdActions>
-            <Button title="delete the row">
+            <Button onClick={() => dispatch({type: 'modal/open', payload : {modal: 'delete'}})} title="delete the row">
               <IoTrashBinOutline></IoTrashBinOutline>
             </Button>
             <Button title="update the row">
