@@ -1,7 +1,7 @@
 import React, {useContext, useReducer} from "react";
 import styled from "styled-components"
 import { Context } from "../lib/hooks/toolsContext";
-import Button from "./Button";
+
 const ModalComponent = React.forwardRef(({defaultState, children, updateState, full}, ref) => {
   const {dispatch} = useContext(Context);
   return (
@@ -16,9 +16,6 @@ const ModalComponent = React.forwardRef(({defaultState, children, updateState, f
         <ModalContent>
           {children}
         </ModalContent>
-        <ModalFooter>
-          <Button>SUBMIT</Button>
-        </ModalFooter>
       </ModalMain>
     </Modal>
   );
@@ -111,12 +108,4 @@ const ModalContent = styled.div`
       padding: 1rem;
     }
   }
-`;
-
-const ModalFooter = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1rem;
-  box-shadow: -1px -1px 3px rgba(0,0,0, .5);
 `;
