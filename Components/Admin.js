@@ -12,10 +12,11 @@ import useSWR from "swr";
 import fetcher from "../lib/module/fetcher";
 import upperFirstWord from "../lib/module/upperFirstWord";
 export default function Admin() {
+  const { dispatch } = useContext(Context);
   return (
     <Container>
       <ContainerButtons>
-        <Button >
+        <Button onClick={() => dispatch({type: 'modalAdd/open'})}>
           <IoAddOutline />
           Add Entity
         </Button>

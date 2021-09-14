@@ -16,7 +16,7 @@ export default async function Handler (req, res) {
             case 'POST':
                 const {name, as = ''} = req.body;
     
-                if (!name) throw {error: {code: 400, title: 'name field not present'}}
+                if (!name) throw {error: {code: 400, message: 'name field not present'}}
 
                 const tool = new Tools({name, as})
                 await tool.save();
@@ -29,13 +29,14 @@ export default async function Handler (req, res) {
                 break;
                 
             default: 
-                res.status(405).json({ errors: { code: 405, title: 'method not found' } });
+                res.status(405).json({ errors: { code: 405, message: 'method not found' } });
                 break;
         }
     } catch (err) {
-        const error = new Error(err.error.title || 'internal server error');
+        console.log(err)
+        // if (err instanceof Error) console.log(err);
+        const massage = err.error.message || 'internal server error';
         const code = err.error.code || 500;
-        console.log(error)
-        res.status(code).json({error: {title: err.error.title}})
+        res.status(code).json({error: {message}})
     }
 }

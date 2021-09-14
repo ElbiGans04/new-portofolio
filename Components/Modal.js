@@ -1,11 +1,14 @@
-import React from "react";
+import React, {useContext, useReducer} from "react";
 import styled from "styled-components"
-const ModalComponent = React.forwardRef(({defaultState, children, updateState}, ref) => {
+import { Context } from "../lib/hooks/toolsContext";
+import Button from "./Button";
+const ModalComponent = React.forwardRef(({defaultState, children, updateState, full}, ref) => {
+  const {dispatch} = useContext(Context);
   return (
     <Modal ref={ref}>
-      <ModalMain>
+      <ModalMain full={full}>
         <ModalAction>
-          <ModalClose onClick={() => updateState(defaultState)}>
+          <ModalClose onClick={() => dispatch({type: 'modal/close'})}>
             <span></span>
             <span></span>
           </ModalClose>
@@ -13,6 +16,9 @@ const ModalComponent = React.forwardRef(({defaultState, children, updateState}, 
         <ModalContent>
           {children}
         </ModalContent>
+        <ModalFooter>
+          <Button>SUBMIT</Button>
+        </ModalFooter>
       </ModalMain>
     </Modal>
   );
@@ -39,8 +45,8 @@ const Modal = styled.div`
 `;
 const ModalMain = styled.div`
   position: relative;
-  width: 90%;
-  height: 90%;
+  width: ${({full}) => full ? '90%' : ''};
+  height: ${({full}) => full ? '90%' : ''};
   box-sizing: border-box;
   background-color: var(--dark);
   box-shadow: 5px 12px 17px rgb(0 0 0 / 30%);
@@ -67,9 +73,11 @@ const ModalAction = styled.div`
   justify-content: flex-end;
   align-items: center;
   width: 100%;
-  height: 10%;
+  height: 50px;
+  padding: 2rem;
   box-sizing: border-box;
   padding: 0.5rem;
+  box-shadow: 1px 1px 3px rgba(0,0,0, .5);
 `;
 
 const ModalClose = styled.div`
@@ -103,7 +111,12 @@ const ModalContent = styled.div`
       padding: 1rem;
     }
   }
-  // display: grid;
-  // grid-template-rows: 2fr 1fr;
-  // overflow: auto;
+`;
+
+const ModalFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1rem;
+  box-shadow: -1px -1px 3px rgba(0,0,0, .5);
 `;
