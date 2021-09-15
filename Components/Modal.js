@@ -1,10 +1,10 @@
 import React from "react";
 import styled from "styled-components"
 
-const ModalComponent = React.forwardRef(({defaultState, children, updateState, full}, ref) => {
+const ModalComponent = React.forwardRef(({defaultState, children, updateState, width, height}, ref) => {
   return (
     <Modal ref={ref}>
-      <ModalMain full={full}>
+      <ModalMain width={width} height={height}>
         <ModalAction>
           <ModalClose onClick={() => updateState(defaultState)}>
             <span></span>
@@ -40,8 +40,8 @@ const Modal = styled.div`
 `;
 const ModalMain = styled.div`
   position: relative;
-  width: ${({width}) => width ? '90%' : ''};
-  height: ${({height}) => height ? '90%' : ''};
+  width: ${({width}) => width || ''};
+  height: ${({height}) => height || ''};
   box-sizing: border-box;
   background-color: var(--dark);
   box-shadow: 5px 12px 17px rgb(0 0 0 / 30%);

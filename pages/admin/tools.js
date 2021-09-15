@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Admin from "../../Components/Admin";
-import React, { useReducer, useRef } from "react";
+import React, { useReducer, useRef, useState } from "react";
 import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
 import ModalComponent from "../../Components/Modal";
@@ -9,8 +9,12 @@ import Input from "../../Components/Input";
 import Label from "../../Components/Label";
 import Button from "../../Components/Button";
 import Heading from "../../Components/Heading";
+import fetcher from "../../lib/module/fetchClient";
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {
+    // iddle, loading, success , failed,
+    status: "iddle",
+    message: null,
     modal: false,
     row: {
       id: false,
@@ -40,19 +44,44 @@ export default function Tools() {
         in={state.modal !== false ? true : false}
         timeout={500}
       >
-        <ModalComponent updateState={dispatch} defaultState={{type: 'modal/close'}} ref={ref}>
-          <SwitchModal row={state.row} modal={state.modal} />
+        <ModalComponent
+          width="500px"
+          updateState={dispatch}
+          defaultState={{ type: "modal/close" }}
+          ref={ref}
+        >
+          {state.status === "loading" && <div className="loader"></div>}
+          {state.status === "finish" && (
+            <ModalMain>
+              <ModalContent>
+                <Heading>{state.message}</Heading>
+              </ModalContent>
+              <ModalFooter>
+                <Button onClick={() => dispatch({type: 'modal/close'})}>CLOSE</Button>
+              </ModalFooter>
+            </ModalMain>
+          )}
+          {
+            state.status === 'failed' && <h1>Error Bro</h1>
+          }
+          {state.status === 'iddle' && (<SwitchModal dispatch={dispatch} state={state} />) }
         </ModalComponent>
       </CSSTransition>
     </React.Fragment>
   );
 }
 
-function SwitchModal({ modal, row: { id, columns, columnsValue } } = {}) {
+function SwitchModal({
+  state: {
+    modal,
+    row: { id, columns, columnsValue },
+  },
+  dispatch,
+} = {}) {
   switch (modal) {
     case "add":
       return (
-        <Form onSubmit={(event) => onSubmit(event)}>
+        <Form onSubmit={(event) => onSubmit(event, dispatch)}>
           <FormContent>
             <FormContentRow>
               <Label htmlFor="name">Name:</Label>
@@ -77,7 +106,7 @@ function SwitchModal({ modal, row: { id, columns, columnsValue } } = {}) {
             </Heading>
           </ModalContent>
           <ModalFooter>
-            <Button onClick={() => onSubmit2(id)}>DELETE</Button>
+            <Button onClick={() => onSubmit2(id, dispatch)}>DELETE</Button>
           </ModalFooter>
         </ModalMain>
       );
@@ -85,7 +114,7 @@ function SwitchModal({ modal, row: { id, columns, columnsValue } } = {}) {
       const nameValue = columnsValue[columns.indexOf("name")];
       const asValue = columnsValue[columns.indexOf("as")];
       return (
-        <Form onSubmit={(event) => onSubmit3(event, id)}>
+        <Form onSubmit={(event) => onSubmit3(event, id, dispatch)}>
           <FormContent>
             <FormContentRow>
               <Label htmlFor="name">Name:</Label>
@@ -117,7 +146,7 @@ function SwitchModal({ modal, row: { id, columns, columnsValue } } = {}) {
 }
 
 // Submit
-const onSubmit = async (event) => {
+const onSubmit = async (event, dispatch) => {
   try {
     event.preventDefault();
     const searchParams = new URLSearchParams();
@@ -126,39 +155,42 @@ const onSubmit = async (event) => {
       searchParams.append(index, value);
     }
 
-    const request = await (
-      await fetch("/api/tools", {
-        method: "post",
-        body: searchParams.toString(),
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      })
-    ).json();
+    dispatch({type: 'modal/request/start'})
 
-    alert(request.meta.message);
+    const request = await fetcher("/api/tools", {
+      method: "post",
+      body: searchParams.toString(),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}})
   } catch (err) {
     alert("Error");
     console.log(err);
+    dispatch({type: 'modal/request/failed', payload: {message: request.error.message}})
   }
 };
 
-const onSubmit2 = async (id) => {
+const onSubmit2 = async (id, dispatch) => {
   try {
-    const request = await (
-      await fetch(`/api/tools/${id}`, {
-        method: "delete",
-      })
-    ).json();
+    dispatch({type: 'modal/request/start'})
 
-    alert("SUCCESS");
+    const request = await fetcher(`/api/tools/${id}`, {
+      method: "delete",
+    })
+
+    
+    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}})
   } catch (err) {
     alert("Error");
     console.log(err);
+    dispatch({type: 'modal/request/failed', payload: {message: request.error.message}})
   }
 };
 
-const onSubmit3 = async (event, id) => {
+const onSubmit3 = async (event, id,dispatch) => {
   try {
     event.preventDefault();
     const searchParams = new URLSearchParams();
@@ -166,7 +198,9 @@ const onSubmit3 = async (event, id) => {
     for (let [index, value] of form.entries()) {
       searchParams.append(index, value);
     }
-    const request = await(
+
+    dispatch({type: 'modal/request/start'})
+    const request = await (
       await fetch(`/api/tools/${id}`, {
         method: "put",
         body: searchParams.toString(),
@@ -175,11 +209,12 @@ const onSubmit3 = async (event, id) => {
         },
       })
     ).json();
-  
-    alert(request.meta.message);
+
+    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}})
   } catch (err) {
     alert("Error");
-    console.log(err)
+    console.log(err);
+    dispatch({type: 'modal/request/failed', payload: {message: request.error.message}})
   }
 };
 

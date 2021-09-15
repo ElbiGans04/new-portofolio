@@ -5,64 +5,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>
-        .container {
-            width: 80%;
-            height: 100vh;
-            border: 2px solid black;
-            box-sizing: border-box;
-            margin: 10px auto;
-            padding: 2rem;
-        }
-
-        table thead{
-           border: 2px solid black;
-        }
-
-        table tbody td {
-            text-align: center;
-            
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Name</th>
-                    <th>Type Project</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Elbi Library Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iste cupiditate nobis incidunt tenetur reiciendis temporibus molestiae dolorem quisquam repudiandae, et doloremque architecto dolorum mollitia nam distinctio eius praesentium illum modi soluta? Sequi, id porro. Laboriosam.</td>
-                    <td>Personal Project</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>delete</button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>2</td>
-                    <td>Corona Web App </td>
-                    <td>Personal Project</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>delete</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    
 </body>
     <script>
-        document.body.addEventListener('mousedown', function(event){
-            console.log(event.clientX, event.clientY)
-        });
+      (async () => {
+          try {
+            console.log(await fetch('http://localhost:3000/api/tools'))
+          } catch (err) {
+              console.log(err)
+          }
+
+      }) ()
     </script>
 </html>
