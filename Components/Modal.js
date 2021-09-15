@@ -1,14 +1,12 @@
 import React, {useContext, useReducer} from "react";
 import styled from "styled-components"
-import { Context } from "../lib/hooks/toolsContext";
 
 const ModalComponent = React.forwardRef(({defaultState, children, updateState, full}, ref) => {
-  const {dispatch} = useContext(Context);
   return (
     <Modal ref={ref}>
       <ModalMain full={full}>
         <ModalAction>
-          <ModalClose onClick={() => dispatch({type: 'modal/close'})}>
+          <ModalClose onClick={() => updateState(defaultState)}>
             <span></span>
             <span></span>
           </ModalClose>

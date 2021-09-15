@@ -1,6 +1,5 @@
 import { CSSTransition } from "react-transition-group";
-import React, { useState, useRef, useContext } from "react";
-import { Context } from "../lib/hooks/toolsContext";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import {
   IoTrashBinOutline,
@@ -11,8 +10,7 @@ import Button from "./Button";
 import useSWR from "swr";
 import fetcher from "../lib/module/fetcher";
 import upperFirstWord from "../lib/module/upperFirstWord";
-export default function Admin() {
-  const { dispatch } = useContext(Context);
+export default function Admin({ dispatch, state }) {
   return (
     <Container>
       <ContainerButtons>
@@ -25,20 +23,19 @@ export default function Admin() {
           Add Entity
         </Button>
       </ContainerButtons>
-      <TableComponent />
+      <TableComponent state={state} dispatch={dispatch} />
     </Container>
   );
 }
 
-function TableComponent() {
-  const {
-    state: {
-      url,
-      columns,
-      visible: { visibleColumns, visibleValue },
-    },
-    dispatch,
-  } = useContext(Context);
+function TableComponent({
+  state: {
+    url,
+    columns,
+    visible: { visibleColumns, visibleValue },
+  },
+  dispatch,
+}) {
   const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
   const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = filter(
     tools,
@@ -69,6 +66,7 @@ function TableComponent() {
           {mainRows.map((mainRow, index) => {
             return (
               <Row
+                dispatch={dispatch}
                 key={getRandom(index)}
                 id={rowsId[index]}
                 detailColumns={detailColumns}
@@ -84,10 +82,9 @@ function TableComponent() {
   );
 }
 
-function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
+function Row({ detailColumns, detailRow, mainColumns, mainRow, id, dispatch }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
-  const { dispatch } = useContext(Context);
 
   return (
     <React.Fragment>
@@ -122,7 +119,11 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
               onClick={() =>
                 dispatch({
                   type: "modalUpdate/open",
-                  payload: { id, columns: [...mainColumns, ...detailColumns], columnsValue: [...mainRow, ...detailRow] },
+                  payload: {
+                    id,
+                    columns: [...mainColumns, ...detailColumns],
+                    columnsValue: [...mainRow, ...detailRow],
+                  },
                 })
               }
               title="update the row"

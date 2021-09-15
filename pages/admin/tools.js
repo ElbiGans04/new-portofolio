@@ -1,6 +1,5 @@
 import Head from "next/head";
 import Admin from "../../Components/Admin";
-import { Context } from "../../lib/hooks/toolsContext";
 import React, { useReducer, useRef } from "react";
 import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
@@ -28,11 +27,11 @@ export default function Tools() {
   const ref = useRef(null);
 
   return (
-    <Context.Provider value={{ state, dispatch }}>
+    <React.Fragment>
       <Head>
         <title>Tools</title>
       </Head>
-      <Admin />
+      <Admin state={state} dispatch={dispatch} />
 
       {/* Modal */}
       <CSSTransition
@@ -41,11 +40,11 @@ export default function Tools() {
         in={state.modal !== false ? true : false}
         timeout={500}
       >
-        <ModalComponent ref={ref}>
+        <ModalComponent updateState={dispatch} defaultState={{type: 'modal/close'}} ref={ref}>
           <SwitchModal row={state.row} modal={state.modal} />
         </ModalComponent>
       </CSSTransition>
-    </Context.Provider>
+    </React.Fragment>
   );
 }
 
