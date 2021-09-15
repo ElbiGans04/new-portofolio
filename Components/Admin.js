@@ -1,13 +1,13 @@
 import { CSSTransition } from "react-transition-group";
 import React, { useState, useRef, useContext } from "react";
-import  {Context} from '../lib/hooks/toolsContext'
+import { Context } from "../lib/hooks/toolsContext";
 import styled from "styled-components";
 import {
   IoTrashBinOutline,
   IoAddOutline,
   IoPencilSharp,
 } from "react-icons/io5";
-import Button from './Button'
+import Button from "./Button";
 import useSWR from "swr";
 import fetcher from "../lib/module/fetcher";
 import upperFirstWord from "../lib/module/upperFirstWord";
@@ -16,24 +16,35 @@ export default function Admin() {
   return (
     <Container>
       <ContainerButtons>
-        <Button onClick={() => dispatch({type: 'modal/open', payload: {modal: 'add'}})}>
+        <Button
+          onClick={() =>
+            dispatch({ type: "modal/open", payload: { modal: "add" } })
+          }
+        >
           <IoAddOutline />
           Add Entity
         </Button>
       </ContainerButtons>
-      <TableComponent  />
+      <TableComponent />
     </Container>
   );
 }
 
 function TableComponent() {
-  const { state: {url, columns, visible: {visibleColumns, visibleValue}}, dispatch } = useContext(Context);
+  const {
+    state: {
+      url,
+      columns,
+      visible: { visibleColumns, visibleValue },
+    },
+    dispatch,
+  } = useContext(Context);
   const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
-  const { mainColumns, detailColumns, mainRows, detailRows } = filter(
+  const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = filter(
     tools,
     columns,
     visibleColumns,
-    visibleValue,
+    visibleValue
   );
 
   // Jika ada error
@@ -55,18 +66,25 @@ function TableComponent() {
           </tr>
         </thead>
         <tbody>
-          {
-            mainRows.map((mainRow, index) => {
-              return <Row key={getRandom(index)} detailColumns={detailColumns} detailRow={detailRows[index]} mainRow={mainRow} />
-            })
-          }
+          {mainRows.map((mainRow, index) => {
+            return (
+              <Row
+                key={getRandom(index)}
+                id={rowsId[index]}
+                detailColumns={detailColumns}
+                detailRow={detailRows[index]}
+                mainRow={mainRow}
+                mainColumns={mainColumns}
+              />
+            );
+          })}
         </tbody>
       </Table>
     </ContainerTable>
   );
 }
 
-function Row({ detailRow, mainRow, detailColumns }) {
+function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
   const { dispatch } = useContext(Context);
@@ -86,20 +104,29 @@ function Row({ detailRow, mainRow, detailColumns }) {
           </td>
         )}
         {/*  Lakukan looping */}
-        {
-          mainRow.map((value, index) => {
-            return (
-              <td key={getRandom(index)}>{upperFirstWord(value)}</td>
-            )
-          })
-        }
+        {mainRow.map((value, index) => {
+          return <td key={getRandom(index)}>{upperFirstWord(value)}</td>;
+        })}
 
         <td>
           <TdActions>
-            <Button onClick={() => dispatch({type: 'modal/open', payload : {modal: 'delete'}})} title="delete the row">
+            <Button
+              onClick={() =>
+                dispatch({ type: "modalDelete/open", payload: { id } })
+              }
+              title="delete the row"
+            >
               <IoTrashBinOutline></IoTrashBinOutline>
             </Button>
-            <Button title="update the row">
+            <Button
+              onClick={() =>
+                dispatch({
+                  type: "modalUpdate/open",
+                  payload: { id, columns: [...mainColumns, ...detailColumns], columnsValue: [...mainRow, ...detailRow] },
+                })
+              }
+              title="update the row"
+            >
               <IoPencilSharp></IoPencilSharp>
             </Button>
           </TdActions>
@@ -116,16 +143,14 @@ function Row({ detailRow, mainRow, detailColumns }) {
           <RowDetails ref={ref}>
             <RowDetailsContent colSpan="4">
               <RowDetailsContentContent>
-                {
-                  detailColumns.map((detailColumn, index) => {
-                    return (
-                      <RowDetailsContentContentContent key={getRandom(index)}>
-                        <div>{upperFirstWord(detailColumn)}</div>
-                        <div>{upperFirstWord(detailRow[index])}</div>
-                      </RowDetailsContentContentContent>
-                    )
-                  })
-                }
+                {detailColumns.map((detailColumn, index) => {
+                  return (
+                    <RowDetailsContentContentContent key={getRandom(index)}>
+                      <div>{upperFirstWord(detailColumn)}</div>
+                      <div>{upperFirstWord(detailRow[index])}</div>
+                    </RowDetailsContentContentContent>
+                  );
+                })}
               </RowDetailsContentContent>
             </RowDetailsContent>
           </RowDetails>
@@ -135,31 +160,32 @@ function Row({ detailRow, mainRow, detailColumns }) {
   );
 }
 
-
 //
 // // Module
-// 
+//
 function filter(data, columns, visibleColumns, visibleValue) {
   const results = {
     mainColumns: [],
     detailColumns: [],
     mainRows: [],
-    detailRows: []
+    detailRows: [],
+    rowsId: [],
   };
 
   if (data.length > 0) {
+    // Filter mana column yang boleh ditampilkan mana yang tidak
     const result = Object.keys(data[0]).filter((column) => {
       // Temukan column yang diberi batasan
       const foundColumn = visibleColumns.find((value) => value === column);
-  
+      // Jika column yang dibatasi memiliki nilai 0 berarti column tsb tidak boleh ditampilkan
       if (foundColumn !== undefined) return visibleValue === 0 ? false : true;
-  
+
+      // U
       return visibleValue === 0 ? true : false;
     });
-  
+
     // if (columns.length === 0 || (result.length < 4 ))
-    if (columns.length === 0)
-      results.mainColumns = [...result];
+    if (columns.length === 0) results.mainColumns = [...result];
     else {
       result.forEach((value) => {
         for (let column of columns) {
@@ -168,47 +194,50 @@ function filter(data, columns, visibleColumns, visibleValue) {
         }
       });
     }
-  
+
     // Isi dengan nilai
-    data.forEach(row => {
+    data.forEach((row) => {
       // Ubah Object menjadi array
       const columns = Object.entries(row);
-  
-  
+
       // Opsi one
       let passColumns = [];
       let passDetails = [];
-  
+
       // Lakukan Filtering
-      columns.forEach(column => {
-        const ifMatch = results.mainColumns.find(matchColumn => matchColumn === column[0]);
+      columns.forEach((column) => {
+        // Perlakuan Khusus Column _id
+        if (column[0] === "_id") results.rowsId.push(column[1]);
+        const ifMatch = results.mainColumns.find(
+          (matchColumn) => matchColumn === column[0]
+        );
         if (ifMatch !== undefined) passColumns.push(column[1]);
-  
-        const ifMatch2 = results.detailColumns.find(matchColumn => matchColumn === column[0]);
-        if (ifMatch2 !== undefined) passDetails.push(column[1])
+
+        const ifMatch2 = results.detailColumns.find(
+          (matchColumn) => matchColumn === column[0]
+        );
+        if (ifMatch2 !== undefined) passDetails.push(column[1]);
       });
-  
+
       results.mainRows.push(passColumns);
       results.detailRows.push(passDetails);
     });
   }
 
-
   return results;
 }
 
-function getRandom (index) {
-  return `${Date.now()}${Math.floor( Math.random() * (1 - 100) + 100)}${index || 1}`
+function getRandom(index) {
+  return `${Date.now()}${Math.floor(Math.random() * (1 - 100) + 100)}${
+    index || 1
+  }`;
 }
 
 // End of Module
 
-
-
-
 //
 // // Styled Component
-// 
+//
 const Container = styled.div`
   width: 80%;
   min-height: 50vh;
@@ -288,7 +317,7 @@ const RowDetails = styled.tr`
   font-size: 0;
 
   &.row-details-enter-done {
-    border-bottom: 2px solid rgba(0, 0, 0, 0.2)!important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2) !important;
   }
 `;
 

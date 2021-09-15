@@ -33,9 +33,8 @@ export default async function Handler (req, res) {
                 break;
         }
     } catch (err) {
-        console.log(err)
-        // if (err instanceof Error) console.log(err);
-        const massage = err.error.message || 'internal server error';
+        console.log(error);
+        const message = err.error.message || 'internal server error';
         const code = err.error.code || 500;
         res.status(code).json({error: {message}})
     }

@@ -42,8 +42,8 @@ const Modal = styled.div`
 `;
 const ModalMain = styled.div`
   position: relative;
-  width: ${({full}) => full ? '90%' : ''};
-  height: ${({full}) => full ? '90%' : ''};
+  width: ${({width}) => width ? '90%' : ''};
+  height: ${({height}) => height ? '90%' : ''};
   box-sizing: border-box;
   background-color: var(--dark);
   box-shadow: 5px 12px 17px rgb(0 0 0 / 30%);

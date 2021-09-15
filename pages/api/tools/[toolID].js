@@ -25,7 +25,7 @@ export default async function Handler (req, res) {
                 if (!result) throw {error: {title: 'tool not found', code: 404}};
         
                 
-                res.json({data: result})
+                res.json({meta: {message: 'success updated'},data: result})
                 break;
 
             case 'DELETE': 
@@ -33,7 +33,7 @@ export default async function Handler (req, res) {
 
                 if (!result) throw {error: {title: 'tool not found', code: 404}};
                 
-                res.json({data: result})
+                res.json({meta: {message: 'success updated'},data: result})
                 break;
                 
             default: 
