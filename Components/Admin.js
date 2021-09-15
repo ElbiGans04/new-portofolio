@@ -1,5 +1,5 @@
 import { CSSTransition } from "react-transition-group";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import styled from "styled-components";
 import {
   IoTrashBinOutline,
@@ -16,7 +16,7 @@ export default function Admin({ dispatch, state }) {
       <ContainerButtons>
         <Button
           onClick={() =>
-            dispatch({ type: "modal/open", payload: { modal: "add" } })
+            dispatch({ type: "modalAdd/open" })
           }
         >
           <IoAddOutline />
@@ -37,12 +37,14 @@ function TableComponent({
   dispatch,
 }) {
   const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
-  const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = filter(
-    tools,
-    columns,
-    visibleColumns,
-    visibleValue
-  );
+  const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(() => (
+    filter(
+      tools,
+      columns,
+      visibleColumns,
+      visibleValue
+    )
+  ), [tools, columns, visibleColumns, visibleValue])
 
   // Jika ada error
   if (err) {
@@ -56,9 +58,11 @@ function TableComponent({
           <tr>
             {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
             {detailColumns.length > 0 && <th></th>}
+            {/* Looping element yang diijinkan */}
             {mainColumns.map((value, index) => {
               return <th key={getRandom(index)}>{upperFirstWord(value)}</th>;
             })}
+            {/* Beli th kosong untuk action */}
             <th></th>
           </tr>
         </thead>

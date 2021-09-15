@@ -1,4 +1,4 @@
-import React, {useContext, useReducer} from "react";
+import React from "react";
 import styled from "styled-components"
 
 const ModalComponent = React.forwardRef(({defaultState, children, updateState, full}, ref) => {
