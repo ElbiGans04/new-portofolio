@@ -10,6 +10,8 @@ import Label from "../../Components/Label";
 import Button from "../../Components/Button";
 import Heading from "../../Components/Heading";
 import fetcher from "../../lib/module/fetchClient";
+import {mutate, useSWRConfig} from 'swr'
+
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {
     // iddle, loading, success , failed,
@@ -62,7 +64,7 @@ export default function Tools() {
             </ModalMain>
           )}
           {
-            state.status === 'failed' && <h1>Error Bro</h1>
+            state.status === 'failed' && <h1>Error Bro, Try Request</h1>
           }
           {state.status === 'iddle' && (<SwitchModal dispatch={dispatch} state={state} />) }
         </ModalComponent>
@@ -78,10 +80,11 @@ function SwitchModal({
   },
   dispatch,
 } = {}) {
+  const {mutate} = useSWRConfig()
   switch (modal) {
     case "add":
       return (
-        <Form onSubmit={(event) => onSubmit(event, dispatch)}>
+        <Form onSubmit={(event) => onSubmit(event, dispatch, mutate)}>
           <FormContent>
             <FormContentRow>
               <Label htmlFor="name">Name:</Label>
@@ -106,7 +109,7 @@ function SwitchModal({
             </Heading>
           </ModalContent>
           <ModalFooter>
-            <Button onClick={() => onSubmit2(id, dispatch)}>DELETE</Button>
+            <Button onClick={() => onSubmit2(id, dispatch, mutate)}>DELETE</Button>
           </ModalFooter>
         </ModalMain>
       );
@@ -114,7 +117,7 @@ function SwitchModal({
       const nameValue = columnsValue[columns.indexOf("name")];
       const asValue = columnsValue[columns.indexOf("as")];
       return (
-        <Form onSubmit={(event) => onSubmit3(event, id, dispatch)}>
+        <Form onSubmit={(event) => onSubmit3(event, id, dispatch, mutate)}>
           <FormContent>
             <FormContentRow>
               <Label htmlFor="name">Name:</Label>
@@ -146,7 +149,7 @@ function SwitchModal({
 }
 
 // Submit
-const onSubmit = async (event, dispatch) => {
+const onSubmit = async (event, dispatch, mutate) => {
   try {
     event.preventDefault();
     const searchParams = new URLSearchParams();
@@ -165,7 +168,8 @@ const onSubmit = async (event, dispatch) => {
       },
     });
 
-    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}})
+    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}});
+    mutate('/api/tools')
   } catch (err) {
     alert("Error");
     console.log(err);
@@ -173,7 +177,7 @@ const onSubmit = async (event, dispatch) => {
   }
 };
 
-const onSubmit2 = async (id, dispatch) => {
+const onSubmit2 = async (id, dispatch, mutate) => {
   try {
     dispatch({type: 'modal/request/start'})
 
@@ -182,7 +186,8 @@ const onSubmit2 = async (id, dispatch) => {
     })
 
     
-    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}})
+    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}});
+    mutate('/api/tools')
   } catch (err) {
     alert("Error");
     console.log(err);
@@ -210,7 +215,8 @@ const onSubmit3 = async (event, id,dispatch) => {
       })
     ).json();
 
-    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}})
+    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}});
+    mutate('/api/tools')
   } catch (err) {
     alert("Error");
     console.log(err);
