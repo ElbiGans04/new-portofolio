@@ -67,18 +67,12 @@ const projectSchema = new mongoose.Schema({
         const TypeProject = mongoose.model('typeProjects', typeProjectSchema);
         const Projects = mongoose.model('Projects', projectSchema);
 
-        // const typeProject = new TypeProject({_id: 'A1', name: 'Personal Project'});
-        // await typeProject.ddsave();
+        const typeProject = new TypeProject({_id: 'A1', name: 'Personal Project'});
+        await typeProject.save();
 
-        // const typeProject2 = new TypeProject({_id: 'A2', name: 'Work Project'});
-        // await typeProject2.save();
+        const typeProject2 = new TypeProject({_id: 'A2', name: 'Work Project'});
+        await typeProject2.save();
 
-
-
-
-        
-        const result = await Projects.find({}, {}, {sort: {title: -1}}).populate('projects');
-        console.log(result);
         
         // const project = new Projects({
         //     title: 'elbi library', 

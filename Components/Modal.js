@@ -37,6 +37,8 @@ const Modal = styled.div`
   left: 50%;
   margin-top: -0.5px;
   margin-left: -0.5px;
+  overflow: auto;
+  padding: 1rem;
 `;
 const ModalMain = styled.div`
   position: relative;
