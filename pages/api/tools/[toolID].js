@@ -1,11 +1,12 @@
 import dbConnect from "../../../database/connection";
 import Tools from "../../../database/schemas/tools";
+import joi from 'joi'
+import ToolValidationSchema from '../../../lib/validation/tools'
 
 export default async function Handler (req, res) {
     try {
         const { method } = req;
         const { toolID } = req.query;
-        const {name, as} = req.body;
         let result;
     
         await dbConnect();
@@ -20,7 +21,8 @@ export default async function Handler (req, res) {
                 res.json({data: result})
                 break;
             case 'PUT':
-                result = await Tools.findByIdAndUpdate(toolID, {name, as}).setOptions({new: true});
+                let valid = joi.attempt(req.body, ToolValidationSchema)
+                result = await Tools.findByIdAndUpdate(toolID, valid).setOptions({new: true});
 
                 if (!result) throw {error: {title: 'tool not found', code: 404}};
         

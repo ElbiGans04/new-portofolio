@@ -4,6 +4,8 @@ import TypeProject from "../../../database/schemas/typeProject";
 import Tools from "../../../database/schemas/tools";
 import runMiddleware from "../../../lib/module/runMiddleware";
 import { multer } from "../../../lib/module/multer";
+import ProjectValidationSchema from "../../../lib/validation/projects";
+import Joi, { valid } from "joi";
 
 export const config = {
   api: {
@@ -39,15 +41,18 @@ export default async function handler(req, res) {
           req.body.tools = [req.body.tools];
         }
 
+        // Validasi
+        const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
+
         // Check Apakah typeProject dengan id tertentu ada
-        if ((await TypeProject.findById(req.body.typeProject)) === null) {
+        if ((await TypeProject.findById(validReqBody.typeProject)) === null) {
           return res
             .status(404)
             .json({ error: { message: "invalid type project id" } });
         }
 
         // Cek apakah tools yang dimasukan terdaftar
-        for (let tool of req.body.tools) {
+        for (let tool of validReqBody.tools) {
           // cek jika tool
           if ((await Tools.findById(tool)) === null) {
             return res
@@ -63,16 +68,14 @@ export default async function handler(req, res) {
         });
 
         // Jika jika ada
-        const result2 = await Project.findByIdAndUpdate(projectID, {
-          title: req.body.title,
-          startDate: req.body.startDate,
-          endDate: req.body.endDate,
-          tools: req.body.tools,
-          typeProject: req.body.typeProject,
-          images,
-          description: req.body.description,
-          url: req.body.url,
-        }, {new: true});
+        const result2 = await Project.findByIdAndUpdate(
+          projectID,
+          {
+            ...validReqBody,
+            images
+          },
+          { new: true }
+        );
 
         // Jika ga ada
         if (!result2) {
@@ -87,9 +90,14 @@ export default async function handler(req, res) {
       case "DELETE":
         const result3 = await Project.findByIdAndDelete(projectID);
 
-        if(!result3) return res.status(404).json({error: {message: 'project not found'}});
+        if (!result3)
+          return res
+            .status(404)
+            .json({ error: { message: "project not found" } });
 
-        return res.status(200).json({meta: {message: 'success deleted'}, data: result3})
+        return res
+          .status(200)
+          .json({ meta: { message: "success deleted" }, data: result3 });
 
       default:
         return res.status(400).json({ error: { message: "method not found" } });

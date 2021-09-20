@@ -25,7 +25,7 @@ export default function Projects() {
       columnsValue: false,
     },
     url: "/api/projects",
-    columns: [],
+    columns: ['title', 'description'],
     visible: {
       visibleValue: 0,
       visibleColumns: ["_id", "__v"],

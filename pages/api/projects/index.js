@@ -4,6 +4,8 @@ import TypeProject from "../../../database/schemas/typeProject";
 import Tools from "../../../database/schemas/tools";
 import runMiddleware from '../../../lib/module/runMiddleware'
 import { multer } from '../../../lib/module/multer'
+import ProjectValidationSchema from '../../../lib/validation/projects'
+import Joi, { valid } from 'joi'
 
 
 
@@ -43,20 +45,24 @@ export default async function handler(req, res) {
         break;
       case "POST":
         await runMiddleware(req, res, multer.array("images", 5));
+
         // Jika hanya mengirim satu data tools
         if (req.body.tools instanceof Array === false) {
           req.body.tools = [req.body.tools];
         }
 
+        // Validasi
+        const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
+
         // Check Apakah typeProject dengan id tertentu ada
-        if ((await TypeProject.findById(req.body.typeProject)) === null) {
+        if ((await TypeProject.findById(validReqBody.typeProject)) === null) {
           return res
             .status(404)
             .json({ error: { message: "invalid type project id" } });
         }
 
         // Cek apakah tools yang dimasukan terdaftar
-        for (let tool of req.body.tools) {
+        for (let tool of validReqBody.tools) {
           // cek jika tool
           if ((await Tools.findById(tool)) === null) {
             return res
@@ -72,14 +78,8 @@ export default async function handler(req, res) {
         });
 
         const project = new Project({
-          title: req.body.title,
-          startDate: req.body.startDate,
-          endDate: req.body.endDate,
-          tools: req.body.tools,
-          typeProject: req.body.typeProject,
-          images,
-          description: req.body.description,
-          url: req.body.url
+          ...validReqBody,
+          images
         });
 
         await project.save()        

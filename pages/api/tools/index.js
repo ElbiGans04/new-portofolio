@@ -1,5 +1,8 @@
 import dbConnect from "../../../database/connection";
 import Tools from "../../../database/schemas/tools";
+import joi from 'joi'
+import ToolValidationSchema from '../../../lib/validation/tools'
+
 
 export default async function Handler (req, res) {
     try {
@@ -14,11 +17,9 @@ export default async function Handler (req, res) {
                 res.json({data: results});
                 break;
             case 'POST':
-                const {name, as = ''} = req.body;
-    
-                if (!name) throw {error: {code: 400, message: 'name field not present'}}
+                const valid = joi.attempt(req.body, ToolValidationSchema);
 
-                const tool = new Tools({name, as})
+                const tool = new Tools(valid)
                 await tool.save();
 
                 res.status(201).json({meta: {message: 'tool has created'}})
@@ -33,9 +34,9 @@ export default async function Handler (req, res) {
                 break;
         }
     } catch (err) {
-        console.log(error);
-        const message = err.error.message || 'internal server error';
-        const code = err.error.code || 500;
+        console.log(err)
+        const message = err.message || 'internal server error';
+        const code = err.code || 500;
         res.status(code).json({error: {message}})
     }
 }

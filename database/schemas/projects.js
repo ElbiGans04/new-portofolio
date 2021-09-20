@@ -26,6 +26,7 @@ const projectSchema = new mongoose.Schema({
     },
     url: {
         type: String,
+        required: true,
     }
 });
 
