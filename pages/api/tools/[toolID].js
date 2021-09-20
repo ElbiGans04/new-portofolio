@@ -40,7 +40,7 @@ export default async function Handler (req, res) {
                 break;
                 
             default: 
-                throw {code: 400, message: 'method not found'}
+                throw {code: 404, message: 'method not found'}
                 break;
         }
     } catch (err) {

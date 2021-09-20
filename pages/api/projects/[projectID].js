@@ -6,6 +6,8 @@ import runMiddleware from "../../../lib/module/runMiddleware";
 import { multer } from "../../../lib/module/multer";
 import ProjectValidationSchema from "../../../lib/validation/projects";
 import Joi, { valid } from "joi";
+import routerErrorHandling from "../../../lib/module/routerErrorHandling";
+
 
 export const config = {
   api: {
@@ -28,10 +30,7 @@ export default async function handler(req, res) {
           .populate("typeProject");
 
         // jika ga ada
-        if (!result)
-          return res
-            .status(404)
-            .json({ error: { message: "project not found" } });
+        if (!result) throw { message: "project not found", code: 404 }
 
         return res.json({ data: result });
       case "PUT":
@@ -46,18 +45,14 @@ export default async function handler(req, res) {
 
         // Check Apakah typeProject dengan id tertentu ada
         if ((await TypeProject.findById(validReqBody.typeProject)) === null) {
-          return res
-            .status(404)
-            .json({ error: { message: "invalid type project id" } });
+          throw { message: "invalid type project id", code: 404 }
         }
 
         // Cek apakah tools yang dimasukan terdaftar
         for (let tool of validReqBody.tools) {
           // cek jika tool
           if ((await Tools.findById(tool)) === null) {
-            return res
-              .status(404)
-              .json({ error: { message: `invalid tool with id ${tool}` } });
+            throw { message: "invalid tool id", code: 404 }
           }
         }
 
@@ -79,9 +74,7 @@ export default async function handler(req, res) {
 
         // Jika ga ada
         if (!result2) {
-          return res
-            .status(404)
-            .json({ error: { message: "project not found" } });
+          throw { message: "project not found", code: 404 }
         }
 
         return res
@@ -91,19 +84,16 @@ export default async function handler(req, res) {
         const result3 = await Project.findByIdAndDelete(projectID);
 
         if (!result3)
-          return res
-            .status(404)
-            .json({ error: { message: "project not found" } });
+          throw { message: "project not found", code: 404 };
 
         return res
           .status(200)
           .json({ meta: { message: "success deleted" }, data: result3 });
 
       default:
-        return res.status(400).json({ error: { message: "method not found" } });
+        throw { message: "method not found", code: 404 }
     }
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: { message: err.message } });
+    routerErrorHandling(res, err)
   }
 }

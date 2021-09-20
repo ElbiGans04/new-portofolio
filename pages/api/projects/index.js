@@ -6,7 +6,7 @@ import runMiddleware from '../../../lib/module/runMiddleware'
 import { multer } from '../../../lib/module/multer'
 import ProjectValidationSchema from '../../../lib/validation/projects'
 import Joi, { valid } from 'joi'
-
+import routerErrorHandling from "../../../lib/module/routerErrorHandling";
 
 
 export const config = {
@@ -56,18 +56,14 @@ export default async function handler(req, res) {
 
         // Check Apakah typeProject dengan id tertentu ada
         if ((await TypeProject.findById(validReqBody.typeProject)) === null) {
-          return res
-            .status(404)
-            .json({ error: { message: "invalid type project id" } });
+          throw { message: "invalid type project id", code: 404 }
         }
 
         // Cek apakah tools yang dimasukan terdaftar
         for (let tool of validReqBody.tools) {
           // cek jika tool
           if ((await Tools.findById(tool)) === null) {
-            return res
-              .status(404)
-              .json({ error: { message: `invalid tool with id ${tool}` } });
+            throw { message: "invalid tool id", code: 404 }
           }
         };
 
@@ -87,14 +83,11 @@ export default async function handler(req, res) {
 
         break;
       default:
-        res
-          .status(405)
-          .json({ error: { code: 405, title: "method not found" } });
+        throw { message: "method not found", code: 404 }
         break;
     }
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: { message: err.message } });
+    routerErrorHandling(res, err)
   }
   // res.json({vv:'s'})
 }
