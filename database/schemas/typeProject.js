@@ -10,7 +10,6 @@ const typeProjectSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    projects: [{ type: Schema.Types.ObjectId, ref: 'Projects' }]
 });
 
 
