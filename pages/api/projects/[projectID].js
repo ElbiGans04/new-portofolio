@@ -2,10 +2,8 @@ import dbConnect from "../../../database/connection";
 import Project from "../../../database/schemas/projects";
 import TypeProject from "../../../database/schemas/typeProject";
 import Tools from "../../../database/schemas/tools";
-import runMiddleware from '../../../lib/module/runMiddleware'
-import { multer } from '../../../lib/module/multer'
-
-
+import runMiddleware from "../../../lib/module/runMiddleware";
+import { multer } from "../../../lib/module/multer";
 
 export const config = {
   api: {
@@ -13,35 +11,28 @@ export const config = {
   },
 };
 
-
-
+// Handler
 export default async function handler(req, res) {
   const { method } = req;
+  const { projectID } = req.query;
+
+  await dbConnect();
 
   try {
-    await dbConnect();
-
     switch (method) {
       case "GET":
-        const { type = "ALL", order = "ASC" } = req.query;
-        let results;
+        const result = await Project.findById(projectID)
+          .populate("tools")
+          .populate("typeProject");
 
-        if (type === "ALL") {
-          results = await Project.find()
-            .sort({ title: order === "ASC" ? 1 : -1 })
-            .populate("typeProject").populate('tools');
-        } else {
-          results = (
-            await TypeProject.findOne({ _id: type })
-              .sort({ title: order === "ASC" ? 1 : -1 })
-              .populate({ path: "projects", populate: "typeProject" }).populate('tools')
-          ).projects;
-        }
+        // jika ga ada
+        if (!result)
+          return res
+            .status(404)
+            .json({ error: { message: "project not found" } });
 
-        res.status(200).json({ data: results });
-
-        break;
-      case "POST":
+        return res.json({ data: result });
+      case "PUT":
         await runMiddleware(req, res, multer.array("images", 5));
         // Jika hanya mengirim satu data tools
         if (req.body.tools instanceof Array === false) {
@@ -63,15 +54,16 @@ export default async function handler(req, res) {
               .status(404)
               .json({ error: { message: `invalid tool with id ${tool}` } });
           }
-        };
+        }
 
         // Buat untuk img
         const images = [];
         req.files.forEach((value) => {
-          images.push({src: value.filename})
+          images.push({ src: value.filename });
         });
 
-        const project = new Project({
+        // Jika jika ada
+        const result2 = await Project.findByIdAndUpdate(projectID, {
           title: req.body.title,
           startDate: req.body.startDate,
           endDate: req.body.endDate,
@@ -79,22 +71,31 @@ export default async function handler(req, res) {
           typeProject: req.body.typeProject,
           images,
           description: req.body.description,
-          url: req.body.url
-        });
+          url: req.body.url,
+        }, {new: true});
 
-        await project.save()        
-        res.status(201).json({meta : {message: 'The project has created'}});
+        // Jika ga ada
+        if (!result2) {
+          return res
+            .status(404)
+            .json({ error: { message: "project not found" } });
+        }
 
-        break;
+        return res
+          .status(200)
+          .json({ meta: { message: "success update data" }, data: result2 });
+      case "DELETE":
+        const result3 = await Project.findByIdAndDelete(projectID);
+
+        if(!result3) return res.status(404).json({error: {message: 'project not found'}});
+
+        return res.status(200).json({meta: {message: 'success deleted'}, data: result3})
+
       default:
-        res
-          .status(405)
-          .json({ error: { code: 405, title: "method not found" } });
-        break;
+        return res.status(400).json({ error: { message: "method not found" } });
     }
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: { message: err.message } });
   }
-  // res.json({vv:'s'})
 }
