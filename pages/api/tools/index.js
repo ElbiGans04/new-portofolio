@@ -2,7 +2,7 @@ import dbConnect from "../../../database/connection";
 import Tools from "../../../database/schemas/tools";
 import joi from 'joi'
 import ToolValidationSchema from '../../../lib/validation/tools'
-
+import routerErrorHandling from "../../../lib/module/routerErrorHandling";
 
 export default async function Handler (req, res) {
     try {
@@ -19,10 +19,10 @@ export default async function Handler (req, res) {
             case 'POST':
                 const valid = joi.attempt(req.body, ToolValidationSchema);
 
-                const tool = new Tools(valid)
+                const tool = new Tools(valid);
                 await tool.save();
 
-                res.status(201).json({meta: {message: 'tool has created'}})
+                res.status(201).json({meta: {message: 'tool has created'}, data: tool})
                 break;
             case 'DELETE': 
                 await Tools.deleteMany({});
@@ -30,13 +30,10 @@ export default async function Handler (req, res) {
                 break;
                 
             default: 
-                res.status(405).json({ errors: { code: 405, message: 'method not found' } });
+                throw { code: 405, message: 'method not found' };
                 break;
         }
     } catch (err) {
-        console.log(err)
-        const message = err.message || 'internal server error';
-        const code = err.code || 500;
-        res.status(code).json({error: {message}})
+        routerErrorHandling(res, err)
     }
 }
