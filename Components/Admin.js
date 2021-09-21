@@ -185,18 +185,19 @@ function filter(data, columns, visibleColumns, visibleValue) {
       // Jika column yang dibatasi memiliki nilai 0 berarti column tsb tidak boleh ditampilkan
       if (foundColumn !== undefined) return visibleValue === 0 ? false : true;
 
-      // U
       return visibleValue === 0 ? true : false;
     });
 
+
+    // // Dari hasil operasi diatas kita pilih mana yang akan ditampilkan sebagai
+    // // Main COlumn dan mana yang bukan
     // if (columns.length === 0 || (result.length < 4 ))
     if (columns.length === 0) results.mainColumns = [...result];
     else {
       result.forEach((value) => {
-        for (let column of columns) {
-          if (value === column) results.mainColumns.push(value);
-          else results.detailColumns.push(value);
-        }
+        const mustBeMainColumn = columns.includes(value)
+        if (mustBeMainColumn) results.mainColumns.push(value)
+        else results.detailColumns.push(value)
       });
     }
 
@@ -205,7 +206,6 @@ function filter(data, columns, visibleColumns, visibleValue) {
       // Ubah Object menjadi array
       const columns = Object.entries(row);
 
-      // Opsi one
       let passColumns = [];
       let passDetails = [];
 
@@ -213,11 +213,15 @@ function filter(data, columns, visibleColumns, visibleValue) {
       columns.forEach((column) => {
         // Perlakuan Khusus Column _id
         if (column[0] === "_id") results.rowsId.push(column[1]);
+
+        // Berikan Kondisi
+        // Ambil Nilai untuk main columns
         const ifMatch = results.mainColumns.find(
           (matchColumn) => matchColumn === column[0]
         );
         if (ifMatch !== undefined) passColumns.push(column[1]);
-
+        
+        // Ambil Nilai Untuk details column
         const ifMatch2 = results.detailColumns.find(
           (matchColumn) => matchColumn === column[0]
         );
