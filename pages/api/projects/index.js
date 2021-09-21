@@ -5,8 +5,9 @@ import Tools from "../../../database/schemas/tools";
 import runMiddleware from '../../../lib/module/runMiddleware'
 import { multer } from '../../../lib/module/multer'
 import ProjectValidationSchema from '../../../lib/validation/projects'
-import Joi, { valid } from 'joi'
+import Joi from 'joi'
 import routerErrorHandling from "../../../lib/module/routerErrorHandling";
+import {deleteTempFiles, moveImages} from '../../../lib/module/files'
 
 
 export const config = {
@@ -14,6 +15,8 @@ export const config = {
     bodyParser: false,
   },
 };
+
+
 
 
 
@@ -45,14 +48,14 @@ export default async function handler(req, res) {
         break;
       case "POST":
         await runMiddleware(req, res, multer.array("images", 5));
-
-        // Jika hanya mengirim satu data tools
-        if (req.body.tools instanceof Array === false) {
-          req.body.tools = [req.body.tools];
-        }
-
+        
         // Validasi
         const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
+
+        // Jika hanya mengirim satu data tools
+        if (validReqBody.tools instanceof Array === false) {
+          validReqBody.tools = [validReqBody.tools];
+        }
 
         // Check Apakah typeProject dengan id tertentu ada
         if ((await TypeProject.findById(validReqBody.typeProject)) === null) {
@@ -73,21 +76,29 @@ export default async function handler(req, res) {
           images.push({src: value.filename})
         });
 
+        // Simpan Ke database
         const project = new Project({
           ...validReqBody,
           images
         });
 
-        await project.save()        
-        res.status(201).json({meta : {message: 'The project has created'}});
+        await project.save();
 
+        // Pindahkan Gambar
+        await moveImages(images);
+
+        res.status(201).json({meta : {message: 'The project has created'}, data: project});
         break;
       default:
         throw { message: "method not found", code: 404 }
         break;
     }
   } catch (err) {
+    // Setiap Ada error semua file dalam tmp file
+    await deleteTempFiles()
     routerErrorHandling(res, err)
   }
   // res.json({vv:'s'})
 }
+
+
