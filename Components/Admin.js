@@ -10,15 +10,13 @@ import Button from "./Button";
 import useSWR from "swr";
 import fetcher from "../lib/module/fetcher";
 import upperFirstWord from "../lib/module/upperFirstWord";
+import getRandom from "../lib/module/randomNumber";
+
 export default function Admin({ dispatch, state }) {
   return (
     <Container>
       <ContainerButtons>
-        <Button
-          onClick={() =>
-            dispatch({ type: "modalAdd/open" })
-          }
-        >
+        <Button onClick={() => dispatch({ type: "modalAdd/open" })}>
           <IoAddOutline />
           Add Entity
         </Button>
@@ -33,18 +31,16 @@ function TableComponent({
     url,
     columns,
     visible: { visibleColumns, visibleValue },
+    specialTreatment,
+    renameColumns,
   },
   dispatch,
 }) {
   const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
-  const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(() => (
-    filter(
-      tools,
-      columns,
-      visibleColumns,
-      visibleValue
-    )
-  ), [tools, columns, visibleColumns, visibleValue])
+  const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(
+    () => filter(tools, columns, visibleColumns, visibleValue),
+    [tools, columns, visibleColumns, visibleValue]
+  );
 
   // Jika ada error
   if (err) {
@@ -60,6 +56,13 @@ function TableComponent({
             {detailColumns.length > 0 && <th></th>}
             {/* Looping element yang diijinkan */}
             {mainColumns.map((value, index) => {
+              const keyRenameColumns = Object.entries(renameColumns);
+              const shouldRename = keyRenameColumns.find(
+                (column) => column[0] === value
+              );
+
+              if (shouldRename)
+                return <th key={getRandom(index)}>{shouldRename[1]}</th>;
               return <th key={getRandom(index)}>{upperFirstWord(value)}</th>;
             })}
             {/* Beli th kosong untuk action */}
@@ -77,6 +80,8 @@ function TableComponent({
                 detailRow={detailRows[index]}
                 mainRow={mainRow}
                 mainColumns={mainColumns}
+                specialTreatment={specialTreatment}
+                renameColumns={renameColumns}
               />
             );
           })}
@@ -86,7 +91,16 @@ function TableComponent({
   );
 }
 
-function Row({ detailColumns, detailRow, mainColumns, mainRow, id, dispatch }) {
+function Row({
+  detailColumns,
+  detailRow,
+  mainColumns,
+  mainRow,
+  id,
+  dispatch,
+  specialTreatment,
+  renameColumns,
+}) {
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
 
@@ -106,6 +120,17 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id, dispatch }) {
         )}
         {/*  Lakukan looping */}
         {mainRow.map((value, index) => {
+          const keySpecialTreatment = Object.entries(specialTreatment);
+
+          // Check jika column harus diperlakukan secara khusus
+          const special = keySpecialTreatment.find(
+            (keySpecial) => keySpecial[0] === mainColumns[index]
+          );
+          if (special) {
+            return special[1](value);
+          }
+
+          // Perlakuan Default
           return <td key={getRandom(index)}>{upperFirstWord(value)}</td>;
         })}
 
@@ -149,9 +174,32 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id, dispatch }) {
             <RowDetailsContent colSpan="4">
               <RowDetailsContentContent>
                 {detailColumns.map((detailColumn, index) => {
+                  const keySpecialTreatment = Object.entries(specialTreatment);
+                  const keyRenameColumns = Object.entries(renameColumns);
+                  // check jika harus direname
+                  const specialField = keyRenameColumns.find(
+                    (keySpecial) => keySpecial[0] === detailColumn
+                  );
+
+                  let fieldName = specialField ? specialField[1]: upperFirstWord(detailColumn);
+
+                  // Check jika nilai  column harus diperlakukan secara khusus
+                  const special = keySpecialTreatment.find(
+                    (keySpecial) => keySpecial[0] === detailColumn
+                  );
+                  if (special) {
+                    return (
+                      <RowDetailsContentContentContent key={getRandom(index)}>
+                        <div>{fieldName}</div>
+                        {special[1](detailRow[index])}
+                      </RowDetailsContentContentContent>
+                    );
+                  }
+
+                  // Default
                   return (
                     <RowDetailsContentContentContent key={getRandom(index)}>
-                      <div>{upperFirstWord(detailColumn)}</div>
+                      <div>{fieldName}</div>
                       <div>{upperFirstWord(detailRow[index])}</div>
                     </RowDetailsContentContentContent>
                   );
@@ -188,16 +236,15 @@ function filter(data, columns, visibleColumns, visibleValue) {
       return visibleValue === 0 ? true : false;
     });
 
-
     // // Dari hasil operasi diatas kita pilih mana yang akan ditampilkan sebagai
     // // Main COlumn dan mana yang bukan
     // if (columns.length === 0 || (result.length < 4 ))
     if (columns.length === 0) results.mainColumns = [...result];
     else {
       result.forEach((value) => {
-        const mustBeMainColumn = columns.includes(value)
-        if (mustBeMainColumn) results.mainColumns.push(value)
-        else results.detailColumns.push(value)
+        const mustBeMainColumn = columns.includes(value);
+        if (mustBeMainColumn) results.mainColumns.push(value);
+        else results.detailColumns.push(value);
       });
     }
 
@@ -220,7 +267,7 @@ function filter(data, columns, visibleColumns, visibleValue) {
           (matchColumn) => matchColumn === column[0]
         );
         if (ifMatch !== undefined) passColumns.push(column[1]);
-        
+
         // Ambil Nilai Untuk details column
         const ifMatch2 = results.detailColumns.find(
           (matchColumn) => matchColumn === column[0]
@@ -234,12 +281,6 @@ function filter(data, columns, visibleColumns, visibleValue) {
   }
 
   return results;
-}
-
-function getRandom(index) {
-  return `${Date.now()}${Math.floor(Math.random() * (1 - 100) + 100)}${
-    index || 1
-  }`;
 }
 
 // End of Module

@@ -12,6 +12,8 @@ import Heading from "../../Components/Heading";
 import fetcher from "../../lib/module/fetchClient";
 import { mutate, useSWRConfig } from "swr";
 import {IoAddOutline} from 'react-icons/io5'
+import getRandom from "../../lib/module/randomNumber";
+import changeFirstWord from "../../lib/module/upperFirstWord";
 
 export default function Projects() {
   const [state, dispatch] = useReducer(reducer, {
@@ -30,6 +32,32 @@ export default function Projects() {
       visibleValue: 0,
       visibleColumns: ["_id", "__v"],
     },
+    renameColumns: {
+      startDate: 'date'
+    },
+    specialTreatment: {
+      tools: (value) => {
+        let textResult = ``;
+        value.forEach((text, index) => {
+          textResult += changeFirstWord(text.name);
+          if (index !== (value.length - 1)) textResult += `, `
+        });
+
+        return <div>{(textResult)}</div>
+      },
+      typeProject: (value) => {
+        return <div>{changeFirstWord(value.name)}</div>
+      },
+      images: (value) => {
+        let textResult = ``;
+        value.forEach((text, index) => {
+          textResult += text.src;
+          if (index !== (value.length - 1)) textResult += `, `
+        });
+
+        return <div>{(textResult)}</div>
+      }
+    }
   });
   const ref = useRef(null);
 
