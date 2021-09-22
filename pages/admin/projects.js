@@ -96,7 +96,18 @@ export default function Projects() {
               </ModalFooter>
             </ModalMain>
           )}
-          {state.status === "failed" && <h1>Error Bro, Try Request</h1>}
+          {state.status === "failed" && (
+            <ModalMain>
+              <ModalContent>
+                <Heading>{state.message}</Heading>
+              </ModalContent>
+              <ModalFooter>
+                <Button onClick={() => dispatch({ type: "modal/close" })}>
+                  CLOSE
+                </Button>
+              </ModalFooter>
+            </ModalMain>
+          )}
           {state.status === "iddle" && (
             <SwitchModal dispatch={dispatch} state={state} />
           )}

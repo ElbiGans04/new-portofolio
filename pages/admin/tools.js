@@ -10,7 +10,7 @@ import Label from "../../Components/Label";
 import Button from "../../Components/Button";
 import Heading from "../../Components/Heading";
 import fetcher from "../../lib/module/fetchClient";
-import {mutate, useSWRConfig} from 'swr'
+import { mutate, useSWRConfig } from "swr";
 import Context from "../../lib/hooks/context";
 
 export default function Tools() {
@@ -32,8 +32,8 @@ export default function Tools() {
     visible: {
       visibleValue: 0,
       visibleColumns: ["_id", "__v"],
-    }
-  })
+    },
+  });
   const ref = useRef(null);
 
   return (
@@ -63,14 +63,27 @@ export default function Tools() {
                 <Heading>{state.message}</Heading>
               </ModalContent>
               <ModalFooter>
-                <Button onClick={() => dispatch({type: 'modal/close'})}>CLOSE</Button>
+                <Button onClick={() => dispatch({ type: "modal/close" })}>
+                  CLOSE
+                </Button>
               </ModalFooter>
             </ModalMain>
           )}
-          {
-            state.status === 'failed' && <h1>Error Bro, Try Request</h1>
-          }
-          {state.status === 'iddle' && (<SwitchModal dispatch={dispatch} state={state} />) }
+          {state.status === "failed" && (
+            <ModalMain>
+              <ModalContent>
+                <Heading>{state.message}</Heading>
+              </ModalContent>
+              <ModalFooter>
+                <Button onClick={() => dispatch({ type: "modal/close" })}>
+                  CLOSE
+                </Button>
+              </ModalFooter>
+            </ModalMain>
+          )}
+          {state.status === "iddle" && (
+            <SwitchModal dispatch={dispatch} state={state} />
+          )}
         </ModalComponent>
       </CSSTransition>
     </Context.Provider>
@@ -84,7 +97,7 @@ function SwitchModal({
   },
   dispatch,
 } = {}) {
-  const {mutate} = useSWRConfig()
+  const { mutate } = useSWRConfig();
   switch (modal) {
     case "add":
       return (
@@ -113,7 +126,9 @@ function SwitchModal({
             </Heading>
           </ModalContent>
           <ModalFooter>
-            <Button onClick={() => onSubmit2(id, dispatch, mutate)}>DELETE</Button>
+            <Button onClick={() => onSubmit2(id, dispatch, mutate)}>
+              DELETE
+            </Button>
           </ModalFooter>
         </ModalMain>
       );
@@ -162,7 +177,7 @@ const onSubmit = async (event, dispatch, mutate) => {
       searchParams.append(index, value);
     }
 
-    dispatch({type: 'modal/request/start'})
+    dispatch({ type: "modal/request/start" });
 
     const request = await fetcher("/api/tools", {
       method: "post",
@@ -172,34 +187,45 @@ const onSubmit = async (event, dispatch, mutate) => {
       },
     });
 
-    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}});
-    mutate('/api/tools')
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: request.meta.message },
+    });
+    mutate("/api/tools");
   } catch (err) {
     alert("Error");
     console.log(err);
-    dispatch({type: 'modal/request/failed', payload: {message: request.error.message}})
+    dispatch({
+      type: "modal/request/failed",
+      payload: { message: err.error.message },
+    });
   }
 };
 
 const onSubmit2 = async (id, dispatch, mutate) => {
   try {
-    dispatch({type: 'modal/request/start'})
+    dispatch({ type: "modal/request/start" });
 
     const request = await fetcher(`/api/tools/${id}`, {
       method: "delete",
-    })
+    });
 
-    
-    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}});
-    mutate('/api/tools')
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: request.meta.message },
+    });
+    mutate("/api/tools");
   } catch (err) {
     alert("Error");
     console.log(err);
-    dispatch({type: 'modal/request/failed', payload: {message: request.error.message}})
+    dispatch({
+      type: "modal/request/failed",
+      payload: { message: err.error.message },
+    });
   }
 };
 
-const onSubmit3 = async (event, id,dispatch) => {
+const onSubmit3 = async (event, id, dispatch) => {
   try {
     event.preventDefault();
     const searchParams = new URLSearchParams();
@@ -208,23 +234,27 @@ const onSubmit3 = async (event, id,dispatch) => {
       searchParams.append(index, value);
     }
 
-    dispatch({type: 'modal/request/start'})
-    const request = await (
-      await fetch(`/api/tools/${id}`, {
-        method: "put",
-        body: searchParams.toString(),
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      })
-    ).json();
+    dispatch({ type: "modal/request/start" });
+    const request = await fetcher(`/api/tools/${id}`, {
+      method: "put",
+      body: searchParams.toString(),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
 
-    dispatch({type: 'modal/request/finish', payload: {message: request.meta.message}});
-    mutate('/api/tools')
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: request.meta.message },
+    });
+    mutate("/api/tools");
   } catch (err) {
     alert("Error");
     console.log(err);
-    dispatch({type: 'modal/request/failed', payload: {message: request.error.message}})
+    dispatch({
+      type: "modal/request/failed",
+      payload: { message: err.error.message },
+    });
   }
 };
 

@@ -35,6 +35,8 @@ function TableComponent() {
     renameColumns = {},
   } = useContext(Context);
   const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
+
+  // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah
   const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(
     () => filter(tools, columns, visibleColumns, visibleValue),
     [tools, columns, visibleColumns, visibleValue]
@@ -113,7 +115,7 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
           const special = keySpecialTreatment.find(
             (keySpecial) => keySpecial[0] === mainColumns[index]
           );
-          console.log(value, special);
+
           if (special) {
             return special[1](value);
           }
