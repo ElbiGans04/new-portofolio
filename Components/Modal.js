@@ -23,10 +23,6 @@ export default ModalComponent;
 
 const Modal = styled.div`
   position: fixed;
-  background-color: var(--dark2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background-color: rgba(31, 33, 39, 0.8);
   transition: var(--transition);
   box-sizing: border-box;
@@ -39,15 +35,6 @@ const Modal = styled.div`
   margin-left: -0.5px;
   overflow: auto;
   padding: 1rem;
-`;
-const ModalMain = styled.div`
-  position: relative;
-  width: ${({width}) => width || ''};
-  height: ${({height}) => height || ''};
-  box-sizing: border-box;
-  background-color: var(--dark);
-  box-shadow: 5px 12px 17px rgb(0 0 0 / 30%);
-  overflow: auto;
   &::-webkit-scrollbar {
     width: 7px;
   }
@@ -63,6 +50,14 @@ const ModalMain = styled.div`
     background: var(--pink);
     border-radius: 10px;
   }
+`;
+const ModalMain = styled.div`
+  margin: 50px auto;
+  width: ${({width}) => width || ''};
+  height: ${({height}) => height || ''};
+  box-sizing: border-box;
+  background-color: var(--dark);
+  box-shadow: 5px 12px 17px rgb(0 0 0 / 30%);
 `;
 
 const ModalAction = styled.div`
@@ -102,7 +97,7 @@ const ModalClose = styled.div`
 
 const ModalContent = styled.div`
   width: 100%;
-  height: 90%;
+  height: 100%;
   @media (max-width: 768px) {
     & {
       padding: 1rem;

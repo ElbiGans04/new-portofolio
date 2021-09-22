@@ -371,7 +371,7 @@ function ImageSlider({ showModal, project }) {
             <ModalImageContentContent key={index}>
               <Image
                 className={projectsStyled.project}
-                src={value.src}
+                src={`/images/${value.src}`}
                 layout="fill"
               ></Image>
             </ModalImageContentContent>

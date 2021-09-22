@@ -311,12 +311,9 @@ function Delete() {
 //
 
 const ModalContentAdd = styled.div`
-  display: grid;
   width: 100%;
   height: 100%;
-  justify-items: center;
-  gap: 2rem;
-  align-items: center;
+  
   @media (min-width: 768px) {
     & {
       padding: 2rem;
