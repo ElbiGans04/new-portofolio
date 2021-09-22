@@ -33,8 +33,10 @@ const Modal = styled.div`
   left: 50%;
   margin-top: -0.5px;
   margin-left: -0.5px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 1rem;
+  
   &::-webkit-scrollbar {
     width: 7px;
   }
@@ -58,6 +60,12 @@ const ModalMain = styled.div`
   box-sizing: border-box;
   background-color: var(--dark);
   box-shadow: 5px 12px 17px rgb(0 0 0 / 30%);
+
+  @media (max-width: 768px) {
+    & {
+      width: 100%;
+    }
+  }
 `;
 
 const ModalAction = styled.div`
@@ -98,9 +106,4 @@ const ModalClose = styled.div`
 const ModalContent = styled.div`
   width: 100%;
   height: 100%;
-  @media (max-width: 768px) {
-    & {
-      padding: 1rem;
-    }
-  }
 `;

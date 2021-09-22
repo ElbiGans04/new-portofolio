@@ -322,20 +322,7 @@ const ModalContentAdd = styled.div`
 `;
 
 const ModalContentAddContent = styled.div`
-  width: 60%;
-  height: 100%;
-
-  @media (max-width: 992px) {
-    & {
-      width: 70%;
-    }
-  }
-
-  @media (max-width: 992px) {
-    & {
-      width: 100%;
-    }
-  }
+  width: 100%;
 `;
 
 const ModalContentAddFooter = styled.div`
@@ -349,9 +336,15 @@ const ModalContentAddContentRow = styled.div`
   display: grid;
   justify-items: space-between;
   align-items: center;
-  grid-template-columns: 1fr 1fr;
   padding: 0.8rem;
   gap: 0.8rem;
+  grid-template-columns: 1fr 1fr;
+
+  @media (max-width: 768px) {
+    & {
+      grid-template-columns: 1fr;
+    }
+  }
 `;
 
 const ContainerCheckbox = styled.div`
@@ -418,7 +411,6 @@ const FormContentRow = styled.div`
 `;
 
 const ModalMain = styled.div`
-  width: 500px;
   color: white;
 `;
 
