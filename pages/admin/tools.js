@@ -15,7 +15,7 @@ import Context from "../../lib/hooks/context";
 
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {
-    // iddle, loading, success , failed,
+    // iddle, loading, finish
     status: "iddle",
     message: null,
     modal: false,
@@ -58,18 +58,6 @@ export default function Tools() {
         >
           {state.status === "loading" && <div className="loader"></div>}
           {state.status === "finish" && (
-            <ModalMain>
-              <ModalContent>
-                <Heading>{state.message}</Heading>
-              </ModalContent>
-              <ModalFooter>
-                <Button onClick={() => dispatch({ type: "modal/close" })}>
-                  CLOSE
-                </Button>
-              </ModalFooter>
-            </ModalMain>
-          )}
-          {state.status === "failed" && (
             <ModalMain>
               <ModalContent>
                 <Heading>{state.message}</Heading>
@@ -196,7 +184,7 @@ const onSubmit = async (event, dispatch, mutate) => {
     alert("Error");
     console.log(err);
     dispatch({
-      type: "modal/request/failed",
+      type: "modal/request/finish",
       payload: { message: err.error.message },
     });
   }
@@ -219,7 +207,7 @@ const onSubmit2 = async (id, dispatch, mutate) => {
     alert("Error");
     console.log(err);
     dispatch({
-      type: "modal/request/failed",
+      type: "modal/request/finish",
       payload: { message: err.error.message },
     });
   }
@@ -252,7 +240,7 @@ const onSubmit3 = async (event, id, dispatch) => {
     alert("Error");
     console.log(err);
     dispatch({
-      type: "modal/request/failed",
+      type: "modal/request/finish",
       payload: { message: err.error.message },
     });
   }

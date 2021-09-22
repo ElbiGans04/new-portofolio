@@ -16,7 +16,7 @@ import Context from "../../lib/hooks/context";
 
 export default function Projects() {
   const [state, dispatch] = useReducer(reducer, {
-    // iddle, loading, success , failed,
+    // iddle, loading, finish
     status: "iddle",
     message: null,
     modal: false,
@@ -78,25 +78,13 @@ export default function Projects() {
         timeout={500}
       >
         <ModalComponent
-          width="500px"
+          width="700px"
           updateState={dispatch}
           defaultState={{ type: "modal/close" }}
           ref={ref}
         >
           {state.status === "loading" && <div className="loader"></div>}
           {state.status === "finish" && (
-            <ModalMain>
-              <ModalContent>
-                <Heading>{state.message}</Heading>
-              </ModalContent>
-              <ModalFooter>
-                <Button onClick={() => dispatch({ type: "modal/close" })}>
-                  CLOSE
-                </Button>
-              </ModalFooter>
-            </ModalMain>
-          )}
-          {state.status === "failed" && (
             <ModalMain>
               <ModalContent>
                 <Heading>{state.message}</Heading>
@@ -352,7 +340,7 @@ const ContainerCheckbox = styled.div`
   display: grid;
   justify-items: center;
   align-items: center;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 0.8rem;
 
   & label {
