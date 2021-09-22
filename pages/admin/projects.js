@@ -9,11 +9,10 @@ import Input from "../../Components/Input";
 import Label from "../../Components/Label";
 import Button from "../../Components/Button";
 import Heading from "../../Components/Heading";
-import fetcher from "../../lib/module/fetchClient";
-import { mutate, useSWRConfig } from "swr";
-import {IoAddOutline} from 'react-icons/io5'
-import getRandom from "../../lib/module/randomNumber";
+import { useSWRConfig } from "swr";
+import { IoAddOutline } from "react-icons/io5";
 import changeFirstWord from "../../lib/module/upperFirstWord";
+import Context from "../../lib/hooks/context";
 
 export default function Projects() {
   const [state, dispatch] = useReducer(reducer, {
@@ -26,47 +25,50 @@ export default function Projects() {
       columns: false,
       columnsValue: false,
     },
+  });
+  const [state2, setState2] = useState({
+    dispatch,
     url: "/api/projects",
-    columns: ['title', 'description'],
+    columns: ["title", "description"],
     visible: {
       visibleValue: 0,
       visibleColumns: ["_id", "__v"],
     },
     renameColumns: {
-      startDate: 'date'
+      startDate: "date",
     },
     specialTreatment: {
       tools: (value) => {
         let textResult = ``;
         value.forEach((text, index) => {
           textResult += changeFirstWord(text.name);
-          if (index !== (value.length - 1)) textResult += `, `
+          if (index !== value.length - 1) textResult += `, `;
         });
 
-        return <div>{(textResult)}</div>
+        return <div>{textResult}</div>;
       },
       typeProject: (value) => {
-        return <div>{changeFirstWord(value.name)}</div>
+        return <div>{changeFirstWord(value.name)}</div>;
       },
       images: (value) => {
         let textResult = ``;
         value.forEach((text, index) => {
           textResult += text.src;
-          if (index !== (value.length - 1)) textResult += `, `
+          if (index !== value.length - 1) textResult += `, `;
         });
 
-        return <div>{(textResult)}</div>
-      }
-    }
+        return <div>{textResult}</div>;
+      },
+    },
   });
   const ref = useRef(null);
 
   return (
-    <React.Fragment>
+    <Context.Provider value={state2}>
       <Head>
         <title>Projects</title>
       </Head>
-      <Admin state={state} dispatch={dispatch} />
+      <Admin dispatch={dispatch} />
 
       {/* Modal */}
       <CSSTransition
@@ -100,7 +102,7 @@ export default function Projects() {
           )}
         </ModalComponent>
       </CSSTransition>
-    </React.Fragment>
+    </Context.Provider>
   );
 }
 
@@ -111,7 +113,7 @@ function SwitchModal({
   },
   dispatch,
 } = {}) {
-  const {mutate} = useSWRConfig()
+  const { mutate } = useSWRConfig();
   switch (modal) {
     case "add":
       return (
@@ -127,7 +129,7 @@ function SwitchModal({
                 required
               ></Input>
             </ModalContentAddContentRow>
-    
+
             <ModalContentAddContentRow>
               <Label htmlFor="startDate">Date start of development: </Label>
               <Input
@@ -138,7 +140,7 @@ function SwitchModal({
                 required
               ></Input>
             </ModalContentAddContentRow>
-    
+
             <ModalContentAddContentRow>
               <Label htmlFor="endDate">Date end of development:</Label>
               <Input
@@ -149,12 +151,12 @@ function SwitchModal({
                 required
               ></Input>
             </ModalContentAddContentRow>
-    
+
             <ModalContentAddContentRow>
               <Label htmlFor="files">Images:</Label>
               <InputCollections type="file" name="image"></InputCollections>
             </ModalContentAddContentRow>
-    
+
             <ModalContentAddContentRow>
               <Label htmlFor="url">Url of website:</Label>
               <Input
@@ -165,7 +167,7 @@ function SwitchModal({
                 required
               ></Input>
             </ModalContentAddContentRow>
-    
+
             <ModalContentAddContentRow>
               <Label htmlFor="description">Description :</Label>
               <Input
@@ -176,7 +178,7 @@ function SwitchModal({
                 required
               ></Input>
             </ModalContentAddContentRow>
-    
+
             <ModalContentAddContentRow>
               <Label>type of project :</Label>
               <ContainerCheckbox>
@@ -202,7 +204,7 @@ function SwitchModal({
                 </div>
               </ContainerCheckbox>
             </ModalContentAddContentRow>
-    
+
             <ModalContentAddContentRow>
               <Label htmlFor="tool">tool :</Label>
               <InputCollections type="select" name="tool"></InputCollections>
@@ -222,7 +224,7 @@ function SwitchModal({
             </Heading>
           </ModalContent>
           <ModalFooter>
-            <Button >DELETE</Button>
+            <Button>DELETE</Button>
           </ModalFooter>
         </ModalMain>
       );
@@ -230,7 +232,7 @@ function SwitchModal({
       const nameValue = columnsValue[columns.indexOf("name")];
       const asValue = columnsValue[columns.indexOf("as")];
       return (
-        <Form >
+        <Form>
           <FormContent>
             <FormContentRow>
               <Label htmlFor="name">Name:</Label>
@@ -264,7 +266,6 @@ function SwitchModal({
 function Update() {
   return <h1>Update</h1>;
 }
-
 
 function InputCollections(props) {
   const [inputCount, setInputCount] = useState(1);

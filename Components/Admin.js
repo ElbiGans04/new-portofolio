@@ -1,5 +1,5 @@
 import { CSSTransition } from "react-transition-group";
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useContext } from "react";
 import styled from "styled-components";
 import {
   IoTrashBinOutline,
@@ -11,8 +11,9 @@ import useSWR from "swr";
 import fetcher from "../lib/module/fetcher";
 import upperFirstWord from "../lib/module/upperFirstWord";
 import getRandom from "../lib/module/randomNumber";
+import Context from "../lib/hooks/context";
 
-export default function Admin({ dispatch, state }) {
+export default function Admin({ dispatch }) {
   return (
     <Container>
       <ContainerButtons>
@@ -21,21 +22,18 @@ export default function Admin({ dispatch, state }) {
           Add Entity
         </Button>
       </ContainerButtons>
-      <TableComponent state={state} dispatch={dispatch} />
+      <TableComponent />
     </Container>
   );
 }
 
-function TableComponent({
-  state: {
-    url,
-    columns,
-    visible: { visibleColumns, visibleValue },
-    specialTreatment,
-    renameColumns,
-  },
-  dispatch,
-}) {
+function TableComponent() {
+  const {
+    url = "",
+    columns = [],
+    visible: { visibleColumns = [], visibleValue = 0 } = {},
+    renameColumns = {},
+  } = useContext(Context);
   const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
   const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(
     () => filter(tools, columns, visibleColumns, visibleValue),
@@ -73,15 +71,12 @@ function TableComponent({
           {mainRows.map((mainRow, index) => {
             return (
               <Row
-                dispatch={dispatch}
                 key={getRandom(index)}
                 id={rowsId[index]}
                 detailColumns={detailColumns}
                 detailRow={detailRows[index]}
                 mainRow={mainRow}
                 mainColumns={mainColumns}
-                specialTreatment={specialTreatment}
-                renameColumns={renameColumns}
               />
             );
           })}
@@ -91,16 +86,8 @@ function TableComponent({
   );
 }
 
-function Row({
-  detailColumns,
-  detailRow,
-  mainColumns,
-  mainRow,
-  id,
-  dispatch,
-  specialTreatment,
-  renameColumns,
-}) {
+function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
+  const { dispatch, specialTreatment = {}, renameColumns = {} } = useContext(Context);
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
 
@@ -126,6 +113,7 @@ function Row({
           const special = keySpecialTreatment.find(
             (keySpecial) => keySpecial[0] === mainColumns[index]
           );
+          console.log(value, special);
           if (special) {
             return special[1](value);
           }
@@ -181,7 +169,9 @@ function Row({
                     (keySpecial) => keySpecial[0] === detailColumn
                   );
 
-                  let fieldName = specialField ? specialField[1]: upperFirstWord(detailColumn);
+                  let fieldName = specialField
+                    ? specialField[1]
+                    : upperFirstWord(detailColumn);
 
                   // Check jika nilai  column harus diperlakukan secara khusus
                   const special = keySpecialTreatment.find(

@@ -11,6 +11,7 @@ import Button from "../../Components/Button";
 import Heading from "../../Components/Heading";
 import fetcher from "../../lib/module/fetchClient";
 import {mutate, useSWRConfig} from 'swr'
+import Context from "../../lib/hooks/context";
 
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {
@@ -23,17 +24,20 @@ export default function Tools() {
       columns: false,
       columnsValue: false,
     },
+  });
+  const [state2] = useState({
+    dispatch,
     url: "/api/tools",
     columns: ["name"],
     visible: {
       visibleValue: 0,
       visibleColumns: ["_id", "__v"],
-    },
-  });
+    }
+  })
   const ref = useRef(null);
 
   return (
-    <React.Fragment>
+    <Context.Provider value={state2}>
       <Head>
         <title>Tools</title>
       </Head>
@@ -69,7 +73,7 @@ export default function Tools() {
           {state.status === 'iddle' && (<SwitchModal dispatch={dispatch} state={state} />) }
         </ModalComponent>
       </CSSTransition>
-    </React.Fragment>
+    </Context.Provider>
   );
 }
 
