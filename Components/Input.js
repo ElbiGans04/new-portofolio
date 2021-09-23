@@ -18,6 +18,10 @@ const Input = styled.input`
         background-color: var(--pink)
     }
 
+    &[type=file] {
+        display: none
+    }
+
     @media (max-width: 576px) {
         & {
             padding: .3rem;

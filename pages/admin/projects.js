@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Admin from "../../Components/Admin";
-import React, { useReducer, useRef, useState } from "react";
+import React, { useReducer, useRef, useState, useCallback } from "react";
 import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
 import ModalComponent from "../../Components/Modal";
@@ -9,10 +9,13 @@ import Input from "../../Components/Input";
 import Label from "../../Components/Label";
 import Button from "../../Components/Button";
 import Heading from "../../Components/Heading";
-import { useSWRConfig } from "swr";
-import { IoAddOutline } from "react-icons/io5";
+import useSWR, { useSWRConfig } from "swr";
+import { IoAddOutline, IoPencilSharp } from "react-icons/io5";
 import changeFirstWord from "../../lib/module/upperFirstWord";
 import Context from "../../lib/hooks/context";
+import fetcher from "../../lib/module/fetcher";
+import getRandom from "../../lib/module/randomNumber";
+import fetcherClient from "../../lib/module/fetchClient";
 
 export default function Projects() {
   const [state, dispatch] = useReducer(reducer, {
@@ -113,10 +116,27 @@ function SwitchModal({
   dispatch,
 } = {}) {
   const { mutate } = useSWRConfig();
+  const { data, error } = useSWR("/api/tools", fetcher);
+
+  if (error) {
+    console.log(error);
+    return (
+      <Heading>
+        <span>Error</span>
+      </Heading>
+    );
+  }
+
+  if (!data) {
+    return <div className="loader"></div>;
+  }
+
   switch (modal) {
     case "add":
       return (
-        <ModalContentAdd>
+        <ModalContentAdd
+          onSubmit={(event) => onSubmit(event, dispatch, mutate)}
+        >
           <ModalContentAddContent>
             <ModalContentAddContentRow>
               <Label htmlFor="title">Title: </Label>
@@ -153,7 +173,7 @@ function SwitchModal({
 
             <ModalContentAddContentRow>
               <Label htmlFor="files">Images:</Label>
-              <InputCollections type="file" name="image"></InputCollections>
+              <InputCollections type="file" name="images"></InputCollections>
             </ModalContentAddContentRow>
 
             <ModalContentAddContentRow>
@@ -183,20 +203,20 @@ function SwitchModal({
               <ContainerCheckbox>
                 <div>
                   <Input
-                    name="type"
+                    name="typeProject"
                     type="radio"
                     id="work"
-                    value="work"
+                    value="A2"
                     required
                   ></Input>
                   <Label htmlFor="work">Work project</Label>
                 </div>
                 <div>
                   <Input
-                    name="type"
+                    name="typeProject"
                     type="radio"
                     id="personal"
-                    value="personal"
+                    value="A1"
                     required
                   ></Input>
                   <Label htmlFor="work">Personal Project</Label>
@@ -205,12 +225,16 @@ function SwitchModal({
             </ModalContentAddContentRow>
 
             <ModalContentAddContentRow>
-              <Label htmlFor="tool">tool :</Label>
-              <InputCollections type="select" name="tool"></InputCollections>
+              <Label htmlFor="tools">tool :</Label>
+              <InputCollections
+                type="select"
+                name="tools"
+                data={data}
+              ></InputCollections>
             </ModalContentAddContentRow>
           </ModalContentAddContent>
           <ModalContentAddFooter>
-            <Button>ADD Project</Button>
+            <Button type="submit">ADD Project</Button>
           </ModalContentAddFooter>
         </ModalContentAdd>
       );
@@ -223,64 +247,269 @@ function SwitchModal({
             </Heading>
           </ModalContent>
           <ModalFooter>
-            <Button>DELETE</Button>
+            <Button onClick={() => onSubmit2(id, dispatch, mutate)}>
+              DELETE
+            </Button>
           </ModalFooter>
         </ModalMain>
       );
     case "update":
-      const nameValue = columnsValue[columns.indexOf("name")];
-      const asValue = columnsValue[columns.indexOf("as")];
+      const titleValue = columnsValue[columns.indexOf("title")];
+      const startDateValue = changeFormatDate(
+        columnsValue[columns.indexOf("startDate")]
+      );
+      const endDateValue = changeFormatDate(
+        columnsValue[columns.indexOf("endDate")]
+      );
+      const urlValue = columnsValue[columns.indexOf("url")];
+      const descriptionValue = columnsValue[columns.indexOf("description")];
+      const { _id } = columnsValue[columns.indexOf("typeProject")];
+      const toolsValue = columnsValue[columns.indexOf("tools")];
+      const imagesValue = columnsValue[columns.indexOf("images")];
+
       return (
-        <Form>
-          <FormContent>
-            <FormContentRow>
-              <Label htmlFor="name">Name:</Label>
+        <ModalContentAdd
+          onSubmit={(event) => onSubmit3(event, id, dispatch, mutate)}
+        >
+          <ModalContentAddContent>
+            <ModalContentAddContentRow>
+              <Label htmlFor="title">Title: </Label>
               <Input
-                name="name"
-                defaultValue={nameValue}
-                id="name"
-                placeholder="insert name"
-              />
-            </FormContentRow>
-            <FormContentRow>
-              <Label htmlFor="as">As:</Label>
+                type="text"
+                id="title"
+                placeholder="enter the project title"
+                name="title"
+                required
+                defaultValue={titleValue}
+              ></Input>
+            </ModalContentAddContentRow>
+
+            <ModalContentAddContentRow>
+              <Label htmlFor="startDate">Date start of development: </Label>
               <Input
-                name="as"
-                defaultValue={asValue}
-                id="as"
-                placeholder="insert as"
-              />
-            </FormContentRow>
-          </FormContent>
-          <ModalFooter>
-            <Button type="submit">SUBMIT</Button>
-          </ModalFooter>
-        </Form>
+                type="date"
+                id="startDate"
+                placeholder="enter the start date of development"
+                name="startDate"
+                required
+                defaultValue={startDateValue}
+              ></Input>
+            </ModalContentAddContentRow>
+
+            <ModalContentAddContentRow>
+              <Label htmlFor="endDate">Date end of development:</Label>
+              <Input
+                id="endDate"
+                type="date"
+                placeholder="enter the end date of development"
+                name="endDate"
+                required
+                defaultValue={endDateValue}
+              ></Input>
+            </ModalContentAddContentRow>
+
+            <ModalContentAddContentRow>
+              <Label htmlFor="files">Images:</Label>
+              <InputCollections
+                defaultValues={imagesValue}
+                type="file"
+                name="images"
+              ></InputCollections>
+            </ModalContentAddContentRow>
+
+            <ModalContentAddContentRow>
+              <Label htmlFor="url">Url of website:</Label>
+              <Input
+                type="text"
+                id="url"
+                placeholder="enter url"
+                name="url"
+                required
+                defaultValue={urlValue}
+              ></Input>
+            </ModalContentAddContentRow>
+
+            <ModalContentAddContentRow>
+              <Label htmlFor="description">Description :</Label>
+              <Input
+                type="text"
+                id="description"
+                name="description"
+                placeholder="enter description of project"
+                required
+                defaultValue={descriptionValue}
+              ></Input>
+            </ModalContentAddContentRow>
+
+            <ModalContentAddContentRow>
+              <Label>Type of project :</Label>
+              <ContainerCheckbox>
+                <div>
+                  <Input
+                    name="typeProject"
+                    type="radio"
+                    id="work"
+                    value="A2"
+                    required
+                    defaultChecked={_id === "A2" ? true : false}
+                  ></Input>
+                  <Label htmlFor="work">Work project</Label>
+                </div>
+                <div>
+                  <Input
+                    name="typeProject"
+                    type="radio"
+                    id="personal"
+                    value="A1"
+                    required
+                    defaultChecked={_id === "A1" ? true : false}
+                  ></Input>
+                  <Label htmlFor="work">Personal Project</Label>
+                </div>
+              </ContainerCheckbox>
+            </ModalContentAddContentRow>
+
+            <ModalContentAddContentRow>
+              <Label htmlFor="tools">Tools :</Label>
+              <InputCollections
+                type="select"
+                name="tools"
+                defaultValues={toolsValue}
+                data={data}
+              ></InputCollections>
+            </ModalContentAddContentRow>
+          </ModalContentAddContent>
+          <ModalContentAddFooter>
+            <Button type="submit">ADD Project</Button>
+          </ModalContentAddFooter>
+        </ModalContentAdd>
       );
     default:
       return <> </>;
   }
 }
 
-function Update() {
-  return <h1>Update</h1>;
+async function onSubmit(event, dispatch) {
+  try {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    dispatch({ type: "modal/request/start" });
+    const request = await fetcherClient("/api/projects", {
+      method: "post",
+      body: form,
+    });
+    
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: request.meta.message },
+    });
+  } catch (err) {
+    console.log(err)
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: err.error.message },
+    });
+  }
 }
 
-function InputCollections(props) {
-  const [inputCount, setInputCount] = useState(1);
+async function onSubmit2(id, dispatch, mutate) {
+  try {
+    dispatch({ type: "modal/request/start" });
+    const request = await fetcherClient(`/api/projects/${id}`, {
+      method: "delete",
+    });
+    
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: request.meta.message },
+    });
+  } catch (err) {
+    console.log(err)
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: err.error.message },
+    });
+  }
+}
+
+async function onSubmit3(event, id, dispatch, mutate) {
+  try {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    dispatch({ type: "modal/request/start" });
+    const request = await fetcherClient(`/api/projects/${id}`, {
+      method: "put",
+      body: form,
+    });
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: request.meta.message },
+    });
+
+  } catch (err) {
+    console.log(err)
+    dispatch({
+      type: "modal/request/finish",
+      payload: { message: err.error.message },
+    });
+  }
+}
+
+function InputCollections({
+  data: { data: result = [] } = {},
+  defaultValues = [],
+  ...props
+} = {}) {
+  const [inputState, setInputState] = useState(() => {
+    return defaultValues.map((defaultValue) => {
+      return props.type === 'select' ? defaultValue._id : defaultValue.src
+    })
+  })
+  const [inputCount, setInputCount] = useState(defaultValues.length || 1);
   const collectionInput = [];
+
+
+  // callback
+  function onChange(event, index) {
+    const arrayBaru = [...inputState]
+    arrayBaru[index] = props.type === 'select' ? event.target.value : event.target.files[0].name;
+
+    setInputState(arrayBaru)
+  }
+  
+
+  // Looping untuk select element yang diperlukan
   for (let i = 0; i < inputCount; i++) {
     const element =
       props.type === "select" ? (
-        <select {...props}></select>
+        <select
+          onChange={event => onChange(event, i)}
+          value={inputState[i]}
+          key={getRandom()}
+          {...props}
+        >
+          {result.map((value) => {
+            return (
+              <option key={getRandom()} value={value._id}>
+                {value.name}
+              </option>
+            );
+          })}
+        </select>
       ) : (
-        <Input {...props} />
+        <React.Fragment>
+          <ContainerIcons title="click to change image">
+            <Label htmlFor={`images-${i}`} key={getRandom()} fontSize="0.8rem">{inputState[i] || 'insert image'}</Label>
+            <IoPencilSharp color="white" />
+          </ContainerIcons>
+          <Input onChange={(event) => onChange(event, i)} id={`images-${i}`} key={getRandom()} {...props} />
+        </React.Fragment>
       );
     collectionInput.push(element);
   }
   return (
     <ContainerInputs>
-      <Button onClick={() => setInputCount((state) => state + 1)}>
+      <Button type="button" onClick={() => setInputCount((state) => state + 1)}>
         <IoAddOutline />
       </Button>
       {collectionInput}
@@ -288,8 +517,13 @@ function InputCollections(props) {
   );
 }
 
-function Delete() {
-  return <h1>Delete</h1>;
+function changeFormatDate(data) {
+  const date = new Date(data);
+  const month =
+    date.getMonth() + 1 < 10
+      ? `0${date.getMonth() + 1}`
+      : `${date.getMonth() + 1}`;
+  return `${date.getFullYear()}-${month}-${date.getDate()}`;
 }
 
 // Styled Component
@@ -298,10 +532,13 @@ function Delete() {
 // Modal add content
 //
 
-const ModalContentAdd = styled.div`
+const ModalContentAdd = styled.form`
   width: 100%;
   height: 100%;
-  
+`;
+
+const ModalContentAddContent = styled.div`
+  width: 100%;
   @media (min-width: 768px) {
     & {
       padding: 2rem;
@@ -309,15 +546,12 @@ const ModalContentAdd = styled.div`
   }
 `;
 
-const ModalContentAddContent = styled.div`
-  width: 100%;
-`;
-
 const ModalContentAddFooter = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   padding: 1rem;
+  box-shadow: -1px -1px 3px rgba(0, 0, 0, 0.5);
 `;
 
 const ModalContentAddContentRow = styled.div`
@@ -366,37 +600,34 @@ const ContainerInputs = styled.div`
     margin-top: -15px;
   }
 
+
   &:hover button {
     opacity: 1;
+  }
+  }
+`;
+
+const ContainerIcons = styled.div`
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  
+  &:hover svg {
+    opacity: 1;
+  }
+
+  & svg {
+    margin-left: .3rem;
+    transition: var(--transition);
+    padding: .1rem;
+    background-color: var(--pink);
+    opacity: 0;
   }
 `;
 
 // // // Styled Component
-const Form = styled.form`
-  width: 100%;
-  height: 100%;
-`;
 
-const FormContent = styled.div`
-  width: 100%;
-  height: 100%;
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  gap: 0.8rem;
-  grid-template-columns: 1fr;
-  grid-auto-rows: 1fr;
-  padding: 1rem;
-`;
-
-const FormContentRow = styled.div`
-  width: 100%;
-  padding: 0.3rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  justify-items: center;
-`;
 
 const ModalMain = styled.div`
   color: white;

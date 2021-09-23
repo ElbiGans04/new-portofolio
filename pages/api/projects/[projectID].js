@@ -69,12 +69,10 @@ export default async function handler(req, res) {
         const result2Old = await Project.findById(projectID, {images: 1});
         
         // Update dan dapatkan data setelah update
+        const newDokumen = images.length === 0 ? { ...validReqBody} : { ...validReqBody, images};
         const result2 = await Project.findByIdAndUpdate(
           projectID,
-          {
-            ...validReqBody,
-            images,
-          },
+          newDokumen,
           { new: true }
         );
 
@@ -84,12 +82,15 @@ export default async function handler(req, res) {
         }
 
         // Hapus gambar lama
-        for (let image of result2Old.images) {
-          await fsPromise.unlink(`${pathImage}/${image.src}`);
+        if (images.length > 0) {
+          for (let image of result2Old.images) {
+            await fsPromise.unlink(`${pathImage}/${image.src}`);
+          }
+
+          // pindahkan gambar
+          await moveImages(images);
         }
 
-        // pindahkan gambar
-        await moveImages(images);
 
         return res
           .status(200)

@@ -18,7 +18,7 @@ const toolSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    description: String,
+    as: String,
 });
 
 const imageSchema = new mongoose.Schema({
@@ -66,12 +66,16 @@ const projectSchema = new mongoose.Schema({
         });
         const TypeProject = mongoose.model('typeProjects', typeProjectSchema);
         const Projects = mongoose.model('Projects', projectSchema);
+        const Tools = mongoose.model('tools', toolSchema);
 
-        const typeProject = new TypeProject({_id: 'A1', name: 'Personal Project'});
-        await typeProject.save();
+        // const typeProject = new TypeProject({_id: 'A1', name: 'Personal Project'});
+        // await typeProject.save();
 
-        const typeProject2 = new TypeProject({_id: 'A2', name: 'Work Project'});
-        await typeProject2.save();
+        const typeProject2 = await Tools.findByIdAndUpdate({_id: '614c8e51123460433d53b9cc'} ,{name: 'Work'}, {new: true});
+        
+
+        console.log(typeProject2)
+        
 
         
         // const project = new Projects({
