@@ -3,7 +3,17 @@ import Admin from "../../Components/Admin";
 import React, { useReducer, useRef, useState, useCallback } from "react";
 import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
-import ModalComponent, { ModalAdmin, ModalMain2, ModalContent2, ModalFooter, GlobalStyle } from "../../Components/Modal";
+import ModalComponent, {
+  ModalAdmin,
+  ModalMain2,
+  ModalContent2,
+  ModalFooter,
+  GlobalStyle,
+  ModalForm,
+  ModalFormContent,
+  ModalFormContentRow,
+  ModalFormFooter,
+} from "../../Components/Modal";
 import styled from "styled-components";
 import Input from "../../Components/Input";
 import Label from "../../Components/Label";
@@ -125,11 +135,11 @@ function SwitchModal({
   switch (modal) {
     case "add":
       return (
-        <ModalContentAdd
+        <ModalForm
           onSubmit={(event) => onSubmit(event, dispatch, mutate)}
         >
-          <ModalContentAddContent>
-            <ModalContentAddContentRow>
+          <ModalFormContent>
+            <ModalFormContentRow>
               <Label htmlFor="title">Title: </Label>
               <Input
                 type="text"
@@ -138,9 +148,9 @@ function SwitchModal({
                 name="title"
                 required
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="startDate">Date start of development: </Label>
               <Input
                 type="date"
@@ -149,9 +159,9 @@ function SwitchModal({
                 name="startDate"
                 required
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="endDate">Date end of development:</Label>
               <Input
                 id="endDate"
@@ -160,9 +170,9 @@ function SwitchModal({
                 name="endDate"
                 required
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="file">Images:</Label>
               <Input
                 name="images"
@@ -171,9 +181,9 @@ function SwitchModal({
                 multiple
                 accept=".jpg, .png, .jpeg"
               />
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="url">Url of website:</Label>
               <Input
                 type="text"
@@ -182,9 +192,9 @@ function SwitchModal({
                 name="url"
                 required
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="description">Description :</Label>
               <Input
                 type="text"
@@ -193,9 +203,9 @@ function SwitchModal({
                 placeholder="enter description of project"
                 required
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label>type of project :</Label>
               <ContainerCheckbox>
                 <div>
@@ -219,21 +229,21 @@ function SwitchModal({
                   <Label htmlFor="work">Personal Project</Label>
                 </div>
               </ContainerCheckbox>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="tools">tool :</Label>
               <InputCollections
                 type="select"
                 name="tools"
                 data={data}
               ></InputCollections>
-            </ModalContentAddContentRow>
-          </ModalContentAddContent>
-          <ModalContentAddFooter>
+            </ModalFormContentRow>
+          </ModalFormContent>
+          <ModalFormFooter>
             <Button type="submit">ADD Project</Button>
-          </ModalContentAddFooter>
-        </ModalContentAdd>
+          </ModalFormFooter>
+        </ModalForm>
       );
     case "delete":
       return (
@@ -264,11 +274,11 @@ function SwitchModal({
       const toolsValue = columnsValue[columns.indexOf("tools")];
 
       return (
-        <ModalContentAdd
+        <ModalForm
           onSubmit={(event) => onSubmit3(event, id, dispatch, mutate)}
         >
-          <ModalContentAddContent>
-            <ModalContentAddContentRow>
+          <ModalFormContent>
+            <ModalFormContentRow>
               <Label htmlFor="title">Title: </Label>
               <Input
                 type="text"
@@ -278,9 +288,9 @@ function SwitchModal({
                 required
                 defaultValue={titleValue}
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="startDate">Date start of development: </Label>
               <Input
                 type="date"
@@ -290,9 +300,9 @@ function SwitchModal({
                 required
                 defaultValue={startDateValue}
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="endDate">Date end of development:</Label>
               <Input
                 id="endDate"
@@ -302,9 +312,9 @@ function SwitchModal({
                 required
                 defaultValue={endDateValue}
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label>Images:</Label>
               <Input
                 name="images"
@@ -313,9 +323,9 @@ function SwitchModal({
                 multiple
                 accept=".jpg, .png, .jpeg"
               />
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="url">Url of website:</Label>
               <Input
                 type="text"
@@ -325,9 +335,9 @@ function SwitchModal({
                 required
                 defaultValue={urlValue}
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="description">Description :</Label>
               <Input
                 type="text"
@@ -337,9 +347,9 @@ function SwitchModal({
                 required
                 defaultValue={descriptionValue}
               ></Input>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label>Type of project :</Label>
               <ContainerCheckbox>
                 <div>
@@ -365,9 +375,9 @@ function SwitchModal({
                   <Label htmlFor="work">Personal Project</Label>
                 </div>
               </ContainerCheckbox>
-            </ModalContentAddContentRow>
+            </ModalFormContentRow>
 
-            <ModalContentAddContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="tools">Tools :</Label>
               <InputCollections
                 type="select"
@@ -375,12 +385,12 @@ function SwitchModal({
                 defaultValues={toolsValue}
                 data={data}
               ></InputCollections>
-            </ModalContentAddContentRow>
-          </ModalContentAddContent>
-          <ModalContentAddFooter>
+            </ModalFormContentRow>
+          </ModalFormContent>
+          <ModalFormFooter>
             <Button type="submit">Update Project</Button>
-          </ModalContentAddFooter>
-        </ModalContentAdd>
+          </ModalFormFooter>
+        </ModalForm>
       );
     default:
       return <> </>;
@@ -521,43 +531,6 @@ function changeFormatDate(data) {
 //
 // Modal add content
 //
-
-const ModalContentAdd = styled.form`
-  width: 100%;
-  height: 100%;
-`;
-
-const ModalContentAddContent = styled.div`
-  width: 100%;
-  @media (min-width: 768px) {
-    & {
-      padding: 2rem;
-    }
-  }
-`;
-
-const ModalContentAddFooter = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1rem;
-  box-shadow: -1px -1px 3px rgba(0, 0, 0, 0.5);
-`;
-
-const ModalContentAddContentRow = styled.div`
-  display: grid;
-  justify-items: space-between;
-  align-items: center;
-  padding: 0.8rem;
-  gap: 0.8rem;
-  grid-template-columns: 1fr 1fr;
-
-  @media (max-width: 768px) {
-    & {
-      grid-template-columns: 1fr;
-    }
-  }
-`;
 
 const ContainerCheckbox = styled.div`
   width: 100%;

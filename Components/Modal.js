@@ -166,3 +166,45 @@ export const ModalContent2 = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
+
+// 
+// // Modal Form
+//
+
+export const ModalForm= styled.form`
+  width: 100%;
+  height: 100%;
+`;
+
+export const ModalFormContent = styled.div`
+  width: 100%;
+  @media (min-width: 768px) {
+    & {
+      padding: 2rem;
+    }
+  }
+`;
+
+export const ModalFormContentRow = styled.div`
+  display: grid;
+  justify-items: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  gap: 0.8rem;
+  grid-template-columns: 1fr 1fr;
+
+  @media (max-width: 768px) {
+    & {
+      grid-template-columns: 1fr;
+    }
+  }
+`;
+
+export const ModalFormFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1rem;
+  box-shadow: -1px -1px 3px rgba(0, 0, 0, 0.5);
+`;

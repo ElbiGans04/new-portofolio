@@ -8,9 +8,12 @@ import ModalComponent, {
   ModalMain2,
   ModalContent2,
   ModalFooter,
-  GlobalStyle
+  GlobalStyle,
+  ModalForm,
+  ModalFormContent,
+  ModalFormContentRow,
+  ModalFormFooter
 } from "../../Components/Modal";
-import styled from "styled-components";
 import Input from "../../Components/Input";
 import Label from "../../Components/Label";
 import Button from "../../Components/Button";
@@ -85,21 +88,21 @@ function SwitchModal({
   switch (modal) {
     case "add":
       return (
-        <Form onSubmit={(event) => onSubmit(event, dispatch, mutate)}>
-          <FormContent>
-            <FormContentRow>
+        <ModalForm onSubmit={(event) => onSubmit(event, dispatch, mutate)}>
+          <ModalFormContent>
+            <ModalFormContentRow>
               <Label htmlFor="name">Name:</Label>
               <Input name="name" id="name" placeholder="insert name" />
-            </FormContentRow>
-            <FormContentRow>
+            </ModalFormContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="as">As:</Label>
               <Input name="as" id="as" placeholder="insert as" />
-            </FormContentRow>
-          </FormContent>
-          <ModalFooter>
+            </ModalFormContentRow>
+          </ModalFormContent>
+          <ModalFormFooter>
             <Button type="submit">SUBMIT</Button>
-          </ModalFooter>
-        </Form>
+          </ModalFormFooter>
+        </ModalForm>
       );
     case "delete":
       return (
@@ -120,9 +123,9 @@ function SwitchModal({
       const nameValue = columnsValue[columns.indexOf("name")];
       const asValue = columnsValue[columns.indexOf("as")];
       return (
-        <Form onSubmit={(event) => onSubmit3(event, id, dispatch, mutate)}>
-          <FormContent>
-            <FormContentRow>
+        <ModalForm onSubmit={(event) => onSubmit3(event, id, dispatch, mutate)}>
+          <ModalFormContent>
+            <ModalFormContentRow>
               <Label htmlFor="name">Name:</Label>
               <Input
                 name="name"
@@ -130,8 +133,8 @@ function SwitchModal({
                 id="name"
                 placeholder="insert name"
               />
-            </FormContentRow>
-            <FormContentRow>
+            </ModalFormContentRow>
+            <ModalFormContentRow>
               <Label htmlFor="as">As:</Label>
               <Input
                 name="as"
@@ -139,12 +142,12 @@ function SwitchModal({
                 id="as"
                 placeholder="insert as"
               />
-            </FormContentRow>
-          </FormContent>
-          <ModalFooter>
+            </ModalFormContentRow>
+          </ModalFormContent>
+          <ModalFormFooter>
             <Button type="submit">SUBMIT</Button>
-          </ModalFooter>
-        </Form>
+          </ModalFormFooter>
+        </ModalForm>
       );
     default:
       return <> </>;
@@ -241,30 +244,3 @@ const onSubmit3 = async (event, id, dispatch) => {
     });
   }
 };
-
-// // // Styled Component
-const Form = styled.form`
-  width: 100%;
-  height: 100%;
-`;
-
-const FormContent = styled.div`
-  width: 100%;
-  height: 100%;
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  gap: 0.8rem;
-  grid-template-columns: 1fr;
-  grid-auto-rows: 1fr;
-  padding: 1rem;
-`;
-
-const FormContentRow = styled.div`
-  width: 100%;
-  padding: 0.3rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  justify-items: center;
-`;
