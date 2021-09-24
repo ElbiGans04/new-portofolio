@@ -12,7 +12,7 @@ import ModalComponent, {
   ModalForm,
   ModalFormContent,
   ModalFormContentRow,
-  ModalFormFooter
+  ModalFormFooter,
 } from "../../Components/Modal";
 import Input from "../../Components/Input";
 import Label from "../../Components/Label";
@@ -85,6 +85,7 @@ function SwitchModal({
   dispatch,
 } = {}) {
   const { mutate } = useSWRConfig();
+
   switch (modal) {
     case "add":
       return (

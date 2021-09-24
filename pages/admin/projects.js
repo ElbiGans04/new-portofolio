@@ -72,6 +72,8 @@ export default function Projects() {
 
         return <div>{textResult}</div>;
       },
+      startDate: (value) => changeFormatDate(value),
+      endDate: (value) => changeFormatDate(value),
     },
   });
   const ref = useRef(null);
@@ -120,24 +122,31 @@ function SwitchModal({
   const { data, error } = useSWR("/api/tools", fetcher);
 
   if (error) {
-    console.log(error);
     return (
-      <Heading>
-        <span>Error</span>
-      </Heading>
+      <ModalMain2>
+        <ModalContent2>
+          <Heading>
+            <span>Error when try fetching data</span>
+          </Heading>
+        </ModalContent2>
+      </ModalMain2>
     );
   }
 
-  if (!data) {
-    return <div className="loader"></div>;
+  if (!data && !error) {
+    return (
+      <ModalMain2>
+        <ModalContent2>
+          <div className="loader"></div>
+        </ModalContent2>
+      </ModalMain2>
+    );
   }
 
   switch (modal) {
     case "add":
       return (
-        <ModalForm
-          onSubmit={(event) => onSubmit(event, dispatch, mutate)}
-        >
+        <ModalForm onSubmit={(event) => onSubmit(event, dispatch, mutate)}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label htmlFor="title">Title: </Label>
@@ -274,9 +283,7 @@ function SwitchModal({
       const toolsValue = columnsValue[columns.indexOf("tools")];
 
       return (
-        <ModalForm
-          onSubmit={(event) => onSubmit3(event, id, dispatch, mutate)}
-        >
+        <ModalForm onSubmit={(event) => onSubmit3(event, id, dispatch, mutate)}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label htmlFor="title">Title: </Label>
