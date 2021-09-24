@@ -172,8 +172,8 @@ function SwitchModal({
             </ModalContentAddContentRow>
 
             <ModalContentAddContentRow>
-              <Label htmlFor="files">Images:</Label>
-              <InputCollections type="file" name="images"></InputCollections>
+              <Label htmlFor="file">Images:</Label>
+              <Input name="images" type="file" id="file" multiple accept=".jpg, .png, .jpeg"/>
             </ModalContentAddContentRow>
 
             <ModalContentAddContentRow>
@@ -265,7 +265,6 @@ function SwitchModal({
       const descriptionValue = columnsValue[columns.indexOf("description")];
       const { _id } = columnsValue[columns.indexOf("typeProject")];
       const toolsValue = columnsValue[columns.indexOf("tools")];
-      const imagesValue = columnsValue[columns.indexOf("images")];
 
       return (
         <ModalContentAdd
@@ -309,12 +308,8 @@ function SwitchModal({
             </ModalContentAddContentRow>
 
             <ModalContentAddContentRow>
-              <Label htmlFor="files">Images:</Label>
-              <InputCollections
-                defaultValues={imagesValue}
-                type="file"
-                name="images"
-              ></InputCollections>
+              <Label>Images:</Label>
+              <Input name="images" type="file" id="file" multiple accept=".jpg, .png, .jpeg"/>
             </ModalContentAddContentRow>
 
             <ModalContentAddContentRow>
@@ -380,7 +375,7 @@ function SwitchModal({
             </ModalContentAddContentRow>
           </ModalContentAddContent>
           <ModalContentAddFooter>
-            <Button type="submit">ADD Project</Button>
+            <Button type="submit">Update Project</Button>
           </ModalContentAddFooter>
         </ModalContentAdd>
       );
@@ -389,7 +384,7 @@ function SwitchModal({
   }
 }
 
-async function onSubmit(event, dispatch) {
+async function onSubmit(event, dispatch, mutate) {
   try {
     event.preventDefault();
     const form = new FormData(event.target);
@@ -398,17 +393,19 @@ async function onSubmit(event, dispatch) {
       method: "post",
       body: form,
     });
-    
+
     dispatch({
       type: "modal/request/finish",
       payload: { message: request.meta.message },
     });
+    mutate("/api/projects");
   } catch (err) {
-    console.log(err)
+    console.log(err);
     dispatch({
       type: "modal/request/finish",
       payload: { message: err.error.message },
     });
+    mutate("/api/projects");
   }
 }
 
@@ -418,17 +415,19 @@ async function onSubmit2(id, dispatch, mutate) {
     const request = await fetcherClient(`/api/projects/${id}`, {
       method: "delete",
     });
-    
+
     dispatch({
       type: "modal/request/finish",
       payload: { message: request.meta.message },
     });
+    mutate("/api/projects");
   } catch (err) {
-    console.log(err)
+    console.log(err);
     dispatch({
       type: "modal/request/finish",
       payload: { message: err.error.message },
     });
+    mutate("/api/projects");
   }
 }
 
@@ -436,6 +435,7 @@ async function onSubmit3(event, id, dispatch, mutate) {
   try {
     event.preventDefault();
     const form = new FormData(event.target);
+
     dispatch({ type: "modal/request/start" });
     const request = await fetcherClient(`/api/projects/${id}`, {
       method: "put",
@@ -445,13 +445,14 @@ async function onSubmit3(event, id, dispatch, mutate) {
       type: "modal/request/finish",
       payload: { message: request.meta.message },
     });
-
+    mutate('/api/projects')
   } catch (err) {
-    console.log(err)
+    console.log(err);
     dispatch({
       type: "modal/request/finish",
       payload: { message: err.error.message },
     });
+    mutate("/api/projects");
   }
 }
 
@@ -460,51 +461,37 @@ function InputCollections({
   defaultValues = [],
   ...props
 } = {}) {
-  const [inputState, setInputState] = useState(() => {
-    return defaultValues.map((defaultValue) => {
-      return props.type === 'select' ? defaultValue._id : defaultValue.src
-    })
-  })
+  const [inputState, setInputState] = useState(() =>
+    defaultValues.map((defaultValue) => defaultValue._id)
+  );
   const [inputCount, setInputCount] = useState(defaultValues.length || 1);
   const collectionInput = [];
 
-
   // callback
   function onChange(event, index) {
-    const arrayBaru = [...inputState]
-    arrayBaru[index] = props.type === 'select' ? event.target.value : event.target.files[0].name;
-
-    setInputState(arrayBaru)
+    const arrayBaru = [...inputState];
+    arrayBaru[index] = event.target.value;
+    setInputState(arrayBaru);
   }
-  
 
   // Looping untuk select element yang diperlukan
   for (let i = 0; i < inputCount; i++) {
-    const element =
-      props.type === "select" ? (
-        <select
-          onChange={event => onChange(event, i)}
-          value={inputState[i]}
-          key={getRandom()}
-          {...props}
-        >
-          {result.map((value) => {
-            return (
-              <option key={getRandom()} value={value._id}>
-                {value.name}
-              </option>
-            );
-          })}
-        </select>
-      ) : (
-        <React.Fragment>
-          <ContainerIcons title="click to change image">
-            <Label htmlFor={`images-${i}`} key={getRandom()} fontSize="0.8rem">{inputState[i] || 'insert image'}</Label>
-            <IoPencilSharp color="white" />
-          </ContainerIcons>
-          <Input onChange={(event) => onChange(event, i)} id={`images-${i}`} key={getRandom()} {...props} />
-        </React.Fragment>
-      );
+    const element = (
+      <select
+        onChange={(event) => onChange(event, i)}
+        value={inputState[i]}
+        key={getRandom()}
+        {...props}
+      >
+        {result.map((value) => {
+          return (
+            <option key={getRandom()} value={value._id}>
+              {value.name}
+            </option>
+          );
+        })}
+      </select>
+    );
     collectionInput.push(element);
   }
   return (
@@ -612,22 +599,21 @@ const ContainerIcons = styled.div`
   cursor: pointer;
   display: flex;
   align-items: center;
-  
+
   &:hover svg {
     opacity: 1;
   }
 
   & svg {
-    margin-left: .3rem;
+    margin-left: 0.3rem;
     transition: var(--transition);
-    padding: .1rem;
+    padding: 0.1rem;
     background-color: var(--pink);
     opacity: 0;
   }
 `;
 
 // // // Styled Component
-
 
 const ModalMain = styled.div`
   color: white;

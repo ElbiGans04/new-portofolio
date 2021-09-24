@@ -37,10 +37,10 @@ export default async function handler(req, res) {
         return res.json({ data: result });
       case "PUT":
         await runMiddleware(req, res, multer.array("images", 5));
-
+        
         // Validasi
         const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
-
+    
         // Jika hanya mengirim satu data tools
         if (validReqBody.tools instanceof Array === false) {
           validReqBody.tools = [validReqBody.tools];
