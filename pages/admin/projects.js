@@ -3,14 +3,14 @@ import Admin from "../../Components/Admin";
 import React, { useReducer, useRef, useState, useCallback } from "react";
 import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
-import ModalComponent from "../../Components/Modal";
+import ModalComponent, { ModalAdmin, ModalMain2, ModalContent2, ModalFooter, GlobalStyle } from "../../Components/Modal";
 import styled from "styled-components";
 import Input from "../../Components/Input";
 import Label from "../../Components/Label";
 import Button from "../../Components/Button";
 import Heading from "../../Components/Heading";
 import useSWR, { useSWRConfig } from "swr";
-import { IoAddOutline, IoPencilSharp } from "react-icons/io5";
+import { IoAddOutline } from "react-icons/io5";
 import changeFirstWord from "../../lib/module/upperFirstWord";
 import Context from "../../lib/hooks/context";
 import fetcher from "../../lib/module/fetcher";
@@ -74,6 +74,7 @@ export default function Projects() {
       <Admin dispatch={dispatch} />
 
       {/* Modal */}
+      {state.modal && <GlobalStyle />}
       <CSSTransition
         nodeRef={ref}
         classNames="modal"
@@ -86,22 +87,12 @@ export default function Projects() {
           defaultState={{ type: "modal/close" }}
           ref={ref}
         >
-          {state.status === "loading" && <div className="loader"></div>}
-          {state.status === "finish" && (
-            <ModalMain>
-              <ModalContent>
-                <Heading>{state.message}</Heading>
-              </ModalContent>
-              <ModalFooter>
-                <Button onClick={() => dispatch({ type: "modal/close" })}>
-                  CLOSE
-                </Button>
-              </ModalFooter>
-            </ModalMain>
-          )}
-          {state.status === "iddle" && (
-            <SwitchModal dispatch={dispatch} state={state} />
-          )}
+          <ModalAdmin
+            status={state.status}
+            message={state.message}
+            dispatch={dispatch}
+            Children={() => <SwitchModal dispatch={dispatch} state={state} />}
+          ></ModalAdmin>
         </ModalComponent>
       </CSSTransition>
     </Context.Provider>
@@ -173,7 +164,13 @@ function SwitchModal({
 
             <ModalContentAddContentRow>
               <Label htmlFor="file">Images:</Label>
-              <Input name="images" type="file" id="file" multiple accept=".jpg, .png, .jpeg"/>
+              <Input
+                name="images"
+                type="file"
+                id="file"
+                multiple
+                accept=".jpg, .png, .jpeg"
+              />
             </ModalContentAddContentRow>
 
             <ModalContentAddContentRow>
@@ -240,18 +237,18 @@ function SwitchModal({
       );
     case "delete":
       return (
-        <ModalMain>
-          <ModalContent>
+        <ModalMain2>
+          <ModalContent2>
             <Heading>
               Are you sure want <span>delete the row?</span>
             </Heading>
-          </ModalContent>
+          </ModalContent2>
           <ModalFooter>
             <Button onClick={() => onSubmit2(id, dispatch, mutate)}>
               DELETE
             </Button>
           </ModalFooter>
-        </ModalMain>
+        </ModalMain2>
       );
     case "update":
       const titleValue = columnsValue[columns.indexOf("title")];
@@ -309,7 +306,13 @@ function SwitchModal({
 
             <ModalContentAddContentRow>
               <Label>Images:</Label>
-              <Input name="images" type="file" id="file" multiple accept=".jpg, .png, .jpeg"/>
+              <Input
+                name="images"
+                type="file"
+                id="file"
+                multiple
+                accept=".jpg, .png, .jpeg"
+              />
             </ModalContentAddContentRow>
 
             <ModalContentAddContentRow>
@@ -445,7 +448,7 @@ async function onSubmit3(event, id, dispatch, mutate) {
       type: "modal/request/finish",
       payload: { message: request.meta.message },
     });
-    mutate('/api/projects')
+    mutate("/api/projects");
   } catch (err) {
     console.log(err);
     dispatch({
@@ -594,42 +597,4 @@ const ContainerInputs = styled.div`
   }
 `;
 
-const ContainerIcons = styled.div`
-  position: relative;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-
-  &:hover svg {
-    opacity: 1;
-  }
-
-  & svg {
-    margin-left: 0.3rem;
-    transition: var(--transition);
-    padding: 0.1rem;
-    background-color: var(--pink);
-    opacity: 0;
-  }
-`;
-
 // // // Styled Component
-
-const ModalMain = styled.div`
-  color: white;
-`;
-
-const ModalFooter = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1rem;
-  box-shadow: -1px -1px 3px rgba(0, 0, 0, 0.5);
-`;
-
-const ModalContent = styled.div`
-  padding: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;

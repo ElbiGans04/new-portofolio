@@ -252,7 +252,7 @@ function Projects() {
                       <ProjectImageContainer>
                         <Image
                           className={projectsStyled.project}
-                          src={value.images[0].src}
+                          src={`/images/${value.images[0].src}`}
                           layout="fill"
                         ></Image>
                       </ProjectImageContainer>

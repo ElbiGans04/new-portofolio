@@ -3,7 +3,13 @@ import Admin from "../../Components/Admin";
 import React, { useReducer, useRef, useState } from "react";
 import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
-import ModalComponent from "../../Components/Modal";
+import ModalComponent, {
+  ModalAdmin,
+  ModalMain2,
+  ModalContent2,
+  ModalFooter,
+  GlobalStyle
+} from "../../Components/Modal";
 import styled from "styled-components";
 import Input from "../../Components/Input";
 import Label from "../../Components/Label";
@@ -28,7 +34,6 @@ export default function Tools() {
   const [state2] = useState({
     dispatch,
     url: "/api/tools",
-    columns: ["name"],
     visible: {
       visibleValue: 0,
       visibleColumns: ["_id", "__v"],
@@ -44,6 +49,7 @@ export default function Tools() {
       <Admin state={state} dispatch={dispatch} />
 
       {/* Modal */}
+      {state.modal && <GlobalStyle />}
       <CSSTransition
         nodeRef={ref}
         classNames="modal"
@@ -56,22 +62,12 @@ export default function Tools() {
           defaultState={{ type: "modal/close" }}
           ref={ref}
         >
-          {state.status === "loading" && <div className="loader"></div>}
-          {state.status === "finish" && (
-            <ModalMain>
-              <ModalContent>
-                <Heading>{state.message}</Heading>
-              </ModalContent>
-              <ModalFooter>
-                <Button onClick={() => dispatch({ type: "modal/close" })}>
-                  CLOSE
-                </Button>
-              </ModalFooter>
-            </ModalMain>
-          )}
-          {state.status === "iddle" && (
-            <SwitchModal dispatch={dispatch} state={state} />
-          )}
+          <ModalAdmin
+            status={state.status}
+            message={state.message}
+            dispatch={dispatch}
+            Children={() => <SwitchModal dispatch={dispatch} state={state} />}
+          ></ModalAdmin>
         </ModalComponent>
       </CSSTransition>
     </Context.Provider>
@@ -107,18 +103,18 @@ function SwitchModal({
       );
     case "delete":
       return (
-        <ModalMain>
-          <ModalContent>
+        <ModalMain2>
+          <ModalContent2>
             <Heading>
               Are you sure want <span>delete the row?</span>
             </Heading>
-          </ModalContent>
+          </ModalContent2>
           <ModalFooter>
             <Button onClick={() => onSubmit2(id, dispatch, mutate)}>
               DELETE
             </Button>
           </ModalFooter>
-        </ModalMain>
+        </ModalMain2>
       );
     case "update":
       const nameValue = columnsValue[columns.indexOf("name")];
@@ -271,24 +267,4 @@ const FormContentRow = styled.div`
   grid-template-columns: 1fr 1fr;
   align-items: center;
   justify-items: center;
-`;
-
-const ModalMain = styled.div`
-  width: 500px;
-  color: white;
-`;
-
-const ModalFooter = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1rem;
-  box-shadow: -1px -1px 3px rgba(0, 0, 0, 0.5);
-`;
-
-const ModalContent = styled.div`
-  padding: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
