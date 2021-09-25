@@ -327,7 +327,7 @@ function ImageSlider({ showModal, project }) {
         clearInterval(interval);
       };
     }
-  }, [showModal, play, project.images]);
+  }, [showModal, play, project]);
 
   return (
     <ModalImage ref={nodeRef}>
