@@ -11,21 +11,21 @@ import Paragraph from "../Components/Paragraph";
 import Modal from "../Components/Modal";
 
 const listActions = [
-  {
-    text: "All",
-    value: "ALL",
-    type: "project-type",
-  },
-  {
-    text: "Personal Projects",
-    value: "A1",
-    type: "project-type",
-  },
-  {
-    text: "Work Projects",
-    value: "A2",
-    type: "project-type",
-  },
+  // {
+  //   text: "All",
+  //   value: "ALL",
+  //   type: "project-type",
+  // },
+  // {
+  //   text: "Personal Projects",
+  //   value: "A1",
+  //   type: "project-type",
+  // },
+  // {
+  //   text: "Work Projects",
+  //   value: "A2",
+  //   type: "project-type",
+  // },
   {
     text: "A-Z",
     value: "ASC",
@@ -212,7 +212,7 @@ function Projects() {
                 {project?.description}.{" "}
                 {project?.url && (
                   <goTo href={project?.url}>
-                    click here to go to this website
+                   <a href={project.url}>{project.url}</a>
                   </goTo>
                 )}
               </Paragraph>

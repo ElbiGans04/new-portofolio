@@ -51,6 +51,7 @@ export default NavBar;
 
 
 // Styled Component
+
 const GlobalStyle = createGlobalStyle`
   body {
     overflow: hidden!important;
