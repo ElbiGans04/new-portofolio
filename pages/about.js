@@ -10,7 +10,7 @@ function About() {
         <title>About Me</title>
       </Head>
       <Paragraph size="1.5" lineHeight="2">
-        Yes it's me, My name is <span>Rhafael Bijaksana</span> my friends call me by the name <span>Elbi</span>. Since
+        Yes it&apos;s me, My name is <span>Rhafael Bijaksana</span> my friends call me by the name <span>Elbi</span>. Since
         entering high school for some reason I have become fond of programming,
         for me it is very interesting to learn and there is a sense of
         satisfaction after solving the problems at hand.

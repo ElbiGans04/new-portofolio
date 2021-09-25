@@ -8,7 +8,7 @@ function Contacts () {
     return (
         <Container>
             <Head>
-                <title>Let's Connect with me</title>
+                <title>Let&apos;s Connect with me</title>
             </Head>
             <Paragraph lineHeight="1.5rem" size={1.5}>
                 You can reach out via email at <span>rhafaelbijaksana04@gmail.com</span>, or via socials below:

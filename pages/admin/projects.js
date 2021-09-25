@@ -51,7 +51,7 @@ export default function Projects() {
       startDate: "date",
     },
     specialTreatment: {
-      tools: (value) => {
+      tools: function tools (value) {
         let textResult = ``;
         value.forEach((text, index) => {
           textResult += changeFirstWord(text.name);
@@ -60,10 +60,10 @@ export default function Projects() {
 
         return <div>{textResult}</div>;
       },
-      typeProject: (value) => {
+      typeProject: function typeProject (value) {
         return <div>{changeFirstWord(value.name)}</div>;
       },
-      images: (value) => {
+      images: function images (value) {
         let textResult = ``;
         value.forEach((text, index) => {
           textResult += text.src;
@@ -72,8 +72,8 @@ export default function Projects() {
 
         return <div>{textResult}</div>;
       },
-      startDate: (value) => changeFormatDate(value),
-      endDate: (value) => changeFormatDate(value),
+      startDate: function startDate (value){changeFormatDate(value)},
+      endDate: function endDate (value){changeFormatDate(value)},
     },
   });
   const ref = useRef(null);

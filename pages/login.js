@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Input from '../Components/Input'
 import Label from '../Components/Label'
 
-export default function login () {
+export default function Login () {
     const {mutateUser} = useUser({redirectTo: '/admin/projects', redirectIfFound: true});
     
     async function onSubmit (event) {

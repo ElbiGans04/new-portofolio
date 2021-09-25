@@ -9,6 +9,7 @@ import { IoStopCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
 import upperFirstWord from "../lib/module/upperFirstWord";
 import Paragraph from "../Components/Paragraph";
 import Modal from "../Components/Modal";
+import getRandom from '../lib/module/randomNumber'
 
 const listActions = [
   // {
@@ -94,7 +95,7 @@ function Projects() {
         didCancel = true;
       };
     }
-  }, [state.activeActions, state.refetch]);
+  }, [state.activeActions, state.refetch, state.status]);
 
   const handleAction = (e, typeButton, buttonValue) => {
     let validValue = false;
@@ -123,7 +124,7 @@ function Projects() {
       {modal.open && <GlobalStyle />}
       <Container>
         <Head>
-          <title>Projects I've made</title>
+          <title>Projects I&apos;ve made</title>
         </Head>
 
         {/* Action Components */}
@@ -251,6 +252,7 @@ function Projects() {
                     >
                       <ProjectImageContainer>
                         <Image
+                          alt="project"
                           className={projectsStyled.project}
                           src={`/images/${value.images[0].src}`}
                           layout="fill"
@@ -325,7 +327,7 @@ function ImageSlider({ showModal, project }) {
         clearInterval(interval);
       };
     }
-  }, [showModal, play]);
+  }, [showModal, play, project.images]);
 
   return (
     <ModalImage ref={nodeRef}>
@@ -370,6 +372,7 @@ function ImageSlider({ showModal, project }) {
           return (
             <ModalImageContentContent key={index}>
               <Image
+                alt="project"
                 className={projectsStyled.project}
                 src={`/images/${value.src}`}
                 layout="fill"
@@ -381,7 +384,8 @@ function ImageSlider({ showModal, project }) {
       <ModalImageCount>
         {project?.images?.map((value, index) => {
           return (
-            <ModalImageCountCount
+            <ModalImageCountCount 
+              key={getRandom()}
               opacity={slide.slide === 0 ? "1" : "0.5"}
               onClick={(event) => changeImage(event, index)}
             ></ModalImageCountCount>
