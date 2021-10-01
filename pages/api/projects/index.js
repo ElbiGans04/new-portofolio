@@ -94,6 +94,7 @@ export default async function handler(req, res) {
         break;
     }
   } catch (err) {
+    console.log(err)
     // Setiap Ada error semua file dalam tmp file
     await deleteTempFiles()
     routerErrorHandling(res, err)

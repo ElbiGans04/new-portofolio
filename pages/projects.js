@@ -58,44 +58,42 @@ function Projects() {
 
   useEffect(() => {
     // Mencegah kondisi balapan
-    if (state.status !== "loading") {
-      // Mencegah react menyetel state ketika sudah pindah halaman
-      let didCancel = false;
-      async function getData() {
-        try {
-          if (!didCancel) {
-            // ubah state
-            dispatch({ type: "initial" });
-          }
-
-          const fetchProjects = await (
-            await fetch(
-              `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`
-            )
-          ).json();
-
-          // console.log(fetchProjects)
-
-          // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
-          if (!didCancel) {
-            dispatch({
-              type: "projects",
-              payload: { projects: fetchProjects.data },
-            });
-          }
-        } catch (err) {
-          if (!didCancel) dispatch({ type: "error" });
+    // Mencegah react menyetel state ketika sudah pindah halaman
+    let didCancel = false;
+    async function getData() {
+      try {
+        if (!didCancel) {
+          // ubah state
+          dispatch({ type: "initial" });
         }
+
+        const fetchProjects = await (
+          await fetch(
+            `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`
+          )
+        ).json();
+
+        console.log(fetchProjects)
+
+        // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
+        if (!didCancel) {
+          dispatch({
+            type: "projects",
+            payload: { projects: fetchProjects.data },
+          });
+        }
+      } catch (err) {
+        if (!didCancel) dispatch({ type: "error" });
       }
-
-      getData();
-
-      // Setel true variabel did cancel
-      return () => {
-        didCancel = true;
-      };
     }
-  }, [state.activeActions, state.refetch, state.status]);
+
+    getData();
+
+    // Setel true variabel did cancel
+    return () => {
+      didCancel = true;
+    };
+  }, [state.activeActions, state.refetch]);
 
   const handleAction = (e, typeButton, buttonValue) => {
     let validValue = false;
@@ -212,9 +210,9 @@ function Projects() {
               >
                 {project?.description}.{" "}
                 {project?.url && (
-                  <goTo href={project?.url}>
-                   <a href={project.url}>{project.url}</a>
-                  </goTo>
+                  <GoTo href={project?.url}>
+                   {project?.url}
+                  </GoTo>
                 )}
               </Paragraph>
             </ModalContentContent>
@@ -446,8 +444,8 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const goTo = styled.a`
-  text-decoration: none;
+const GoTo = styled.a`
+  text-decoration: underline;
   color: var(--pink);
 `;
 
