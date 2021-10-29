@@ -20,6 +20,8 @@ const ModalComponent = React.forwardRef(
   }
 );
 
+ModalComponent.displayName = 'Modal'
+
 export default ModalComponent;
 
 export function ModalAdmin({ status, message, dispatch, Children, ...props }) {

@@ -82,7 +82,7 @@ function NavBar ({active}) {
       <Navbar>
           {navbarOpen && <GlobalStyle></GlobalStyle>}
           <NavbarHead>
-              <Link href="/">
+              <Link passHref href="/">
                   <NavbarHeadItem>
                       Elbi
                   </NavbarHeadItem>
