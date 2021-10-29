@@ -42,14 +42,14 @@ export default function Login () {
             <Form onSubmit={onSubmit}>
                 <FormRow>
                     <Label htmlFor="email">Email :</Label>
-                    <Input type="email" id="email" name="email" required></Input>
+                    <Input placeholder="Enter your email" type="email" id="email" name="email" required></Input>
                 </FormRow>
                 <FormRow>
                     <Label htmlFor="password">Password :</Label>
-                    <Input type="password" id="password" name="password" required></Input>
+                    <Input placeholder="Enter your password" type="password" id="password" name="password" required></Input>
                 </FormRow>
                 
-                    <Button type="submit">Enter</Button>              
+                    <NewButton type="submit">Enter</NewButton>              
     
 
             </Form>
@@ -61,6 +61,10 @@ export default function Login () {
 const Container = styled.div`
     width: 30%;
     height: 50vh;
+    background-color: var(--dark2);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 2px 2px 7px rgba(0,0,0, 0.5);
 
     @media (max-width: 992px) {
         & {
@@ -86,4 +90,9 @@ const FormRow = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
 `;
+
+const NewButton = styled(Button)`
+    width: 100%;
+`
