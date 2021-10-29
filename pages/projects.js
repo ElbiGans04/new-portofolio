@@ -124,6 +124,7 @@ function Projects() {
         </Head>
 
         {/* Action Components */}
+        {/* Check Kondisi Jika merupakan button yang aktif maka kita bedakan */}
         <ContainerActions>
           {listActions.map((value, index) => {
             if (
@@ -200,7 +201,6 @@ function Projects() {
                 </ModalContentContentListValue>
               </ModalContentContentList>
               <Paragraph
-                margin="2rem 0 0 0"
                 align="start"
                 textIndent="2rem"
                 fontWeight="normal"
@@ -278,52 +278,24 @@ export default Projects;
 
 function ImageSlider({ showModal, project }) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
-  const [play, setPlay] = useState(true);
   const nodeRef = useRef(null);
 
-  function changeImage(event, index) {
-    if (project.images.length > 1) {
-      const modal = event.target.parentElement.parentElement;
-      const { width: modalWidth } = modal.getBoundingClientRect();
-
-      setSlide({ slide: index, translateX: index * -modalWidth });
-    }
-  }
-
   function changeImageAction(event, action) {
-    if (project.images.length > 1) {
+    if (project.images.length > 1 ) {
       const modal = event.target.parentElement.parentElement;
       const { width: modalWidth } = modal.getBoundingClientRect();
 
       const result =
         action === 0
           ? slide.slide - 1 < 0
-            ? 2
+            ? (project.images.length - 1)
             : slide.slide - 1
-          : slide.slide + 1 > 2
-          ? 0
-          : slide.slide + 1;
+          : slide.slide + 1 > (project.images.length - 1)
+            ? 0
+            : slide.slide + 1;
       setSlide({ slide: result, translateX: result * -modalWidth });
     }
   }
-
-  useEffect(() => {
-    if (showModal && play && project.images.length > 1) {
-      let interval = setInterval(() => {
-        console.log(showModal);
-        const modal = nodeRef.current;
-        const { width: modalWidth } = modal?.getBoundingClientRect();
-        setSlide((state) => {
-          const result = state.slide + 1 > 2 ? 0 : state.slide + 1;
-          return { slide: result, translateX: result * -modalWidth };
-        });
-      }, 3000);
-
-      return () => {
-        clearInterval(interval);
-      };
-    }
-  }, [showModal, play, project]);
 
   return (
     <ModalImage ref={nodeRef}>
@@ -337,24 +309,6 @@ function ImageSlider({ showModal, project }) {
             <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
           </ModalImageAction>
           <ModalImageAction
-            backgroundColor="transparent"
-            onDoubleClick={() => setPlay((state) => !state)}
-          >
-            {!play ? (
-              <IoPlayCircleOutline
-                color="var(--pink)"
-                size="4rem"
-                title="move image automatic"
-              ></IoPlayCircleOutline>
-            ) : (
-              <IoStopCircleOutline
-                color="var(--pink)"
-                size="4rem"
-                title="stop move image automatic"
-              ></IoStopCircleOutline>
-            )}
-          </ModalImageAction>
-          <ModalImageAction
             onClick={(event) => changeImageAction(event, 1)}
             title="next image"
           >
@@ -363,6 +317,7 @@ function ImageSlider({ showModal, project }) {
           </ModalImageAction>
         </ModalImageActions>
       )}
+      {/* Content Images */}
       <ModalImageContent translateX={slide.translateX}>
         {project?.images?.map((value, index) => {
           return (
@@ -377,13 +332,13 @@ function ImageSlider({ showModal, project }) {
           );
         })}
       </ModalImageContent>
+      {/* Content Count */}
       <ModalImageCount>
         {project?.images?.map((value, index) => {
           return (
             <ModalImageCountCount 
               key={getRandom()}
-              opacity={slide.slide === 0 ? "1" : "0.5"}
-              onClick={(event) => changeImage(event, index)}
+              opacity={slide.slide === index ? "1" : "0.5"}
             ></ModalImageCountCount>
           );
         })}
@@ -412,7 +367,7 @@ function reducer(state, action) {
     case "error":
       return { ...state, status: "error", refetch: false };
     case "refetch":
-      return { ...state, refetch: true };
+      return { ...state, status: 'loading', refetch: true };
     default:
       return { ...state };
   }

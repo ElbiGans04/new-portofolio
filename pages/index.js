@@ -31,7 +31,6 @@ export default function Home() {
         </Heading>
         {/* <Heading>Reach me via email <span>rhafaelbijaksana04@gmail.com</span></Heading> */}
       </TextParent>
-      <Label minSize={1.5} size={2}>Hello World</Label>
     </Container>
   );
 }
