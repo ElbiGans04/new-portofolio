@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Admin from "../../Components/Admin";
+import Admin from "../../components/Admin";
 import React, { useReducer, useRef, useState } from "react";
 import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
@@ -13,11 +13,11 @@ import ModalComponent, {
   ModalFormContent,
   ModalFormContentRow,
   ModalFormFooter,
-} from "../../Components/Modal";
-import Input from "../../Components/Input";
-import Label from "../../Components/Label";
-import Button from "../../Components/Button";
-import Heading from "../../Components/Heading";
+} from "../../components/Modal";
+import Input from "../../components/Input";
+import Label from "../../components/Label";
+import Button from "../../components/Button";
+import Heading from "../../components/Heading";
 import fetcher from "../../lib/module/fetchClient";
 import { mutate, useSWRConfig } from "swr";
 import Context from "../../lib/hooks/context";

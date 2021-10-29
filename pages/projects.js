@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Heading from "../Components/Heading";
+import Heading from "../components/Heading";
 import styled, { createGlobalStyle } from "styled-components";
 import React, { useEffect, useReducer, useState, useRef } from "react";
 import Image from "next/image";
@@ -7,8 +7,8 @@ import projectsStyled from "../styles/projects.module.css";
 import { CSSTransition } from "react-transition-group";
 import { IoStopCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
 import upperFirstWord from "../lib/module/upperFirstWord";
-import Paragraph from "../Components/Paragraph";
-import Modal from "../Components/Modal";
+import Paragraph from "../components/Paragraph";
+import Modal from "../components/Modal";
 import getRandom from '../lib/module/randomNumber'
 
 const listActions = [
@@ -72,8 +72,6 @@ function Projects() {
             `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`
           )
         ).json();
-
-        console.log(fetchProjects)
 
         // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
         if (!didCancel) {

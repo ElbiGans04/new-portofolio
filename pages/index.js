@@ -3,7 +3,7 @@ import Image from "next/image";
 import React from "react";
 import styleIndex from "../styles/index.module.css";
 import styled from "styled-components";
-import Heading from "../Components/Heading";
+import Heading from "../components/Heading";
 import ProfileImage from "../public/images/profile.jpg";
 
 export default function Home() {

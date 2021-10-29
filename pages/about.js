@@ -1,5 +1,5 @@
-import Paragraph from "../Components/Paragraph";
-import Container from "../Components/Container";
+import Paragraph from "../components/Paragraph";
+import Container from "../components/Container";
 import Head from 'next/head'
 
 

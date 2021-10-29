@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Admin from "../../Components/Admin";
+import Admin from "../../components/Admin";
 import React, { useReducer, useRef, useState, useCallback } from "react";
 import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
@@ -13,12 +13,12 @@ import ModalComponent, {
   ModalFormContent,
   ModalFormContentRow,
   ModalFormFooter,
-} from "../../Components/Modal";
+} from "../../components/Modal";
 import styled from "styled-components";
-import Input from "../../Components/Input";
-import Label from "../../Components/Label";
-import Button from "../../Components/Button";
-import Heading from "../../Components/Heading";
+import Input from "../../components/Input";
+import Label from "../../components/Label";
+import Button from "../../components/Button";
+import Heading from "../../components/Heading";
 import useSWR, { useSWRConfig } from "swr";
 import { IoAddOutline } from "react-icons/io5";
 import changeFirstWord from "../../lib/module/upperFirstWord";

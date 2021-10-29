@@ -1,9 +1,9 @@
 import Head from 'next/head'
 import styled from 'styled-components'
 import {IoLogoGithub, IoLogoFacebook, IoMail, IoLogoLinkedin} from 'react-icons/io5'
-import Heading from '../Components/Heading'
-import Container from "../Components/Container";
-import Paragraph from "../Components/Paragraph";
+import Heading from '../components/Heading'
+import Container from "../components/Container";
+import Paragraph from "../components/Paragraph";
 function Contacts () {
     return (
         <Container>
