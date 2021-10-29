@@ -59,7 +59,7 @@ export default function Login () {
 
 
 const Container = styled.div`
-    width: 30%;
+    width: 50%;
     height: 50vh;
     background-color: var(--dark2);
     padding: 2rem;

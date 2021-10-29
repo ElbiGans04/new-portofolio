@@ -5,7 +5,6 @@ import React, { useEffect, useReducer, useState, useRef } from "react";
 import Image from "next/image";
 import projectsStyled from "../styles/projects.module.css";
 import { CSSTransition } from "react-transition-group";
-import { IoStopCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
 import upperFirstWord from "../lib/module/upperFirstWord";
 import Paragraph from "../components/Paragraph";
 import Modal from "../components/Modal";
@@ -93,6 +92,8 @@ function Projects() {
     };
   }, [state.activeActions, state.refetch]);
 
+  
+  // Event Handler untuk tombol aksi
   const handleAction = (e, typeButton, buttonValue) => {
     let validValue = false;
     let validType = false;
@@ -280,11 +281,18 @@ function ImageSlider({ showModal, project }) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const nodeRef = useRef(null);
 
+  // Reset state saat modal diclose
+  useEffect(() => {
+    if (!showModal) setSlide({slide: 0, translateX: 0});
+  }, [showModal, setSlide])
+
   function changeImageAction(event, action) {
     if (project.images.length > 1 ) {
       const modal = event.target.parentElement.parentElement;
       const { width: modalWidth } = modal.getBoundingClientRect();
 
+      // Jika nilai berikutnya ditambah lalu melebihi panjang gambar maka nilai akan menjadi ke 0
+      // Jika nilai berikutnya dikurang lalu kurang dari 0 maka nilai akan menjadi jumlah gambar
       const result =
         action === 0
           ? slide.slide - 1 < 0
@@ -367,7 +375,7 @@ function reducer(state, action) {
     case "error":
       return { ...state, status: "error", refetch: false };
     case "refetch":
-      return { ...state, status: 'loading', refetch: true };
+      return { ...state, refetch: true };
     default:
       return { ...state };
   }

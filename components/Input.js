@@ -13,7 +13,7 @@ const Input = styled.input`
     transition: var(--transition);
 
 
-    &:focus {
+    &:focus, &:hover {
         border-bottom: 2px solid var(--pink);
     }
 
