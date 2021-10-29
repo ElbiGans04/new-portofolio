@@ -5,6 +5,7 @@ import styleIndex from "../styles/index.module.css";
 import styled from "styled-components";
 import Heading from "../components/Heading";
 import ProfileImage from "../public/images/profile.jpg";
+import Label from "../components/Label";
 
 export default function Home() {
   return (
@@ -30,6 +31,7 @@ export default function Home() {
         </Heading>
         {/* <Heading>Reach me via email <span>rhafaelbijaksana04@gmail.com</span></Heading> */}
       </TextParent>
+      <Label minSize={1.5} size={2}>Hello World</Label>
     </Container>
   );
 }

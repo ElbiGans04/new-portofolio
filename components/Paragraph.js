@@ -3,11 +3,17 @@ import resize from '../lib/module/resize'
 
 const Paragraph = styled.p`
   color: white;
-  margin: ${({margin}) => margin || ''};
+  font-size: ${({size = 1}) => `${size}rem`}
+  margin: ${({margin}) => `${margin}rem` || ''};
   text-align: ${({align}) => align || 'center'};
-  font-weight: ${({fontWeight}) => fontWeight || ''};
   text-indent: ${({textIndent}) => textIndent || ''};
   line-height: ${({lineHeight}) => lineHeight || ''};
+
+
+  & span {
+    color: var(--pink);
+    font-weight: ${({fontWeight}) => fontWeight || 'bold'};
+  }
 
 
   @media (max-width: 768px) {
@@ -20,11 +26,6 @@ const Paragraph = styled.p`
     & {
       font-size :  ${({size, minSize}) => resize(size, 1.5, minSize)};
     }
-  }
-
-  & span {
-    color: var(--pink);
-    font-weight: ${({fontWeight}) => fontWeight || 'bold'};
   }
 `;
 
