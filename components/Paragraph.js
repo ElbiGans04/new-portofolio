@@ -3,8 +3,7 @@ import resize from '../lib/module/resize'
 
 const Paragraph = styled.p`
   color: white;
-  font-size: ${({size = 1}) => `${size}rem`}
-  margin: ${({margin}) => `${margin}rem` || ''};
+  font-size: ${({size = 1}) => `${size}rem`};
   text-align: ${({align}) => align || 'center'};
   text-indent: ${({textIndent}) => textIndent || ''};
   line-height: ${({lineHeight}) => lineHeight || ''};
