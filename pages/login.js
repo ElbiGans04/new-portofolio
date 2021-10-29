@@ -66,13 +66,7 @@ const Container = styled.div`
     border-radius: 1rem;
     box-shadow: 2px 2px 7px rgba(0,0,0, 0.5);
 
-    @media (max-width: 992px) {
-        & {
-            width: 50%;
-        }
-    }
-
-    @media (max-width: 576px) {
+    @media (max-width: 768px) {
         & {
             width: 90%;
         }
@@ -84,13 +78,19 @@ const Form = styled.form`
     display: grid;
     justify-items: center;
     align-items: center;
+    grid-template-rows: repeat(3, 1fr);
 `;
 const FormRow = styled.div`
     width: 100%;
-    display: flex;
-    justify-content: space-between;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
     align-items: center;
-    flex-wrap: wrap;
+    // display: flex;
+    // justify-content: space-between;
+    // align-items: flex-start;
+    // flex-wrap: wrap;
+    // flex-direction: column;
 `;
 
 const NewButton = styled(Button)`
