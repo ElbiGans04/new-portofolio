@@ -1,8 +1,10 @@
 import Head from "next/head";
-import Admin from "../../components/Admin";
 import React, { useReducer, useRef, useState, useCallback } from "react";
-import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
+import useSWR, { useSWRConfig } from "swr";
+import { IoAddOutline } from "react-icons/io5";
+import styled from "styled-components";
+import { reducer } from "../../lib/hooks/reducer";
 import ModalComponent, {
   ModalAdmin,
   ModalMain2,
@@ -14,20 +16,19 @@ import ModalComponent, {
   ModalFormContentRow,
   ModalFormFooter,
 } from "../../components/Modal";
-import styled from "styled-components";
-import Input from "../../components/Input";
-import Label from "../../components/Label";
-import Button from "../../components/Button";
-import Heading from "../../components/Heading";
-import useSWR, { useSWRConfig } from "swr";
-import { IoAddOutline } from "react-icons/io5";
 import changeFirstWord from "../../lib/module/upperFirstWord";
 import Context from "../../lib/hooks/context";
 import fetcher from "../../lib/module/fetcher";
 import getRandom from "../../lib/module/randomNumber";
 import fetcherClient from "../../lib/module/fetchClient";
+import Admin from "../../components/Admin";
+import Input from "../../components/Input";
+import Label from "../../components/Label";
+import Button from "../../components/Button";
+import Heading from "../../components/Heading";
 
 export default function Projects() {
+  const ref = useRef(null);
   const [state, dispatch] = useReducer(reducer, {
     // iddle, loading, finish
     status: "iddle",
@@ -39,7 +40,7 @@ export default function Projects() {
       columnsValue: false,
     },
   });
-  const [state2, setState2] = useState({
+  const [state2] = useState({
     dispatch,
     url: "/api/projects",
     columns: ["title", "description"],
@@ -76,16 +77,18 @@ export default function Projects() {
       endDate: function endDate (value){changeFormatDate(value)},
     },
   });
-  const ref = useRef(null);
 
   return (
     <Context.Provider value={state2}>
       <Head>
         <title>Projects</title>
       </Head>
+
+      {/* Halaman Admin */}
       <Admin dispatch={dispatch} />
 
       {/* Modal */}
+      {/* Saat modal diopen overflow pada body harus dihidden */}
       {state.modal && <GlobalStyle />}
       <CSSTransition
         nodeRef={ref}
@@ -119,14 +122,14 @@ function SwitchModal({
   dispatch,
 } = {}) {
   const { mutate } = useSWRConfig();
-  const { data, error } = useSWR("/api/tools", fetcher);
+  const { data, error  } = useSWR("/api/tools", fetcher);
 
   if (error) {
     return (
       <ModalMain2>
         <ModalContent2>
           <Heading>
-            <span>Error when try fetching data</span>
+            <span>Error </span>when try <span> fetching data</span>
           </Heading>
         </ModalContent2>
       </ModalMain2>

@@ -1,8 +1,9 @@
 import Head from "next/head";
-import Admin from "../../components/Admin";
 import React, { useReducer, useRef, useState } from "react";
-import { reducer } from "../../lib/hooks/reducer";
 import { CSSTransition } from "react-transition-group";
+import Admin from "../../components/Admin";
+import { mutate, useSWRConfig } from "swr";
+import { reducer } from "../../lib/hooks/reducer";
 import ModalComponent, {
   ModalAdmin,
   ModalMain2,
@@ -19,7 +20,6 @@ import Label from "../../components/Label";
 import Button from "../../components/Button";
 import Heading from "../../components/Heading";
 import fetcher from "../../lib/module/fetchClient";
-import { mutate, useSWRConfig } from "swr";
 import Context from "../../lib/hooks/context";
 
 export default function Tools() {
@@ -49,6 +49,8 @@ export default function Tools() {
       <Head>
         <title>Tools</title>
       </Head>
+
+       {/* Halaman Admin */}
       <Admin state={state} dispatch={dispatch} />
 
       {/* Modal */}

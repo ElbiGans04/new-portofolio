@@ -194,13 +194,6 @@ export const ModalFormContentRow = styled.div`
   align-items: center;
   padding: 0.8rem;
   gap: 0.8rem;
-  grid-template-columns: 1fr 1fr;
-
-  @media (max-width: 768px) {
-    & {
-      grid-template-columns: 1fr;
-    }
-  }
 `;
 
 export const ModalFormFooter = styled.div`
