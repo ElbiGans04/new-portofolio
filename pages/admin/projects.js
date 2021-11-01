@@ -280,7 +280,6 @@ function SwitchModal({
       const endDateValue = changeFormatDate(
         columnsValue[columns.indexOf("endDate")]
       );
-      console.log(startDateValue)
       const urlValue = columnsValue[columns.indexOf("url")];
       const descriptionValue = columnsValue[columns.indexOf("description")];
       const { _id } = columnsValue[columns.indexOf("typeProject")];
@@ -480,15 +479,67 @@ async function onSubmit3(event, id, dispatch, mutate) {
   }
 }
 
+// function InputCollections({
+//   data: { data: result = [] } = {},
+//   defaultValues = [],
+//   ...props
+// } = {}) {
+//   const [inputState, setInputState] = useState(() =>
+//     defaultValues.map((defaultValue) => defaultValue._id)
+//   );
+//   const [inputCount, setInputCount] = useState(defaultValues.length || 1);
+//   const collectionInput = [];
+
+//   // callback
+//   function onChange(event, index) {
+//     const arrayBaru = [...inputState];
+//     arrayBaru[index] = event.target.value;
+//     setInputState(arrayBaru);
+//   }
+
+//   // Looping untuk select element yang diperlukan
+//   for (let i = 0; i < inputCount; i++) {
+//     const element = (
+//       <ContainerInput>
+//         <select
+//           onChange={(event) => onChange(event, i)}
+//           value={inputState[i]}
+//           key={getRandom()}
+//           {...props}
+//         >
+//           {result.map((value) => {
+//             return (
+//               <option key={getRandom()} value={value._id}>
+//                 {value.name}
+//               </option>
+//             );
+//           })}
+//         </select>
+//         <Button type="button" onClick={() => console.log(i)}>X</Button>
+//       </ContainerInput>
+//     );
+//     collectionInput.push(element);
+//   }
+//   return (
+//     <ContainerInputs>
+//       <Button className="add" type="button" onClick={() => setInputCount((state) => state + 1)}>
+//         <IoAddOutline />
+//       </Button>
+//       {collectionInput}
+//     </ContainerInputs>
+//   );
+// }
+
 function InputCollections({
   data: { data: result = [] } = {},
   defaultValues = [],
   ...props
 } = {}) {
-  const [inputState, setInputState] = useState(() =>
-    defaultValues.map((defaultValue) => defaultValue._id)
-  );
-  const [inputCount, setInputCount] = useState(defaultValues.length || 1);
+  const [inputState, setInputState] = useState(() => {
+    if (defaultValues.length > 0) return defaultValues.map((defaultValue) => defaultValue._id)
+    else return [result[0]._id]
+
+  });
   const collectionInput = [];
 
   // callback
@@ -498,29 +549,43 @@ function InputCollections({
     setInputState(arrayBaru);
   }
 
+  function onRemoveItem (event, index) {
+    const newInputState = [...inputState];
+    setInputState(newInputState.filter((value, idx) => index !== idx ? true : false))
+  }
+
+  function onAddItem () {
+    const newInputState = [...inputState];
+    newInputState.push(result[0]._id)
+    setInputState(newInputState)
+  }
+
   // Looping untuk select element yang diperlukan
-  for (let i = 0; i < inputCount; i++) {
+  for (let i = 0; i < inputState.length; i++) {
     const element = (
-      <select
-        onChange={(event) => onChange(event, i)}
-        value={inputState[i]}
-        key={getRandom()}
-        {...props}
-      >
-        {result.map((value) => {
-          return (
-            <option key={getRandom()} value={value._id}>
-              {value.name}
-            </option>
-          );
-        })}
-      </select>
+      <ContainerInput key={i}>
+        <select
+          onChange={(event) => onChange(event, i)}
+          value={inputState[i]}
+          key={getRandom()}
+          {...props}
+        >
+          {result.map((value) => {
+            return (
+              <option key={getRandom()} value={value._id}>
+                {value.name}
+              </option>
+            );
+          })}
+        </select>
+        <Button type="button" onClick={event => onRemoveItem(event, i)}>X</Button>
+      </ContainerInput>
     );
     collectionInput.push(element);
   }
   return (
     <ContainerInputs>
-      <Button type="button" onClick={() => setInputCount((state) => state + 1)}>
+      <Button className="add" type="button" onClick={() => onAddItem()}>
         <IoAddOutline />
       </Button>
       {collectionInput}
@@ -573,7 +638,7 @@ const ContainerInputs = styled.div`
   display: grid;
   gap: 0.5rem;
 
-  & button {
+  & button.add {
     transition: var(--transition);
     opacity: 0;
     position: absolute;
@@ -591,4 +656,20 @@ const ContainerInputs = styled.div`
   }
 `;
 
+const ContainerInput = styled.div`
+  position: relative;
+
+  & > button {
+    position: absolute;
+    right: -35px;
+    width: 30px;
+    height: 30px;
+    top: 50%;
+    margin-top: -15px;
+  }
+
+  & > select {
+    width: 100%;
+  }
+`;
 // // // Styled Component

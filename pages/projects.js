@@ -72,8 +72,6 @@ function Projects() {
           )
         ).json();
 
-        console.log(fetchProjects)
-
         // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
         if (!didCancel) {
           dispatch({
@@ -240,7 +238,6 @@ function Projects() {
             ) : (
               <ContainerProjects>
                 {state.projects.map((value, index) => {
-                  console.log(value)
                   return (
                     <Project
                       onClick={() => {
