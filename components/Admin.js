@@ -12,29 +12,17 @@ import fetcher from "../lib/module/fetcher";
 import upperFirstWord from "../lib/module/upperFirstWord";
 import getRandom from "../lib/module/randomNumber";
 import Context from "../lib/hooks/context";
+import Heading from "./Heading";
 
-export default function Admin({ dispatch }) {
-  return (
-    <Container>
-      <ContainerButtons>
-        <Button onClick={() => dispatch({ type: "modalAdd/open" })}>
-          <IoAddOutline />
-          Add Entity
-        </Button>
-      </ContainerButtons>
-      <TableComponent />
-    </Container>
-  );
-}
-
-function TableComponent() {
+export default function Admin () {
   const {
     url = "",
     columns = [],
     visible: { visibleColumns = [], visibleValue = 0 } = {},
     renameColumns = {},
+    dispatch
   } = useContext(Context);
-  const { data: { data: tools = [] } = {}, err } = useSWR(url, fetcher);
+  const { data: { data: tools} = {}, err } = useSWR(url, fetcher);
 
   // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah
   const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(
@@ -44,47 +32,67 @@ function TableComponent() {
 
   // Jika ada error
   if (err) {
-    return <h1>Found a error</h1>;
+    return  (
+      <ContainerError>
+        <Heading size={1.5} minSize={1.3}>An error occurred when <span>trying to request data</span></Heading>;
+        <Heading size={1.3}>Please <span>restart this page</span></Heading>;
+      </ContainerError>
+    )
   }
 
   return (
-    <ContainerTable>
-      <Table>
-        <thead>
-          <tr>
-            {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
-            {detailColumns.length > 0 && <th></th>}
-            {/* Looping element yang diijinkan */}
-            {mainColumns.map((value, index) => {
-              const keyRenameColumns = Object.entries(renameColumns);
-              const shouldRename = keyRenameColumns.find(
-                (column) => column[0] === value
-              );
+    <Container>
+      {
+        (!tools && !err) ? (
+          <div className="loader"></div>) : (
+            <React.Fragment>
+              <ContainerButtons>
+                  <Button onClick={() => dispatch({ type: "modalAdd/open" })}>
+                    <IoAddOutline />
+                    Add Entity
+                  </Button>
+                </ContainerButtons>
+              <ContainerTable>
+                <Table>
+                  <thead>
+                    <tr>
+                      {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
+                      {detailColumns.length > 0 && <th></th>}
+                      {/* Looping element yang diijinkan */}
+                      {mainColumns.map((value, index) => {
+                        const keyRenameColumns = Object.entries(renameColumns);
+                        const shouldRename = keyRenameColumns.find(
+                          (column) => column[0] === value
+                        );
 
-              if (shouldRename)
-                return <th key={getRandom(index)}>{shouldRename[1]}</th>;
-              return <th key={getRandom(index)}>{upperFirstWord(value)}</th>;
-            })}
-            {/* Beli th kosong untuk action */}
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {mainRows.map((mainRow, index) => {
-            return (
-              <Row
-                key={getRandom(index)}
-                id={rowsId[index]}
-                detailColumns={detailColumns}
-                detailRow={detailRows[index]}
-                mainRow={mainRow}
-                mainColumns={mainColumns}
-              />
-            );
-          })}
-        </tbody>
-      </Table>
-    </ContainerTable>
+                        if (shouldRename)
+                          return <th key={getRandom(index)}>{shouldRename[1]}</th>;
+                        return <th key={getRandom(index)}>{upperFirstWord(value)}</th>;
+                      })}
+                      {/* Beli th kosong untuk action */}
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mainRows.map((mainRow, index) => {
+                      return (
+                        <Row
+                          key={getRandom(index)}
+                          id={rowsId[index]}
+                          detailColumns={detailColumns}
+                          detailRow={detailRows[index]}
+                          mainRow={mainRow}
+                          mainColumns={mainColumns}
+                        />
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </ContainerTable>
+            </React.Fragment>
+          )
+      }
+    </Container>
   );
 }
 
@@ -208,7 +216,7 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
 //
 // // Module
 //
-function filter(data, columns, visibleColumns, visibleValue) {
+function filter(data = [], columns = [], visibleColumns = [], visibleValue = 0) {
   const results = {
     mainColumns: [],
     detailColumns: [],
@@ -290,6 +298,11 @@ const Container = styled.div`
       width: 90%;
     }
   }
+`;
+
+const ContainerError = styled.div`
+  display: grid;
+  gap" 0.3rem;
 `;
 
 const ContainerButtons = styled.div`

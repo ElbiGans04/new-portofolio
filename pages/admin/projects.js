@@ -85,7 +85,7 @@ export default function Projects() {
       </Head>
 
       {/* Halaman Admin */}
-      <Admin dispatch={dispatch} />
+      <Admin />
 
       {/* Modal */}
       {/* Saat modal diopen overflow pada body harus dihidden */}

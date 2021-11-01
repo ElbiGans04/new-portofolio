@@ -51,7 +51,7 @@ export default function Tools() {
       </Head>
 
        {/* Halaman Admin */}
-      <Admin state={state} dispatch={dispatch} />
+      <Admin />
 
       {/* Modal */}
       {state.modal && <GlobalStyle />}
