@@ -13,6 +13,7 @@ import upperFirstWord from "../lib/module/upperFirstWord";
 import getRandom from "../lib/module/randomNumber";
 import Context from "../lib/hooks/context";
 import Heading from "./Heading";
+import useUser from "../lib/hooks/useUser";
 
 export default function Admin () {
   const {
@@ -23,6 +24,7 @@ export default function Admin () {
     dispatch
   } = useContext(Context);
   const { data: { data: tools} = {}, err } = useSWR(url, fetcher);
+  const user = useUser({redirectTo: '/login'});
 
   // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah
   const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(
@@ -43,7 +45,7 @@ export default function Admin () {
   return (
     <Container>
       {
-        (!tools && !err) ? (
+        ((!tools && !err) || (!user || user.isLoggedIn === false)) ? (
           <div className="loader"></div>) : (
             <React.Fragment>
               <ContainerButtons>
