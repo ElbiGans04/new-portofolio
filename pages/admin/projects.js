@@ -218,9 +218,9 @@ function SwitchModal({
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label>type of project :</Label>
+              <Label>Type of project :</Label>
               <ContainerCheckbox>
-                <div>
+                <Checkbox>
                   <Input
                     name="typeProject"
                     type="radio"
@@ -229,8 +229,8 @@ function SwitchModal({
                     required
                   ></Input>
                   <Label htmlFor="work">Work project</Label>
-                </div>
-                <div>
+                </Checkbox>
+                <Checkbox>
                   <Input
                     name="typeProject"
                     type="radio"
@@ -239,7 +239,7 @@ function SwitchModal({
                     required
                   ></Input>
                   <Label htmlFor="work">Personal Project</Label>
-                </div>
+                </Checkbox>
               </ContainerCheckbox>
             </ModalFormContentRow>
 
@@ -280,6 +280,7 @@ function SwitchModal({
       const endDateValue = changeFormatDate(
         columnsValue[columns.indexOf("endDate")]
       );
+      console.log(startDateValue)
       const urlValue = columnsValue[columns.indexOf("url")];
       const descriptionValue = columnsValue[columns.indexOf("description")];
       const { _id } = columnsValue[columns.indexOf("typeProject")];
@@ -362,7 +363,7 @@ function SwitchModal({
             <ModalFormContentRow>
               <Label>Type of project :</Label>
               <ContainerCheckbox>
-                <div>
+                <Checkbox>
                   <Input
                     name="typeProject"
                     type="radio"
@@ -372,8 +373,8 @@ function SwitchModal({
                     defaultChecked={_id === "A2" ? true : false}
                   ></Input>
                   <Label htmlFor="work">Work project</Label>
-                </div>
-                <div>
+                </Checkbox>
+                <Checkbox>
                   <Input
                     name="typeProject"
                     type="radio"
@@ -383,7 +384,7 @@ function SwitchModal({
                     defaultChecked={_id === "A1" ? true : false}
                   ></Input>
                   <Label htmlFor="work">Personal Project</Label>
-                </div>
+                </Checkbox>
               </ContainerCheckbox>
             </ModalFormContentRow>
 
@@ -533,7 +534,7 @@ function changeFormatDate(data) {
     date.getMonth() + 1 < 10
       ? `0${date.getMonth() + 1}`
       : `${date.getMonth() + 1}`;
-  return `${date.getFullYear()}-${month}-${date.getDate()}`;
+  return `${date.getFullYear()}-${month}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`;
 }
 
 // Styled Component
@@ -553,6 +554,16 @@ const ContainerCheckbox = styled.div`
   & label {
     font-size: 1rem;
     font-weight: normal;
+  }
+`;
+
+const Checkbox = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & input[type=radio] {
+    margin: 0 .3rem;
   }
 `;
 

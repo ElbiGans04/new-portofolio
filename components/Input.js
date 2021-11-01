@@ -18,7 +18,9 @@ const Input = styled.input`
     }
 
     &[type=radio] {
-        border: 1px solid var(--pink)
+        border: 1px solid var(--pink);
+        border-radius: 50%;
+        margin: 0 .3rem;
     }
     
     &[type=radio]:checked{
