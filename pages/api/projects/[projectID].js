@@ -36,9 +36,12 @@ export default withIronSession(async function handler(req, res) {
 
       return res.json({ data: result });
     } else {
-      if (!req.session.get('user')) return res.status(403).json({error: {message: 'please login ahead', code: 403}})
+
+       // Jika belum login
+      if (!req.session.get('user')) return res.status(403).json({error: {message: 'please login ahead', code: 403}});
+
       switch (method) {
-        case "PUT":
+        case "PUT": {
           await runMiddleware(req, res, multer.array("images", 5));
 
           // Validasi
@@ -100,24 +103,21 @@ export default withIronSession(async function handler(req, res) {
           return res
             .status(200)
             .json({ meta: { message: "success update data" }, data: result2 });
-        case "DELETE":
-          // withIronSession(function (req, res) => {
+        }
+        case "DELETE": {
+          const result = await Project.findByIdAndDelete(projectID);
 
-          // })
-     
-          const result3 = await Project.findByIdAndDelete(projectID);
-
-          if (!result3) throw { message: "project not found", code: 404 };
+          if (!result) throw { message: "project not found", code: 404 };
 
           // Hapus imagenya juga
-          for (let image of result3.images) {
+          for (let image of result.images) {
             await fsPromise.unlink(`${pathImage}/${image.src}`);
           }
 
           return res
             .status(200)
-            .json({ meta: { message: "success deleted" }, data: result3 });
-
+            .json({ meta: { message: "success deleted" }, data: result });
+        }
         default:
           throw { message: "method not found", code: 404 };
       }

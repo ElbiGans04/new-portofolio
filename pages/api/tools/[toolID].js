@@ -19,10 +19,8 @@ export default withIronSession(async function Handler(req, res) {
 
       res.json({ data: result });
     } else {
-      if (!req.session.get("user"))
-        return res
-          .status(403)
-          .json({ error: { message: "please login ahead", code: 403 } });
+      // Jika belum login
+      if (!req.session.get('user')) return res.status(403).json({error: {message: 'please login ahead', code: 403}});
       switch (method) {
         case "PUT": {
           let valid = joi.attempt(req.body, ToolValidationSchema);

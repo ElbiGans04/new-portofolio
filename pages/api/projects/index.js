@@ -18,36 +18,27 @@ export const config = {
 };
 
 
-
-
-
 export default withIronSession(async function handler(req, res) {
   const { method } = req;
+  const { type = "ALL", order = "ASC" } = req.query;
 
   try {
     await dbConnect();
 
     if (method === 'GET') {
-      const { type = "ALL", order = "ASC" } = req.query;
-        let results;
-
-        if (type === "ALL") {
-          results = await Project.find()
-            .sort({ title: order === "ASC" ? 1 : -1 })
-            .populate("typeProject").populate('tools');
-        } else {
-          results = (
-            await TypeProject.findOne({ _id: type })
-              .sort({ title: order === "ASC" ? 1 : -1 })
-              .populate({ path: "projects", populate: "typeProject" }).populate('tools')
-          ).projects;
-        }
+        let results = await Project.find()
+          .sort({ title: order === "ASC" ? 1 : -1 })
+          .populate("typeProject").populate('tools');
 
         res.status(200).json({ data: results });
     } else {
+
+      // Jika belum login
       if (!req.session.get('user')) return res.status(403).json({error: {message: 'please login ahead', code: 403}})
+      
+      // Lakukan operasi bedasarkan dari jenis http method
       switch (method) {
-        case "POST":
+        case "POST": {
           await runMiddleware(req, res, multer.array("images", 5));
           
           // Validasi
@@ -90,6 +81,7 @@ export default withIronSession(async function handler(req, res) {
   
           res.status(201).json({meta : {message: 'The project has created'}, data: project});
           break;
+        }
         default:
           throw { message: "method not found", code: 404 }
           break;
