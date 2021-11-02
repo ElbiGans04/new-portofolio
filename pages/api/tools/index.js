@@ -13,8 +13,7 @@ export default withIronSession(async function Handler (req, res) {
 
         if (method === 'GET') {
             const results = await Tools.find();
-            res.json({data: results});
-            break;
+            return res.json({data: results});
         } else {
 
             // Jika belum login
