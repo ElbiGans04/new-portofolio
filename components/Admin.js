@@ -120,7 +120,7 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
         {/*  Lakukan looping */}
         {mainRow.map((value, index) => {
           const keySpecialTreatment = Object.entries(specialTreatment);
-
+          
           // Check jika column harus diperlakukan secara khusus
           const special = keySpecialTreatment.find(
             (keySpecial) => keySpecial[0] === mainColumns[index]
@@ -229,7 +229,7 @@ function filter(data = [], columns = [], visibleColumns = [], visibleValue = 0) 
 
   if (data.length > 0) {
     // Filter mana column yang boleh ditampilkan mana yang tidak
-    const result = Object.keys(data[0]).filter((column) => {
+    const result = Object.keys(data[0]?.attributes).filter((column) => {
       // Temukan column yang diberi batasan
       const foundColumn = visibleColumns.find((value) => value === column);
       // Jika column yang dibatasi memiliki nilai 0 berarti column tsb tidak boleh ditampilkan
@@ -253,7 +253,7 @@ function filter(data = [], columns = [], visibleColumns = [], visibleValue = 0) 
     // Isi dengan nilai
     data.forEach((row) => {
       // Ubah Object menjadi array
-      const columns = Object.entries(row);
+      const columns = Object.entries(row?.attributes);
 
       let passColumns = [];
       let passDetails = [];

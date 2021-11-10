@@ -1,12 +1,15 @@
 import withSession from "../../lib/module/withSession";
 
 export default withSession(async function (req, res) {
-  const {email, password} = req.body;
-  
-  if (process.env.EMAIL !== email || process.env.PW !== password) return res.status(404).json({meta: {message: 'failed', code: 404}})
+  const { email, password } = req.body;
 
-  req.session.set("user",  {type: 'user', attributes: {isLoggedIn: true}});
+  if (process.env.EMAIL !== email || process.env.PW !== password)
+    return res.status(404).json({ errors: [{ title: "password or email does not match", code: 404 }] });
+
+  req.session.set("user", {  isLoggedIn: true });
 
   await req.session.save();
-  res.json({meta: {message: 'success', code: 200}, data: {type: 'user', attributes: {isLoggedIn: true}}})
-})
+  res.status(200).json({
+    meta: { title: "success to login", code: 200, isLoggedIn: true },
+  });
+});

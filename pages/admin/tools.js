@@ -161,25 +161,28 @@ function SwitchModal({
 const onSubmit = async (event, dispatch, mutate) => {
   try {
     event.preventDefault();
-    const searchParams = new URLSearchParams();
+    const document = {
+      type: 'tool',
+      attributes: {}
+    };
     const form = new FormData(event.target);
     for (let [index, value] of form.entries()) {
-      searchParams.append(index, value);
+      document.attributes[index] = value;
     }
 
     dispatch({ type: "modal/request/start" });
 
     const request = await fetcher("/api/tools", {
       method: "post",
-      body: searchParams.toString(),
+      body: JSON.stringify(document),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
       },
     });
 
     dispatch({
       type: "modal/request/finish",
-      payload: { message: request.meta.message },
+      payload: { message: request.meta.title },
     });
     mutate("/api/tools");
   } catch (err) {
@@ -187,7 +190,7 @@ const onSubmit = async (event, dispatch, mutate) => {
     console.log(err);
     dispatch({
       type: "modal/request/finish",
-      payload: { message: err.error.message },
+      payload: { message: err.errors[0].title },
     });
   }
 };
@@ -202,7 +205,7 @@ const onSubmit2 = async (id, dispatch, mutate) => {
 
     dispatch({
       type: "modal/request/finish",
-      payload: { message: request.meta.message },
+      payload: { message: request.meta.title },
     });
     mutate("/api/tools");
   } catch (err) {
@@ -210,7 +213,7 @@ const onSubmit2 = async (id, dispatch, mutate) => {
     console.log(err);
     dispatch({
       type: "modal/request/finish",
-      payload: { message: err.error.message },
+      payload: { message: err.errors[0].title },
     });
   }
 };
@@ -218,24 +221,27 @@ const onSubmit2 = async (id, dispatch, mutate) => {
 const onSubmit3 = async (event, id, dispatch) => {
   try {
     event.preventDefault();
-    const searchParams = new URLSearchParams();
+    const document = {
+      type: 'tool',
+      attributes: {}
+    };
     const form = new FormData(event.target);
     for (let [index, value] of form.entries()) {
-      searchParams.append(index, value);
+      document.attributes[index] = value;
     }
 
     dispatch({ type: "modal/request/start" });
     const request = await fetcher(`/api/tools/${id}`, {
       method: "put",
-      body: searchParams.toString(),
+      body: JSON.stringify(document),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
       },
     });
 
     dispatch({
       type: "modal/request/finish",
-      payload: { message: request.meta.message },
+      payload: { message: request.meta.title },
     });
     mutate("/api/tools");
   } catch (err) {
@@ -243,7 +249,7 @@ const onSubmit3 = async (event, id, dispatch) => {
     console.log(err);
     dispatch({
       type: "modal/request/finish",
-      payload: { message: err.error.message },
+      payload: { message: err.errors[0].title },
     });
   }
 };

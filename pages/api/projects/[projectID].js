@@ -11,6 +11,7 @@ import { deleteTempFiles, moveImages } from "../../../lib/module/files";
 import fsPromise from "fs/promises";
 import path from "path";
 import withIronSession from "../../../lib/module/withSession";
+import formatResource from "../../../lib/module/formatResource";
 const pathImage = path.resolve(process.cwd(), "public/images");
 export const config = {
   api: {
@@ -32,36 +33,41 @@ export default withIronSession(async function handler(req, res) {
         .populate("typeProject");
 
       // jika ga ada
-      if (!result) throw { message: "project not found", code: 404 };
-
-      return res.json({ data: result });
+      if (!result) throw { title: "project not found", code: 404 };
+  
+      res.setHeader('content-type', 'application/vnd.api+json');
+      res.statusCode = 200;
+      return res.end(JSON.stringify({ data: formatResource(result, result.constructor.modelName), code: 200 }))
     } else {
 
        // Jika belum login
-      if (!req.session.get('user')) return res.status(403).json({error: {message: 'please login ahead', code: 403}});
+      if (!req.session.get('user')) return res.status(403).json({errors: [{title: 'please login ahead', code: 403}]});
 
       switch (method) {
-        case "PUT": {
+        case "PATCH": {
           await runMiddleware(req, res, multer.array("images", 5));
 
           // Validasi
           const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
 
+          // Jika tidak memasukan field id
+          if(!validReqBody.id) throw {title: 'missing id property in request document', code: 404}
+
           // Jika hanya mengirim satu data tools
-          if (validReqBody.tools instanceof Array === false) {
-            validReqBody.tools = [validReqBody.tools];
+          if (validReqBody.attributes.tools instanceof Array === false) {
+            validReqBody.attributes.tools = [validReqBody.attributes.tools];
           }
 
           // Check Apakah typeProject dengan id tertentu ada
-          if ((await TypeProject.findById(validReqBody.typeProject)) === null) {
-            throw { message: "invalid type project id", code: 404 };
+          if ((await TypeProject.findById(validReqBody.attributes.typeProject)) === null) {
+            throw { title: "invalid type project id", code: 404 };
           }
 
           // Cek apakah tools yang dimasukan terdaftar
-          for (let tool of validReqBody.tools) {
+          for (let tool of validReqBody.attributes.tools) {
             // cek jika tool
             if ((await Tools.findById(tool)) === null) {
-              throw { message: "invalid tool id", code: 404 };
+              throw { title: "invalid tool id", code: 404 };
             }
           }
 
@@ -77,8 +83,8 @@ export default withIronSession(async function handler(req, res) {
           // Update dan dapatkan data setelah update
           const newDokumen =
             images.length === 0
-              ? { ...validReqBody }
-              : { ...validReqBody, images };
+              ? { ...validReqBody.attributes }
+              : { ...validReqBody.attributes, images };
           const result2 = await Project.findByIdAndUpdate(
             projectID,
             newDokumen,
@@ -87,7 +93,7 @@ export default withIronSession(async function handler(req, res) {
 
           // Jika ga ada
           if (!result2Old) {
-            throw { message: "project not found", code: 404 };
+            throw { title: "project not found", code: 404 };
           }
 
           // Hapus gambar lama
@@ -100,26 +106,26 @@ export default withIronSession(async function handler(req, res) {
             await moveImages(images);
           }
 
-          return res
-            .status(200)
-            .json({ meta: { message: "success update data" }, data: result2 });
+          res.setHeader('content-type', 'application/vnd.api+json');
+          res.statusCode = 200;
+          return res.end(JSON.stringify({ meta: { title: "success update data", code: 200 }}))
         }
         case "DELETE": {
           const result = await Project.findByIdAndDelete(projectID);
 
-          if (!result) throw { message: "project not found", code: 404 };
+          if (!result) throw { title: "project not found", code: 404 };
 
           // Hapus imagenya juga
           for (let image of result.images) {
             await fsPromise.unlink(`${pathImage}/${image.src}`);
           }
 
-          return res
-            .status(200)
-            .json({ meta: { message: "success deleted" }, data: result });
+          res.setHeader('content-type', 'application/vnd.api+json');
+          res.statusCode = 200;
+          return res.end(JSON.stringify({ meta: { title: "success deleted", code: 200 }}))
         }
         default:
-          throw { message: "method not found", code: 404 };
+          throw { title: "method not found", code: 404 };
       }
     }
   } catch (err) {

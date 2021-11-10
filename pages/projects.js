@@ -173,7 +173,7 @@ function Projects() {
             <ImageSlider showModal={modal.open} project={project}></ImageSlider>
             <ModalContentContent>
               <Heading align="start" minSize={1.5} size={2}>
-                <span>{upperFirstWord(project?.title)}</span>
+                <span>{upperFirstWord(project?.attributes?.title)}</span>
               </Heading>
               <ModalContentContentList>
                 <ModalContentContentListTitle>
@@ -189,15 +189,15 @@ function Projects() {
                 </ModalContentContentListTitle>
                 <ModalContentContentListValue>
                   <Heading align="start" fontWeight="normal">
-                    {":"}&nbsp;{getFullDate(project?.startDate)}
+                    {":"}&nbsp;{getFullDate(project?.attributes?.startDate)}
                     {" - "}
-                    {getFullDate(project?.endDate)}
+                    {getFullDate(project?.attributes?.endDate)}
                   </Heading>
                   <Heading align="start" fontWeight="normal">
-                    {":"}&nbsp; {getTool(project?.tools)}
+                    {":"}&nbsp; {getTool(project?.attributes?.tools)}
                   </Heading>
                   <Heading align="start" fontWeight="normal">
-                    {":"}&nbsp;{upperFirstWord(project?.typeProject.name)}
+                    {":"}&nbsp;{upperFirstWord(project?.attributes?.typeProject.name)}
                   </Heading>
                 </ModalContentContentListValue>
               </ModalContentContentList>
@@ -207,10 +207,10 @@ function Projects() {
                 fontWeight="normal"
                 lineHeight="1.5rem"
               >
-                {project?.description}.{" "}
-                {project?.url && (
-                  <GoTo href={project?.url}>
-                   {project?.url}
+                {project?.attributes?.description}.{" "}
+                {project?.attributes?.url && (
+                  <GoTo href={project?.attributes?.url}>
+                   {project?.attributes?.url}
                   </GoTo>
                 )}
               </Paragraph>
@@ -251,16 +251,16 @@ function Projects() {
                         <Image
                           alt="project"
                           className={projectsStyled.project}
-                          src={`/images/${value?.images[0]?.src}`}
+                          src={`/images/${value?.attributes?.images[0]?.src}`}
                           layout="fill"
                         ></Image>
                       </ProjectImageContainer>
                       <ProjectTextContainer>
                         <Heading size={1.3} margin="0 ">
-                          <span>{upperFirstWord(value?.title)}</span>
+                          <span>{upperFirstWord(value?.attributes?.title)}</span>
                         </Heading>
                         <Heading margin=".3rem 0 0 0 ">
-                          {upperFirstWord(value?.typeProject.name)}
+                          {upperFirstWord(value?.attributes?.typeProject.name)}
                         </Heading>
                       </ProjectTextContainer>
                     </Project>
@@ -287,7 +287,7 @@ function ImageSlider({ showModal, project }) {
   }, [showModal, setSlide])
 
   function changeImageAction(event, action) {
-    if (project.images.length > 1 ) {
+    if (project?.attributes.images.length > 1 ) {
       const modal = event.target.parentElement.parentElement;
       const { width: modalWidth } = modal.getBoundingClientRect();
 
@@ -296,9 +296,9 @@ function ImageSlider({ showModal, project }) {
       const result =
         action === 0
           ? slide.slide - 1 < 0
-            ? (project.images.length - 1)
+            ? (project?.attributes.images.length - 1)
             : slide.slide - 1
-          : slide.slide + 1 > (project.images.length - 1)
+          : slide.slide + 1 > (project?.attributes.images.length - 1)
             ? 0
             : slide.slide + 1;
       setSlide({ slide: result, translateX: result * -modalWidth });
@@ -307,7 +307,7 @@ function ImageSlider({ showModal, project }) {
 
   return (
     <ModalImage ref={nodeRef}>
-      {project?.images?.length > 1 && (
+      {project?.attributes?.images?.length > 1 && (
         <ModalImageActions>
           <ModalImageAction
             onClick={(event) => changeImageAction(event, 0)}
@@ -327,7 +327,7 @@ function ImageSlider({ showModal, project }) {
       )}
       {/* Content Images */}
       <ModalImageContent translateX={slide.translateX}>
-        {project?.images?.map((value, index) => {
+        {project?.attributes?.images?.map((value, index) => {
           return (
             <ModalImageContentContent key={index}>
               <Image
@@ -342,7 +342,7 @@ function ImageSlider({ showModal, project }) {
       </ModalImageContent>
       {/* Content Count */}
       <ModalImageCount>
-        {project?.images?.map((value, index) => {
+        {project?.attributes?.images?.map((value, index) => {
           return (
             <ModalImageCountCount 
               key={getRandom()}

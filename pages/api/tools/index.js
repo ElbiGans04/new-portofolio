@@ -4,6 +4,7 @@ import joi from 'joi'
 import ToolValidationSchema from '../../../lib/validation/tools'
 import routerErrorHandling from "../../../lib/module/routerErrorHandling";
 import withIronSession from "../../../lib/module/withSession";
+import formatResource from "../../../lib/module/formatResource";
 
 export default withIronSession(async function Handler (req, res) {
     try {
@@ -13,30 +14,27 @@ export default withIronSession(async function Handler (req, res) {
 
         if (method === 'GET') {
             const results = await Tools.find();
-            return res.json({data: results});
+            res.setHeader('content-type', 'application/vnd.api+json');
+            res.statusCode = 200;
+            return res.end(JSON.stringify({data: formatResource(results, results.constructor.modelName)}))
         } else {
 
             // Jika belum login
-            if (!req.session.get('user')) return res.status(403).json({error: {message: 'please login ahead', code: 403}});
+            if (!req.session.get('user')) return res.status(403).json({errors: [{title: 'please login ahead', code: 403}]});
 
             switch (method) {
-                case 'POST': {
+                case 'POST': {               
                     const valid = joi.attempt(req.body, ToolValidationSchema);
-    
-                    const tool = new Tools(valid);
+                    const tool = new Tools(valid.attributes);
                     await tool.save();
     
-                    res.status(201).json({meta: {message: 'tool has created'}, data: tool})
-                    break;
+                    res.setHeader('content-type', 'application/vnd.api+json');
+                    res.statusCode = 201;
+                    return res.end(JSON.stringify({meta: {title: 'tool has created'}, data: formatResource(tool, tool.constructor.modelName)}))
                 }
-                case 'DELETE': {
-                    await Tools.deleteMany({});
-                    res.status(200).json({meta: {message: 'tools has deleted'}})
-                    break;
-                } 
                     
                 default: 
-                    throw { code: 404, message: 'method not found' };
+                    throw { code: 404, title: 'method not found' };
                     break;
             }
         }

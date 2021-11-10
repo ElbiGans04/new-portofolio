@@ -73,8 +73,8 @@ export default function Projects() {
 
         return <div>{textResult}</div>;
       },
-      startDate: function startDate (value){changeFormatDate(value)},
-      endDate: function endDate (value){changeFormatDate(value)},
+      startDate: function startDate (value){return changeFormatDate(value)},
+      endDate: function endDate (value){return changeFormatDate(value)},
     },
   });
 
@@ -414,19 +414,22 @@ async function onSubmit(event, dispatch, mutate) {
     dispatch({ type: "modal/request/start" });
     const request = await fetcherClient("/api/projects", {
       method: "post",
-      body: form,
+      body: {
+        type: 'project',
+        attributes: form
+      },
     });
 
     dispatch({
       type: "modal/request/finish",
-      payload: { message: request.meta.message },
+      payload: { message: request.meta.title },
     });
     mutate("/api/projects");
   } catch (err) {
     console.log(err);
     dispatch({
       type: "modal/request/finish",
-      payload: { message: err.error.message },
+      payload: { message: err.errors[0].title },
     });
     mutate("/api/projects");
   }
@@ -441,14 +444,14 @@ async function onSubmit2(id, dispatch, mutate) {
 
     dispatch({
       type: "modal/request/finish",
-      payload: { message: request.meta.message },
+      payload: { message: request.meta.title },
     });
     mutate("/api/projects");
   } catch (err) {
     console.log(err);
     dispatch({
       type: "modal/request/finish",
-      payload: { message: err.error.message },
+      payload: { message: err.errors[0].title },
     });
     mutate("/api/projects");
   }
@@ -462,18 +465,21 @@ async function onSubmit3(event, id, dispatch, mutate) {
     dispatch({ type: "modal/request/start" });
     const request = await fetcherClient(`/api/projects/${id}`, {
       method: "put",
-      body: form,
+      body: {
+        type: 'project',
+        attributes: form
+      }
     });
     dispatch({
       type: "modal/request/finish",
-      payload: { message: request.meta.message },
+      payload: { message: request.meta.title },
     });
     mutate("/api/projects");
   } catch (err) {
     console.log(err);
     dispatch({
       type: "modal/request/finish",
-      payload: { message: err.error.message },
+      payload: { message: err.errors[0].title },
     });
     mutate("/api/projects");
   }
@@ -537,7 +543,7 @@ function InputCollections({
 } = {}) {
   const [inputState, setInputState] = useState(() => {
     if (defaultValues.length > 0) return defaultValues.map((defaultValue) => defaultValue._id)
-    else return [result[0]._id]
+    else return [result[0]?.attributes._id]
 
   });
   const collectionInput = [];
@@ -556,7 +562,7 @@ function InputCollections({
 
   function onAddItem () {
     const newInputState = [...inputState];
-    newInputState.push(result[0]._id)
+    newInputState.push(result[0]?.attributes._id)
     setInputState(newInputState)
   }
 
@@ -572,8 +578,8 @@ function InputCollections({
         >
           {result.map((value) => {
             return (
-              <option key={getRandom()} value={value._id}>
-                {value.name}
+              <option key={getRandom()} value={value?.attributes._id}>
+                {value?.attributes.name}
               </option>
             );
           })}
