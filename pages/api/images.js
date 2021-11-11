@@ -1,5 +1,5 @@
-import runMiddleware from "../../lib/module/runMiddleware";
-import { multer } from '../../../lib/module/multer'
+import runMiddleware from "../../module/runMiddleware";
+import { multer } from '../../../module/multer'
 
 export const config = {
     api: {

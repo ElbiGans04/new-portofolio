@@ -5,10 +5,10 @@ import React, { useEffect, useReducer, useState, useRef } from "react";
 import Image from "next/image";
 import projectsStyled from "../styles/projects.module.css";
 import { CSSTransition } from "react-transition-group";
-import upperFirstWord from "../lib/module/upperFirstWord";
+import upperFirstWord from "../module/upperFirstWord";
 import Paragraph from "../components/Paragraph";
 import Modal from "../components/Modal";
-import getRandom from '../lib/module/randomNumber'
+import getRandom from '../module/randomNumber'
 
 const listActions = [
   // {

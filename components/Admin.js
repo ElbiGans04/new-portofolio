@@ -8,12 +8,12 @@ import {
 } from "react-icons/io5";
 import Button from "./Button";
 import useSWR from "swr";
-import fetcher from "../lib/module/fetcher";
-import upperFirstWord from "../lib/module/upperFirstWord";
-import getRandom from "../lib/module/randomNumber";
-import Context from "../lib/hooks/context";
+import fetcher from "../module/fetcher";
+import upperFirstWord from "../module/upperFirstWord";
+import getRandom from "../module/randomNumber";
+import Context from "../hooks/context";
 import Heading from "./Heading";
-import useUser from "../lib/hooks/useUser";
+import useUser from "../hooks/useUser";
 
 export default function Admin () {
   const {

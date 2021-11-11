@@ -3,7 +3,7 @@ import React, { useReducer, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import Admin from "../../components/Admin";
 import { mutate, useSWRConfig } from "swr";
-import { reducer } from "../../lib/hooks/reducer";
+import { reducer } from "../../hooks/reducer";
 import ModalComponent, {
   ModalAdmin,
   ModalMain2,
@@ -19,8 +19,8 @@ import Input from "../../components/Input";
 import Label from "../../components/Label";
 import Button from "../../components/Button";
 import Heading from "../../components/Heading";
-import fetcher from "../../lib/module/fetchClient";
-import Context from "../../lib/hooks/context";
+import fetcher from "../../module/fetchClient";
+import Context from "../../hooks/context";
 
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {

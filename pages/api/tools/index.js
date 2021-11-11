@@ -1,10 +1,10 @@
 import dbConnect from "../../../database/connection";
 import Tools from "../../../database/schemas/tools";
 import joi from 'joi'
-import ToolValidationSchema from '../../../lib/validation/tools'
-import routerErrorHandling from "../../../lib/module/routerErrorHandling";
-import withIronSession from "../../../lib/module/withSession";
-import formatResource from "../../../lib/module/formatResource";
+import ToolValidationSchema from '../../../validation/tools'
+import routerErrorHandling from "../../../module/routerErrorHandling";
+import withIronSession from "../../../module/withSession";
+import formatResource from "../../../module/formatResource";
 
 export default withIronSession(async function Handler (req, res) {
     try {

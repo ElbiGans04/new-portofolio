@@ -4,7 +4,7 @@ import { CSSTransition } from "react-transition-group";
 import useSWR, { useSWRConfig } from "swr";
 import { IoAddOutline } from "react-icons/io5";
 import styled from "styled-components";
-import { reducer } from "../../lib/hooks/reducer";
+import { reducer } from "../../hooks/reducer";
 import ModalComponent, {
   ModalAdmin,
   ModalMain2,
@@ -16,11 +16,11 @@ import ModalComponent, {
   ModalFormContentRow,
   ModalFormFooter,
 } from "../../components/Modal";
-import changeFirstWord from "../../lib/module/upperFirstWord";
-import Context from "../../lib/hooks/context";
-import fetcher from "../../lib/module/fetcher";
-import getRandom from "../../lib/module/randomNumber";
-import fetcherClient from "../../lib/module/fetchClient";
+import changeFirstWord from "../../module/upperFirstWord";
+import Context from "../../hooks/context";
+import fetcher from "../../module/fetcher";
+import getRandom from "../../module/randomNumber";
+import fetcherClient from "../../module/fetchClient";
 import Admin from "../../components/Admin";
 import Input from "../../components/Input";
 import Label from "../../components/Label";

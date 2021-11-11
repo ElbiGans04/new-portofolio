@@ -1,4 +1,4 @@
-import useUser from '../lib/hooks/useUser'
+import useUser from '../hooks/useUser'
 import Head from 'next/head'
 import styled from 'styled-components'
 import Input from '../components/Input'
