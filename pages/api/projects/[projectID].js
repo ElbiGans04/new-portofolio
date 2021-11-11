@@ -12,6 +12,8 @@ import fsPromise from "fs/promises";
 import path from "path";
 import withIronSession from "../../../lib/module/withSession";
 import formatResource from "../../../lib/module/formatResource";
+import bodyParser from "body-parser";
+
 const pathImage = path.resolve(process.cwd(), "public/images");
 export const config = {
   api: {
@@ -45,7 +47,7 @@ export default withIronSession(async function handler(req, res) {
 
       switch (method) {
         case "PATCH": {
-          await runMiddleware(req, res, multer.array("images", 5));
+          await runMiddleware(req, res, bodyParser.json({type: 'application/vnd.api+json'}));
 
           // Validasi
           const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
@@ -71,23 +73,12 @@ export default withIronSession(async function handler(req, res) {
             }
           }
 
-          // Buat untuk img
-          const images = [];
-          req.files.forEach((value) => {
-            images.push({ src: value.filename });
-          });
-
           // Ambil Daftar gambar lama
           const result2Old = await Project.findById(projectID, { images: 1 });
 
-          // Update dan dapatkan data setelah update
-          const newDokumen =
-            images.length === 0
-              ? { ...validReqBody.attributes }
-              : { ...validReqBody.attributes, images };
           const result2 = await Project.findByIdAndUpdate(
             projectID,
-            newDokumen,
+            validReqBody.attributes,
             { new: true }
           );
 

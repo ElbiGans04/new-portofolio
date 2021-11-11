@@ -10,6 +10,7 @@ import routerErrorHandling from "../../../lib/module/routerErrorHandling";
 import {deleteTempFiles, moveImages} from '../../../lib/module/files'
 import withIronSession from '../../../lib/module/withSession'
 import formatResource from "../../../lib/module/formatResource";
+import bodyParser from "body-parser";
 
 export const config = {
   api: {
@@ -41,8 +42,8 @@ export default withIronSession(async function handler(req, res) {
       // Lakukan operasi bedasarkan dari jenis http method
       switch (method) {
         case "POST": {
-          await runMiddleware(req, res, multer.array("images", 5));
-          
+          await runMiddleware(req, res, bodyParser.json({type: 'application/vnd.api+json'}));
+
           // Validasi
           const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
   
@@ -64,18 +65,10 @@ export default withIronSession(async function handler(req, res) {
             }
           };
   
-          // Buat untuk img
-          const images = [];
-          req.files.forEach((value) => {
-            images.push({src: value.filename})
-          });
   
           // Simpan Ke database
-          const project = new Project({
-            ...validReqBody.attributes,
-            images
-          });
-  
+          const project = new Project(validReqBody.attributes);
+          
           await project.save();
   
           // Pindahkan Gambar

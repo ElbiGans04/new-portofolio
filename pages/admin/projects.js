@@ -65,13 +65,14 @@ export default function Projects() {
         return <div>{changeFirstWord(value.name)}</div>;
       },
       images: function images (value) {
-        let textResult = ``;
-        value.forEach((text, index) => {
-          textResult += text.src;
-          if (index !== value.length - 1) textResult += `, `;
-        });
+        console.log('HELLO', value)
+        // let textResult = ``;
+        // value.forEach((text, index) => {
+        //   textResult += text.src;
+        //   if (index !== value.length - 1) textResult += `, `;
+        // });
 
-        return <div>{textResult}</div>;
+        return <div>{'hello'}</div>;
       },
       startDate: function startDate (value){return changeFormatDate(value)},
       endDate: function endDate (value){return changeFormatDate(value)},
@@ -282,7 +283,7 @@ function SwitchModal({
       );
       const urlValue = columnsValue[columns.indexOf("url")];
       const descriptionValue = columnsValue[columns.indexOf("description")];
-      const { _id } = columnsValue[columns.indexOf("typeProject")];
+      const { id } = columnsValue[columns.indexOf("typeProject")];
       const toolsValue = columnsValue[columns.indexOf("tools")];
 
       return (
@@ -369,7 +370,7 @@ function SwitchModal({
                     id="work"
                     value="A2"
                     required
-                    defaultChecked={_id === "A2" ? true : false}
+                    defaultChecked={id === "A2" ? true : false}
                   ></Input>
                   <Label htmlFor="work">Work project</Label>
                 </Checkbox>
@@ -380,7 +381,7 @@ function SwitchModal({
                     id="personal"
                     value="A1"
                     required
-                    defaultChecked={_id === "A1" ? true : false}
+                    defaultChecked={id === "A1" ? true : false}
                   ></Input>
                   <Label htmlFor="work">Personal Project</Label>
                 </Checkbox>
@@ -410,14 +411,37 @@ function SwitchModal({
 async function onSubmit(event, dispatch, mutate) {
   try {
     event.preventDefault();
-    const form = new FormData(event.target);
+    const form = new FormData();
+    const form2 = new FormData(event.target);
+    const fileImage = event.target[3].files;
+    const document = {
+      type: 'project',
+      attributes: {}
+    };
+
+
+    for (let [fieldName, fieldValue] of form2.entries()) {
+      document.attributes[fieldName] = fieldValue
+    }
+
+    // Logic
     dispatch({ type: "modal/request/start" });
+    for (let i = 0; i <  fileImage.length; i++) {
+      form.append('images', fileImage.item(i))
+    }
+
+    const {data: images} = await fetcherClient("/api/images", {
+      method: "post",
+      body: form
+    });
+
+    document.attributes.images = images;
     const request = await fetcherClient("/api/projects", {
       method: "post",
-      body: {
-        type: 'project',
-        attributes: form
-      },
+      body: JSON.stringify(document),
+      headers: {
+        'content-type': 'application/vnd.api+json'
+      }
     });
 
     dispatch({
@@ -460,15 +484,35 @@ async function onSubmit2(id, dispatch, mutate) {
 async function onSubmit3(event, id, dispatch, mutate) {
   try {
     event.preventDefault();
-    const form = new FormData(event.target);
+    const form = new FormData();
+    const form2 = new FormData(event.target);
+    const fileImage = event.target[3].files;
+    const document = {
+      type: 'project',
+      attributes: {}
+    };
 
+
+    for (let [fieldName, fieldValue] of form2.entries()) {
+      document.attributes[fieldName] = fieldValue
+    }
+
+    // Logic
     dispatch({ type: "modal/request/start" });
+    for (let i = 0; i <  fileImage.length; i++) {
+      form.append('images', fileImage.item(i))
+    }
+
+    const {data: images} = await fetcherClient("/api/images", {
+      method: "post",
+      body: form
+    });
+
+    document.attributes.images = images;
+
     const request = await fetcherClient(`/api/projects/${id}`, {
       method: "put",
-      body: {
-        type: 'project',
-        attributes: form
-      }
+      body: JSON.stringify(document)
     });
     dispatch({
       type: "modal/request/finish",
@@ -542,8 +586,8 @@ function InputCollections({
   ...props
 } = {}) {
   const [inputState, setInputState] = useState(() => {
-    if (defaultValues.length > 0) return defaultValues.map((defaultValue) => defaultValue._id)
-    else return [result[0]?.attributes._id]
+    if (defaultValues.length > 0) return defaultValues.map((defaultValue) => defaultValue.id)
+    else return [result[0]?.id]
 
   });
   const collectionInput = [];
@@ -562,7 +606,7 @@ function InputCollections({
 
   function onAddItem () {
     const newInputState = [...inputState];
-    newInputState.push(result[0]?.attributes._id)
+    newInputState.push(result[0]?.id)
     setInputState(newInputState)
   }
 
@@ -578,7 +622,7 @@ function InputCollections({
         >
           {result.map((value) => {
             return (
-              <option key={getRandom()} value={value?.attributes._id}>
+              <option key={getRandom()} value={value?.id}>
                 {value?.attributes.name}
               </option>
             );

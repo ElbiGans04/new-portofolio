@@ -189,6 +189,7 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
                   const special = keySpecialTreatment.find(
                     (keySpecial) => keySpecial[0] === detailColumn
                   );
+
                   if (special) {
                     return (
                       <RowDetailsContentContentContent key={getRandom(index)}>
