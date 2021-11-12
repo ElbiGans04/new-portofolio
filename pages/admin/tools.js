@@ -176,7 +176,7 @@ const onSubmit = async (event, dispatch, mutate) => {
       method: "post",
       body: JSON.stringify(document),
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/vnd.api+json",
       },
     });
 
@@ -236,7 +236,7 @@ const onSubmit3 = async (event, id, dispatch) => {
       method: "PATCH",
       body: JSON.stringify(document),
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/vnd.api+json",
       },
     });
 

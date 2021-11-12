@@ -2,6 +2,8 @@ import formatResource from "../module/formatResource";
 import ToolsSchema from "../database/schemas/tools";
 import ToolValidationSchema from "../validation/tools";
 import joi from "joi";
+import bodyParse from "body-parser";
+import runMiddleware from "../module/runMiddleware";
 
 class Tools {
     async getTool (req, res) {
@@ -24,6 +26,7 @@ class Tools {
     }
 
     async postTools(req, res) {
+      await runMiddleware(req, res, bodyParse.json({type: 'application/vnd.api+json'}));
       const valid = joi.attempt(req.body, ToolValidationSchema);
       const tool = new ToolsSchema(valid.attributes);
       await tool.save();
@@ -34,6 +37,7 @@ class Tools {
     }
 
     async patchTool (req, res) {
+        await runMiddleware(req, res, bodyParse.json({type: 'application/vnd.api+json'}));
         const { toolID } = req.query;
         let valid = joi.attempt(req.body, ToolValidationSchema);
 

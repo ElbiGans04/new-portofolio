@@ -3,6 +3,12 @@ import routerErrorHandling from "../../../module/routerErrorHandling";
 import withIronSession from "../../../module/withSession";
 import Controller from '../../../controllers/tools'
 
+export const config = {
+    api: {
+      bodyParser: false,
+    },
+  };
+
 export default withIronSession(async function Handler (req, res) {
     try {
         const { method } = req;
