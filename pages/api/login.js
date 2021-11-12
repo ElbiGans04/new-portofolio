@@ -1,15 +1,10 @@
 import withSession from "../../module/withSession";
-
+import Controller from '../../controllers/login'
 export default withSession(async function (req, res) {
-  const { email, password } = req.body;
+  if (req.method === 'POST') {
+   await Controller.postLogin(req, res); 
+   return
+  }
 
-  if (process.env.EMAIL !== email || process.env.PW !== password)
-    return res.status(404).json({ errors: [{ title: "password or email does not match", code: 404 }] });
-
-  req.session.set("user", {  isLoggedIn: true });
-
-  await req.session.save();
-  res.status(200).json({
-    meta: { title: "success to login", code: 200, isLoggedIn: true },
-  });
+  return res.status(406).json({errors: [{title: 'request not support'}]})
 });

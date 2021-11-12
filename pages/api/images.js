@@ -1,25 +1,16 @@
-import runMiddleware from "../../module/runMiddleware";
-import { multer } from '../../../module/multer'
-
+import Controller from '../../controllers/images'
 export const config = {
     api: {
       bodyParser: false,
     },
   };
 
-export default async function images () {
+export default async function images (req, res) {
     const contentType = req.headers['content-type'].split(';')[0];
 
-    if (contentType === 'multipart/form-data') {
-        await runMiddleware(req, res, multer.array("images", 5));
-        let images = [];
-    
-        // Lakukan looping
-        req.files.forEach((image) => {
-          images.push({src: image.filename});
-        });
-    
-        return res.json({data: images});
+    if (contentType === 'multipart/form-data' && req.method === 'POST') {
+      await Controller.postImages(req, res);
+      return;
     }
 
     return res.status(406).json({errors: [{title: 'request not support'}]})
