@@ -31,7 +31,7 @@ export default function Admin () {
     () => filter(tools, columns, visibleColumns, visibleValue),
     [tools, columns, visibleColumns, visibleValue]
   );
-
+  
   // Jika ada error
   if (err) {
     return  (
@@ -62,6 +62,7 @@ export default function Admin () {
                       {detailColumns.length > 0 && <th></th>}
                       {/* Looping element yang diijinkan */}
                       {mainColumns.map((value, index) => {
+                        // Check apakah field tertentu harus direname
                         const keyRenameColumns = Object.entries(renameColumns);
                         const shouldRename = keyRenameColumns.find(
                           (column) => column[0] === value
@@ -102,11 +103,11 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
   const { dispatch, specialTreatment = {}, renameColumns = {} } = useContext(Context);
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
+  const keySpecialTreatment = Object.entries(specialTreatment);
 
   return (
     <React.Fragment>
       <tr>
-        {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
         {detailColumns.length > 0 && (
           <td>
             <Button
@@ -119,8 +120,6 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
         )}
         {/*  Lakukan looping */}
         {mainRow.map((value, index) => {
-          const keySpecialTreatment = Object.entries(specialTreatment);
-          
           // Check jika column harus diperlakukan secara khusus
           const special = keySpecialTreatment.find(
             (keySpecial) => keySpecial[0] === mainColumns[index]
@@ -162,7 +161,8 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
           </TdActions>
         </td>
       </tr>
-
+      
+      {/* Detail Row */}
       {detailColumns.length > 0 && (
         <CSSTransition
           nodeRef={ref}
@@ -174,9 +174,8 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
             <RowDetailsContent colSpan="4">
               <RowDetailsContentContent>
                 {detailColumns.map((detailColumn, index) => {
-                  const keySpecialTreatment = Object.entries(specialTreatment);
                   const keyRenameColumns = Object.entries(renameColumns);
-                  // check jika harus direname
+                  // check jika ada column yang harus direname
                   const specialField = keyRenameColumns.find(
                     (keySpecial) => keySpecial[0] === detailColumn
                   );
@@ -185,16 +184,17 @@ function Row({ detailColumns, detailRow, mainColumns, mainRow, id }) {
                     ? specialField[1]
                     : upperFirstWord(detailColumn);
 
-                  // Check jika nilai  column harus diperlakukan secara khusus
+                  // Check jika nilai column harus diperlakukan secara khusus
                   const special = keySpecialTreatment.find(
                     (keySpecial) => keySpecial[0] === detailColumn
                   );
 
+                  
                   if (special) {
                     return (
                       <RowDetailsContentContentContent key={getRandom(index)}>
                         <div>{fieldName}</div>
-                        {special[1](detailRow[index])}
+                        {special[1](detailRow[index], detailColumn)}
                       </RowDetailsContentContentContent>
                     );
                   }
@@ -240,8 +240,9 @@ function filter(data = [], columns = [], visibleColumns = [], visibleValue = 0) 
     });
 
     // // Dari hasil operasi diatas kita pilih mana yang akan ditampilkan sebagai
-    // // Main COlumn dan mana yang bukan
-    // if (columns.length === 0 || (result.length < 4 ))
+    // // Main column dan mana yang bukan
+    // // Jika nilai column sama dengan 0 berarti menandakan bahwa semua column harus ditandakan sebagai
+    // // Main column
     if (columns.length === 0) results.mainColumns = [...result];
     else {
       result.forEach((value) => {
@@ -253,17 +254,17 @@ function filter(data = [], columns = [], visibleColumns = [], visibleValue = 0) 
 
     // Isi dengan nilai
     data.forEach((row) => {
+      // Push setiap id
+      results.rowsId.push(row?.id);
+
       // Ubah Object menjadi array
       const columns = Object.entries(row?.attributes);
 
       let passColumns = [];
       let passDetails = [];
 
-      // Lakukan Filtering
+      // Untuk setiap column kita lakukan Filtering
       columns.forEach((column) => {
-        // Perlakuan Khusus Column _id
-        if (column[0] === "_id") results.rowsId.push(column[1]);
-
         // Berikan Kondisi
         // Ambil Nilai untuk main columns
         const ifMatch = results.mainColumns.find(

@@ -389,9 +389,10 @@ function getFullDate(data) {
 function getTool(data) {
   if (data) {
     let result = ``;
+    console.log(data)
     data.forEach((value, index) => {
       result += `${upperFirstWord(value.name)}`;
-      if (value.description) result += ` as ${value.description}`;
+      if (value.as) result += ` as ${value.as}`;
       if (index !== data.length - 1) result += `, `;
     });
 

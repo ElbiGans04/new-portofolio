@@ -64,15 +64,14 @@ export default function Projects() {
       typeProject: function typeProject (value) {
         return <div>{changeFirstWord(value.name)}</div>;
       },
-      images: function images (value) {
-        console.log('HELLO', value)
-        // let textResult = ``;
-        // value.forEach((text, index) => {
-        //   textResult += text.src;
-        //   if (index !== value.length - 1) textResult += `, `;
-        // });
+      images: function images (value, name) {
+        let textResult = ``;
+        value.forEach((text, index) => {
+          textResult += text.src;
+          if (index !== value.length - 1) textResult += `, `;
+        });
 
-        return <div>{'hello'}</div>;
+        return <div>{textResult}</div>;
       },
       startDate: function startDate (value){return changeFormatDate(value)},
       endDate: function endDate (value){return changeFormatDate(value)},

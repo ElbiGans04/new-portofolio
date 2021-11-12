@@ -1,12 +1,12 @@
 import bodyParser from "body-parser";
 import Joi from "joi";
 import runMiddleware from "../module/runMiddleware";
-import Project from "../../../database/schemas/projects";
-import formatResource from "../../../module/formatResource";
+import Project from "../database/schemas/projects";
+import formatResource from "../module/formatResource";
 import Tools from "../database/schemas/tools";
 import TypeProject from "../database/schemas/typeProject";
 import ProjectValidationSchema from "../validation/projects";
-import { deleteTempFiles, moveImages } from "../../../module/files";
+import { deleteTempFiles, moveImages } from "../module/files";
 import fsPromise from "fs/promises";
 import path from "path";
 const pathImage = path.resolve(process.cwd(), "public/images");
@@ -84,7 +84,7 @@ class Projects {
     await project.save();
 
     // Pindahkan Gambar
-    await moveImages(images);
+    if (req.body.attributes.images) await moveImages(req.body.attributes.images);
 
     // atur headers
     res.setHeader("Location", `/api/projects/${project._id}`);

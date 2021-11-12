@@ -1,12 +1,12 @@
 import formatResource from "../module/formatResource";
-import Tools from "../database/schemas/tools";
+import ToolsSchema from "../database/schemas/tools";
 import ToolValidationSchema from "../validation/tools";
 import joi from "joi";
 
 class Tools {
     async getTool (req, res) {
       const { toolID } = req.query;
-      let result = await Tools.findById(toolID);
+      let result = await ToolsSchema.findById(toolID);
 
       // Jika tidak ada
       if (!result) throw { code: 404, title: "tool not found" };
@@ -17,7 +17,7 @@ class Tools {
     }
 
     async getTools (req, res) {
-      const results = await Tools.find();
+      const results = await ToolsSchema.find();
       res.setHeader('content-type', 'application/vnd.api+json');
       res.statusCode = 200;
       return res.end(JSON.stringify({data: formatResource(results, results.constructor.modelName)}))
@@ -25,7 +25,7 @@ class Tools {
 
     async postTools(req, res) {
       const valid = joi.attempt(req.body, ToolValidationSchema);
-      const tool = new Tools(valid.attributes);
+      const tool = new ToolsSchema(valid.attributes);
       await tool.save();
     
       res.setHeader('content-type', 'application/vnd.api+json');
@@ -39,7 +39,7 @@ class Tools {
 
         if (!valid.attributes.id) throw { title: "missing id property in request document", code: 404 };
 
-        let result = await Tools.findByIdAndUpdate(toolID, valid.attributes).setOptions({
+        let result = await ToolsSchema.findByIdAndUpdate(toolID, valid.attributes).setOptions({
           new: true,
         });
 
@@ -52,7 +52,7 @@ class Tools {
 
     async deleteTool (req, res) {
         const { toolID } = req.query;
-        let result = await Tools.findByIdAndDelete(toolID);
+        let result = await ToolsSchema.findByIdAndDelete(toolID);
 
         if (!result) throw { title: "tool not found", code: 404 };
 
