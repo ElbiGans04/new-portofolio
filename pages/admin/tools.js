@@ -223,6 +223,7 @@ const onSubmit3 = async (event, id, dispatch) => {
     event.preventDefault();
     const document = {
       type: 'tool',
+      id,
       attributes: {}
     };
     const form = new FormData(event.target);
@@ -232,7 +233,7 @@ const onSubmit3 = async (event, id, dispatch) => {
 
     dispatch({ type: "modal/request/start" });
     const request = await fetcher(`/api/tools/${id}`, {
-      method: "put",
+      method: "PATCH",
       body: JSON.stringify(document),
       headers: {
         "Content-Type": "application/json",

@@ -6,7 +6,7 @@ export const config = {
   };
 
 export default async function images (req, res) {
-    const contentType = req.headers['content-type'].split(';')[0];
+    const contentType = req.headers['content-type']?.split(';')[0];
 
     if (contentType === 'multipart/form-data' && req.method === 'POST') {
       await Controller.postImages(req, res);

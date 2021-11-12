@@ -37,7 +37,7 @@ class Tools {
         const { toolID } = req.query;
         let valid = joi.attempt(req.body, ToolValidationSchema);
 
-        if (!valid.attributes.id) throw { title: "missing id property in request document", code: 404 };
+        if (!valid.id) throw { title: "missing id property in request document", code: 404 };
 
         let result = await ToolsSchema.findByIdAndUpdate(toolID, valid.attributes).setOptions({
           new: true,

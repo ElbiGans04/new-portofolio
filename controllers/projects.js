@@ -108,6 +108,8 @@ class Projects {
 
     const { projectID } = req.query;
 
+    console.log(req.body)
+
     // Validasi
     const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
 
@@ -150,13 +152,13 @@ class Projects {
     }
 
     // Hapus gambar lama
-    if (images.length > 0) {
+    if (req.body.attributes.images.length > 0) {
       for (let image of result2Old.images) {
         await fsPromise.unlink(`${pathImage}/${image.src}`);
       }
 
       // pindahkan gambar
-      await moveImages(images);
+      await moveImages(req.body.attributes.images);
     }
 
     res.setHeader("content-type", "application/vnd.api+json");

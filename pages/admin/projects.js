@@ -282,7 +282,7 @@ function SwitchModal({
       );
       const urlValue = columnsValue[columns.indexOf("url")];
       const descriptionValue = columnsValue[columns.indexOf("description")];
-      const { id } = columnsValue[columns.indexOf("typeProject")];
+      const { _id } = columnsValue[columns.indexOf("typeProject")];
       const toolsValue = columnsValue[columns.indexOf("tools")];
 
       return (
@@ -369,7 +369,7 @@ function SwitchModal({
                     id="work"
                     value="A2"
                     required
-                    defaultChecked={id === "A2" ? true : false}
+                    defaultChecked={_id === "A2" ? true : false}
                   ></Input>
                   <Label htmlFor="work">Work project</Label>
                 </Checkbox>
@@ -380,7 +380,7 @@ function SwitchModal({
                     id="personal"
                     value="A1"
                     required
-                    defaultChecked={id === "A1" ? true : false}
+                    defaultChecked={_id === "A1" ? true : false}
                   ></Input>
                   <Label htmlFor="work">Personal Project</Label>
                 </Checkbox>
@@ -487,10 +487,12 @@ async function onSubmit3(event, id, dispatch, mutate) {
     const form2 = new FormData(event.target);
     const fileImage = event.target[3].files;
     const document = {
+      id,
       type: 'project',
-      attributes: {}
+      attributes: {
+        images: [],
+      }
     };
-
 
     for (let [fieldName, fieldValue] of form2.entries()) {
       document.attributes[fieldName] = fieldValue
@@ -498,21 +500,27 @@ async function onSubmit3(event, id, dispatch, mutate) {
 
     // Logic
     dispatch({ type: "modal/request/start" });
-    for (let i = 0; i <  fileImage.length; i++) {
-      form.append('images', fileImage.item(i))
-    }
+    if (fileImage?.[0]?.size > 0) {
+      for (let i = 0; i <  fileImage.length; i++) {
+        form.append('images', fileImage.item(i))
+      }
+      
+      const {data: images} = await fetcherClient("/api/images", {
+        method: "post",
+        body: form
+      });
+      
+      document.attributes.images = images;
+    } else document.attributes.images = [];
 
-    const {data: images} = await fetcherClient("/api/images", {
-      method: "post",
-      body: form
-    });
+    const request = (await fetcherClient(`/api/projects/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(document),
+      headers: {
+        'content-type': 'application/vnd.api+json'
+      }
+    }));
 
-    document.attributes.images = images;
-
-    const request = await fetcherClient(`/api/projects/${id}`, {
-      method: "put",
-      body: JSON.stringify(document)
-    });
     dispatch({
       type: "modal/request/finish",
       payload: { message: request.meta.title },
@@ -585,7 +593,7 @@ function InputCollections({
   ...props
 } = {}) {
   const [inputState, setInputState] = useState(() => {
-    if (defaultValues.length > 0) return defaultValues.map((defaultValue) => defaultValue.id)
+    if (defaultValues.length > 0) return defaultValues.map((defaultValue) => defaultValue._id)
     else return [result[0]?.id]
 
   });
@@ -599,8 +607,8 @@ function InputCollections({
   }
 
   function onRemoveItem (event, index) {
-    const newInputState = [...inputState];
-    setInputState(newInputState.filter((value, idx) => index !== idx ? true : false))
+    const newInputState = [...inputState].filter((value, idx) => index !== idx ? true : false);
+    if (newInputState.length > 0) setInputState(newInputState)
   }
 
   function onAddItem () {
