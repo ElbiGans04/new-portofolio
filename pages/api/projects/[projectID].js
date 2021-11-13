@@ -1,7 +1,7 @@
 import dbConnect from "../../../database/connection";
 import { deleteTempFiles } from "../../../module/files";
 import routerErrorHandling from "../../../module/routerErrorHandling";
-import withIronSession from "../../../module/withSession";
+import withIronSession from "../../../middleware/withSession";
 import Controller from '../../../controllers/projects'
 
 export const config = {

@@ -1,4 +1,4 @@
-import runMiddleware from "../module/runMiddleware";
+import runMiddleware from "../middleware/runMiddleware";
 import {multer} from '../module/multer'
 class Images {
     async postImages(req, res) {

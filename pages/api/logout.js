@@ -1,4 +1,4 @@
-import withSession from "../../module/withSession";
+import withSession from "../../middleware/withSession";
 
 export default withSession(async function (req, res) {  
   await req.session.destroy('user');

@@ -1,4 +1,4 @@
-import withSession from "../../module/withSession";
+import withSession from "../../middleware/withSession";
 import Controller from '../../controllers/login'
 export default withSession(async function (req, res) {
   if (req.method === 'POST') {

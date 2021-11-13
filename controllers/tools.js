@@ -3,7 +3,7 @@ import ToolsSchema from "../database/schemas/tools";
 import ToolValidationSchema from "../validation/tools";
 import joi from "joi";
 import bodyParse from "body-parser";
-import runMiddleware from "../module/runMiddleware";
+import runMiddleware from "../middleware/runMiddleware";
 
 class Tools {
     async getTool (req, res) {

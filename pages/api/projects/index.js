@@ -1,7 +1,7 @@
 import dbConnect from "../../../database/connection";
 import routerErrorHandling from "../../../module/routerErrorHandling";
 import {deleteTempFiles, moveImages} from '../../../module/files'
-import withIronSession from '../../../module/withSession'
+import withIronSession from '../../../middleware/withSession'
 import Controller from '../../../controllers/projects'
 
 

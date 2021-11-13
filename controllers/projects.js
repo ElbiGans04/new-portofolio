@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import Joi from "joi";
-import runMiddleware from "../module/runMiddleware";
+import runMiddleware from "../middleware/runMiddleware";
 import Project from "../database/schemas/projects";
 import formatResource from "../module/formatResource";
 import Tools from "../database/schemas/tools";

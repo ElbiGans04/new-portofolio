@@ -1,6 +1,6 @@
 import dbConnect from "../../../database/connection";
 import routerErrorHandling from "../../../module/routerErrorHandling";
-import withIronSession from "../../../module/withSession";
+import withIronSession from "../../../middleware/withSession";
 import Controller from '../../../controllers/tools'
 
 export const config = {
