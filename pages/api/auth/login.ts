@@ -1,7 +1,7 @@
-import withSession from "../../middleware/withSession";
-import Controller from '../../controllers/login'
+import withSession from "../../../middleware/withSession";
+import Controller from '../../../controllers/login'
 import { NextApiResponse } from 'next'
-import type { NextIronSessionRequest } from '../../types/nextIronSession'
+import type { NextIronSessionRequest } from '../../../types/nextIronSession'
 
 export default withSession(async function (req:NextIronSessionRequest, res:NextApiResponse) {
   if (req.method === 'POST') {

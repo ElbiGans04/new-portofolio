@@ -1,6 +1,6 @@
-import withSession from "../../middleware/withSession";
+import withSession from "../../../middleware/withSession";
 import { NextApiResponse } from 'next'
-import type { NextIronSessionRequest } from '../../types/nextIronSession'
+import type { NextIronSessionRequest } from '../../../types/nextIronSession'
 
 type Response = {
   meta: {
