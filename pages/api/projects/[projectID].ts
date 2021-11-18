@@ -1,7 +1,10 @@
 import dbConnect from "../../../database/connection";
+import { deleteTempFiles } from "../../../module/files";
 import routerErrorHandling from "../../../module/routerErrorHandling";
 import withIronSession from "../../../middleware/withSession";
-import Controller from '../../../controllers/tools'
+import Controller from '../../../controllers/projects'
+import { NextApiResponse } from 'next'
+import type { NextIronSessionRequest } from '../../../types/nextIronSession'
 
 export const config = {
   api: {
@@ -9,34 +12,35 @@ export const config = {
   },
 };
 
-
-export default withIronSession(async function Handler(req, res) {
+// Handler
+export default withIronSession(async function handler(req: NextIronSessionRequest, res: NextApiResponse) {
   try {
     const { method } = req;
+
     await dbConnect();
 
-    if (method === "GET") await Controller.getTool(req, res);  
+    if (method === "GET") await Controller.getProject(req, res);
     else {
 
-      // Jika belum login
+       // Jika belum login
       if (!req.session.get('user')) return res.status(403).json({errors: [{title: 'please login ahead', code: 403}]});
 
       switch (method) {
         case "PATCH": {
-          await Controller.patchTool(req, res);
+          await Controller.patchProject(req, res);
           break;
         }
         case "DELETE": {
-          await Controller.deleteTool(req, res);
+          await Controller.deleteProject(req, res);
           break;
         }
-
         default:
-          throw { code: 404, title: "method not found" };
-          break;
+          throw { title: "method not found", code: 404 };
       }
     }
   } catch (err) {
+    console.log(err)
+    await deleteTempFiles();
     routerErrorHandling(res, err);
   }
-});
+})

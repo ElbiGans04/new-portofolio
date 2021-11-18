@@ -1,11 +1,14 @@
 import Controller from '../../controllers/images'
+import { NextApiResponse } from 'next'
+import type { NextIronSessionRequest } from '../../types/nextIronSession'
+
 export const config = {
     api: {
       bodyParser: false,
     },
   };
 
-export default async function images (req, res) {
+export default async function images (req: NextIronSessionRequest, res: NextApiResponse) {
     const contentType = req.headers['content-type']?.split(';')[0];
 
     if (contentType === 'multipart/form-data' && req.method === 'POST') {

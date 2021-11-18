@@ -3,6 +3,8 @@ import routerErrorHandling from "../../../module/routerErrorHandling";
 import {deleteTempFiles, moveImages} from '../../../module/files'
 import withIronSession from '../../../middleware/withSession'
 import Controller from '../../../controllers/projects'
+import { NextApiResponse } from 'next'
+import type { NextIronSessionRequest } from '../../../types/nextIronSession'
 
 
 export const config = {
@@ -12,7 +14,7 @@ export const config = {
 };
 
 
-export default withIronSession(async function handler(req, res) {
+export default withIronSession(async function handler(req:NextIronSessionRequest, res:NextApiResponse) {
   const { method } = req;
 
   try {

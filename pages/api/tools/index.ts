@@ -2,6 +2,8 @@ import dbConnect from "../../../database/connection";
 import routerErrorHandling from "../../../module/routerErrorHandling";
 import withIronSession from "../../../middleware/withSession";
 import Controller from '../../../controllers/tools'
+import { NextApiResponse } from 'next'
+import type { NextIronSessionRequest } from '../../../types/nextIronSession'
 
 export const config = {
     api: {
@@ -9,7 +11,7 @@ export const config = {
     },
   };
 
-export default withIronSession(async function Handler (req, res) {
+export default withIronSession(async function Handler (req: NextIronSessionRequest, res: NextApiResponse) {
     try {
         const { method } = req;
     
