@@ -5,6 +5,7 @@ import withIronSession from '../../../middleware/withSession'
 import Controller from '../../../controllers/projects'
 import { NextApiResponse } from 'next'
 import type { NextIronSessionRequest } from '../../../types/nextIronSession'
+import { Doc, DocErrors, DocMeta } from "../../../types/jsonApi";
 
 
 export const config = {
@@ -14,7 +15,7 @@ export const config = {
 };
 
 
-export default withIronSession(async function handler(req:NextIronSessionRequest, res:NextApiResponse) {
+export default withIronSession(async function handler(req:NextIronSessionRequest, res:NextApiResponse<Doc | DocMeta | DocErrors>) {
   const { method } = req;
 
   try {
@@ -24,7 +25,7 @@ export default withIronSession(async function handler(req:NextIronSessionRequest
     else {
 
       // Jika belum login
-      if (!req.session.get('user')) return res.status(403).json({errors: [{title: 'please login ahead', code: 403}]});
+      if (!req.session.get('user')) return res.status(403).json({errors: [{title: 'please login ahead', detail: `can't fulfill the request because access is not allowed`, status: '403'}]});
       
       // Lakukan operasi bedasarkan dari jenis http method
       switch (method) {

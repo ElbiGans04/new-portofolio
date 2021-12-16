@@ -1,0 +1,2 @@
+export type OObjectWithFiles = string | number | boolean | null | OObject[] | { [key: string]: OObject } | File | FileList;
+export type OObject = string | number | boolean | null | OObject[] | { [key: string]: OObject };

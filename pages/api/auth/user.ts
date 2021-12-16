@@ -1,14 +1,10 @@
+import { NextApiResponse } from 'next';
 import withSession from "../../../middleware/withSession";
-import { NextApiResponse } from 'next'
-import type { NextIronSessionRequest } from '../../../types/nextIronSession'
+import type { DocMeta } from '../../../types/jsonApi/index';
+import type { NextIronSessionRequest } from '../../../types/nextIronSession';
 
-type Response = {
-  meta: {
-    isLoggedIn: boolean
-  }
-}
 
-export default withSession(async function (req: NextIronSessionRequest, res: NextApiResponse<Response>) {
+export default withSession(async function (req: NextIronSessionRequest, res: NextApiResponse<DocMeta>) {
   const user = req.session.get('user')
 
   if (user) return res.json({
