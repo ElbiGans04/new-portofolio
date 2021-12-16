@@ -23,9 +23,9 @@ import fetcherClient from "../../module/fetchClient";
 import fetcher from "../../module/fetcherGeneric";
 import getRandom from "../../module/randomNumber";
 import changeFirstWord from "../../module/upperFirstWord";
-import type { admin } from '../../types/admin';
-import type { Doc, DocErrors, DocMeta, ResourceObject, ResourceObjectForSendWithFiles } from "../../types/jsonApi";
-import { OObject } from "../../types/jsonApi/object";
+import type { admin } from '../../../types/admin';
+import type { Doc, DocErrors, DocMeta, ResourceObject, ResourceObjectForSendWithFiles } from "../../../types/jsonApi";
+import { OObject } from "../../../types/jsonApi/object";
 
 
 export default function Projects() {

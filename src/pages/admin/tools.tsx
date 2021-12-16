@@ -22,8 +22,8 @@ import ModalComponent, {
 import Context from "../../hooks/context";
 import { reducer } from "../../hooks/reducer";
 import fetcher from "../../module/fetcherGeneric";
-import type { action, admin } from "../../types/admin";
-import type { DocMeta, ResourceObjectForSendWithFiles } from "../../types/jsonApi/index";
+import type { action, admin } from "../../../types/admin";
+import type { DocMeta, ResourceObjectForSendWithFiles } from "../../../types/jsonApi/index";
 
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {

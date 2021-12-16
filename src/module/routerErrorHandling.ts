@@ -1,4 +1,3 @@
-import { ValidationError } from "joi";
 import { NextApiResponse } from "next";
 import { DocErrors } from "../types/jsonApi";
 
