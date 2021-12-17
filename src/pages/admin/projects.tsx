@@ -136,7 +136,7 @@ function SwitchModal({
   dispatch,
 } : {state: admin, dispatch: Dispatch<any>}) {
   const { mutate } = useSWRConfig();
-  const { data, error, isValidating  } = useSWR<Doc, DocErrors>("/api/tools", fetcher);
+  const { data, error  } = useSWR<Doc, DocErrors>("/api/tools", fetcher);
   const row = state.row!;
 
   if (error) {

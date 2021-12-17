@@ -25,7 +25,7 @@ export default function Admin() {
     renameColumns = {},
     dispatch,
   } = useContext(Context);
-  const { data, error, isValidating } = useSWR<Doc, DocErrors>(url, fetcher);
+  const { data, error } = useSWR<Doc, DocErrors>(url, fetcher);
   const user = useUser({ redirectTo: "/login", redirectIfFound: false });
 
   // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah
@@ -54,7 +54,7 @@ export default function Admin() {
   }
 
   // Jika sedang memverifikasi data atau saat sedang mengambil data
-  if (isValidating || !user)
+  if (!user)
     return (
       <Container>
         <div className="loader"></div>
