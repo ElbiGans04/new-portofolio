@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import projectType from '../../types/mongoose/schemas/project';
+import projectType from '@typess/mongoose/schemas/project';
 import imageSchema from './image';
 
 const projectSchema = new mongoose.Schema<projectType>({

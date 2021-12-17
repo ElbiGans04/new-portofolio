@@ -1,7 +1,7 @@
 import { NextApiResponse } from "next";
 import { withIronSession } from "next-iron-session";
-import { Doc, DocErrors, DocMeta } from "../types/jsonApi";
-import { NextIronSessionRequest } from "../types/nextIronSession";
+import { Doc, DocErrors, DocMeta } from "@typess/jsonApi";
+import { NextIronSessionRequest } from "@typess/nextIronSession";
 
 export default function withSession(handler: (req: NextIronSessionRequest, res: NextApiResponse<Doc | DocMeta | DocErrors>) => Promise<void>) {
     if (process.env.SECRET_COOKIE_PASSWORD === undefined) throw new Error('SECRET PASSWORD NOT FOUND'); 

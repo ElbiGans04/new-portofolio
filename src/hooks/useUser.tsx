@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import Router from "next/router";
-import fetcher from "../module/fetcher";
+import fetcher from "@module/fetcher";
 import useSWR from "swr";
-import { DocErrors, DocMeta } from "../types/jsonApi";
+import { DocErrors, DocMeta } from "@typess/jsonApi";
 
 type argument = {
   redirectTo: boolean | string;

@@ -1,8 +1,8 @@
 import { NextApiResponse } from 'next';
-import Controller from '../../../controllers/login';
-import withSession from "../../../middleware/withSession";
-import type { DocErrors, DocMeta } from '../../../types/jsonApi/index';
-import type { NextIronSessionRequest } from '../../../types/nextIronSession';
+import Controller from '@controllers/login';
+import withSession from "@middleware/withSession";
+import type { DocErrors, DocMeta } from '@typess/jsonApi/index';
+import type { NextIronSessionRequest } from '@typess/nextIronSession';
 
 export default withSession(async function (req:NextIronSessionRequest, res:NextApiResponse<DocErrors | DocMeta>) {
   if (req.method === 'POST') {

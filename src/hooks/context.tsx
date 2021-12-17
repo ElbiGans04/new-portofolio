@@ -1,5 +1,5 @@
 import { Dispatch, createContext } from "react";
-import { OObject } from '../types/jsonApi/object';
+import { OObject } from '@typess/jsonApi/object';
 
 const context = createContext<{
   url: string;

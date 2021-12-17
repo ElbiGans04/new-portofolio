@@ -7,23 +7,23 @@ import React, {
 } from "react";
 import { CSSTransition } from "react-transition-group";
 import { useSWRConfig } from "swr";
-import Admin from "../../components/Admin";
-import Button from "../../components/Button";
-import Heading from "../../components/Heading";
-import Input from "../../components/Input";
-import Label from "../../components/Label";
+import Admin from "@components/Admin";
+import Button from "@components/Button";
+import Heading from "@components/Heading";
+import Input from "@components/Input";
+import Label from "@components/Label";
 import ModalComponent, {
   GlobalStyle, ModalAdmin, ModalContent2,
   ModalFooter, ModalForm,
   ModalFormContent,
   ModalFormContentRow,
   ModalFormFooter, ModalMain2
-} from "../../components/Modal";
-import Context from "../../hooks/context";
-import { reducer } from "../../hooks/reducer";
-import fetcher from "../../module/fetcherGeneric";
-import type { action, admin } from "../../../types/admin";
-import type { DocMeta, ResourceObjectForSendWithFiles } from "../../../types/jsonApi/index";
+} from "@components/Modal";
+import Context from "@hooks/context";
+import { reducer } from "@hooks/reducer";
+import fetcher from "@module/fetcherGeneric";
+import type { action, admin } from "@typess/admin";
+import type { DocMeta, ResourceObjectForSendWithFiles } from "@typess/jsonApi/index";
 
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {

@@ -1,4 +1,4 @@
-import { RequestControllerRouter, RespondControllerRouter } from '../types/controllersRoutersApi';
+import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 
 class Login {
     async postLogin (req: RequestControllerRouter, res: RespondControllerRouter) {

@@ -1,5 +1,5 @@
 import mongoose, {Schema} from 'mongoose';
-import typeProject from '../../types/mongoose/schemas/typeProject';
+import typeProject from '@typess/mongoose/schemas/typeProject';
 
 const typeProjectSchema = new Schema<typeProject>({
     _id:  {

@@ -1,4 +1,4 @@
-import type { DocErrors } from '../types/jsonApi/index';
+import type { DocErrors } from '@typess/jsonApi/index';
 export default async function fetcher<T>(url: string, options = {}) {
     const request = await fetch(url, options);
 

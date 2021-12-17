@@ -1,5 +1,5 @@
 import { Document, Model, QueryWithHelpers } from "mongoose";
-import {OObject} from '../types/jsonApi/object'
+import {OObject} from '@typess/jsonApi/object'
 interface ResultType {
     type: string,
     id: string | null,

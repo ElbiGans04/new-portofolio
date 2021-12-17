@@ -1,4 +1,4 @@
-import images from './image'
+import images from '@typess/mongoose/schemas/image'
 import {Types} from 'mongoose'
 export default interface project {
     title: string,

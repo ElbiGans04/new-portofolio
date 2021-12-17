@@ -1,4 +1,4 @@
-import type {OObject} from '../types/jsonApi/object'
+import type {OObject} from '@typess/jsonApi/object'
 
 interface Data {
   id: string;

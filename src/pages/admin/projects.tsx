@@ -5,27 +5,27 @@ import { IoAddOutline } from "react-icons/io5";
 import { CSSTransition } from "react-transition-group";
 import styled from "styled-components";
 import useSWR, { useSWRConfig } from "swr";
-import Admin from "../../components/Admin";
-import Button from "../../components/Button";
-import Heading from "../../components/Heading";
-import Input from "../../components/Input";
-import Label from "../../components/Label";
+import Admin from "@components/Admin";
+import Button from "@components/Button";
+import Heading from "@components/Heading";
+import Input from "@components/Input";
+import Label from "@components/Label";
 import ModalComponent, {
   GlobalStyle, ModalAdmin, ModalContent2,
   ModalFooter, ModalForm,
   ModalFormContent,
   ModalFormContentRow,
   ModalFormFooter, ModalMain2
-} from "../../components/Modal";
-import Context from "../../hooks/context";
-import { reducer } from "../../hooks/reducer";
-import fetcherClient from "../../module/fetchClient";
-import fetcher from "../../module/fetcherGeneric";
-import getRandom from "../../module/randomNumber";
-import changeFirstWord from "../../module/upperFirstWord";
-import type { admin } from '../../../types/admin';
-import type { Doc, DocErrors, DocMeta, ResourceObject, ResourceObjectForSendWithFiles } from "../../../types/jsonApi";
-import { OObject } from "../../../types/jsonApi/object";
+} from "@components/Modal";
+import Context from "@hooks/context";
+import { reducer } from "@hooks/reducer";
+import fetcherClient from "@module/fetchClient";
+import fetcher from "@module/fetcherGeneric";
+import getRandom from "@module/randomNumber";
+import changeFirstWord from "@module/upperFirstWord";
+import type { admin } from '@typess/admin';
+import type { Doc, DocErrors, DocMeta, ResourceObject, ResourceObjectForSendWithFiles } from "@typess/jsonApi";
+import { OObject } from "@typess/jsonApi/object";
 
 
 export default function Projects() {

@@ -1,9 +1,9 @@
 import useUser from '../hooks/useUser'
 import Head from 'next/head'
 import styled from 'styled-components'
-import Input from '../components/Input'
-import Label from '../components/Label'
-import Button from '../components/Button'
+import Input from '@components/Input'
+import Label from '@components/Label'
+import Button from '@components/Button'
 import {FormEvent} from 'react'
 
 interface EventTargetType extends FormEvent<HTMLFormElement> {

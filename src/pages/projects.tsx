@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Heading from "../components/Heading";
+import Heading from "@components/Heading";
 import styled, { createGlobalStyle } from "styled-components";
 import React, {
   useEffect,
@@ -11,10 +11,10 @@ import React, {
 import Image from "next/image";
 import projectsStyled from "../styles/projects.module.css";
 import { CSSTransition } from "react-transition-group";
-import upperFirstWord from "../module/upperFirstWord";
-import Paragraph from "../components/Paragraph";
-import Modal from "../components/Modal";
-import getRandom from "../module/randomNumber";
+import upperFirstWord from "@module/upperFirstWord";
+import Paragraph from "@components/Paragraph";
+import Modal from "@components/Modal";
+import getRandom from "@module/randomNumber";
 
 type StateProjects = Array<{
   id: string;

@@ -1,7 +1,7 @@
-import formidable from 'formidable'
-import { NextApiRequest, NextApiResponse } from 'next';
-import path from 'path'
-import { RequestControllerRouter } from '../types/controllersRoutersApi';
+import { RequestControllerRouter } from '@typess/controllersRoutersApi';
+import formidable from 'formidable';
+import { NextApiResponse } from 'next';
+import path from 'path';
 const form = formidable({
     multiples: true,
     filename: (name, ext, part, form) => {

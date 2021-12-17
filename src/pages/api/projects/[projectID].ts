@@ -1,11 +1,11 @@
-import dbConnect from "../../../database/connection";
-import { deleteTempFiles } from "../../../module/files";
-import routerErrorHandling from "../../../module/routerErrorHandling";
-import withIronSession from "../../../middleware/withSession";
-import Controller from '../../../controllers/projects'
+import dbConnect from "@database/connection";
+import { deleteTempFiles } from "@module/files";
+import routerErrorHandling from "@module/routerErrorHandling";
+import withIronSession from "@middleware/withSession";
+import Controller from '@controllers/projects'
 import { NextApiResponse } from 'next'
-import type { NextIronSessionRequest } from '../../../types/nextIronSession'
-import type {Doc, DocErrors, DocMeta} from '../../../types/jsonApi/index'
+import type { NextIronSessionRequest } from '@typess/nextIronSession'
+import type {Doc, DocErrors, DocMeta} from '@typess/jsonApi/index'
 
 export const config = {
   api: {

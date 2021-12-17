@@ -1,6 +1,6 @@
 import { NextApiResponse } from 'next';
-import Controller from '../../controllers/images';
-import { DocErrors, DocMeta } from '../../types/jsonApi';
+import Controller from '@controllers/images';
+import type { DocErrors, DocMeta } from '@typess/jsonApi';
 import type { NextIronSessionRequest } from '../../types/nextIronSession';
 
 export const config = {

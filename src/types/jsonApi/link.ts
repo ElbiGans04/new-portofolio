@@ -1,4 +1,4 @@
-import type {meta} from './meta'
+import type {meta} from '@typess/jsonApi/meta'
 export type link = {
     self: string
 } | {

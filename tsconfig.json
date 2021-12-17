@@ -18,7 +18,20 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "noEmitOnError": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@public/*": ["public/*"],
+      "@components/*": ["src/components/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@database/*": ["src/database/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@middleware/*": ["src/middleware/*"],
+      "@module/*": ["src/module/*"],
+      "@style/*": ["src/style/*"],
+      "@typess/*": ["src/types/*"],
+      "@validation/*": ["src/validation/*"]
+    }
   },
   "include": [
     "next-env.d.ts",
@@ -28,5 +41,5 @@
   ],
   "exclude": [
     "node_modules"
-  ]
+  ],
 }

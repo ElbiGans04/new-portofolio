@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import resize from '../module/resize'
+import resize from '@module/resize'
 
 const Paragraph = styled.p<{size: number, align?: string, textIndent?: string, fontWeight?: string, lineHeight?: string, minSize: number}>`
   color: white;

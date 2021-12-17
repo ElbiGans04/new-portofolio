@@ -1,5 +1,5 @@
-import type {meta} from './meta'
-import type {link} from './link'
+import type {meta} from '@typess/jsonApi/meta'
+import type {link} from '@typess/jsonApi/link'
 
 export interface error {
     id?: string,

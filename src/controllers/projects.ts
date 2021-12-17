@@ -2,14 +2,14 @@ import bodyParser from "body-parser";
 import fsPromise from "fs/promises";
 import Joi from "joi";
 import path from "path";
-import Project from "../database/schemas/projects";
-import Tools from "../database/schemas/tools";
-import TypeProject from "../database/schemas/typeProject";
-import runMiddleware from "../middleware/runMiddleware";
-import { moveImages } from "../module/files";
-import formatResource from "../module/formatResource";
-import { RequestControllerRouter, RespondControllerRouter } from '../types/controllersRoutersApi';
-import ProjectValidationSchema from "../validation/projects";
+import Project from "@database/schemas/projects";
+import Tools from "@database/schemas/tools";
+import TypeProject from "@database/schemas/typeProject";
+import runMiddleware from "@middleware/runMiddleware";
+import { moveImages } from "@module/files";
+import formatResource from "@module/formatResource";
+import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
+import ProjectValidationSchema from "@validation/projects";
 const pathImage = path.resolve(process.cwd(), "public/images");
 
 class Projects {

@@ -1,10 +1,10 @@
-import dbConnect from "../../../database/connection";
-import routerErrorHandling from "../../../module/routerErrorHandling";
-import withIronSession from "../../../middleware/withSession";
-import Controller from '../../../controllers/tools'
+import dbConnect from "@database/connection";
+import routerErrorHandling from "@module/routerErrorHandling";
+import withIronSession from "@middleware/withSession";
+import Controller from '@controllers/tools'
 import { NextApiResponse } from 'next'
-import type { NextIronSessionRequest } from '../../../types/nextIronSession'
-import { Doc, DocErrors, DocMeta } from "../../../types/jsonApi";
+import type { NextIronSessionRequest } from '@typess/nextIronSession'
+import { Doc, DocErrors, DocMeta } from "@typess/jsonApi";
 
 export const config = {
     api: {

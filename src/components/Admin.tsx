@@ -6,16 +6,16 @@ import {
   IoAddOutline,
   IoPencilSharp,
 } from "react-icons/io5";
-import Button from "./Button";
+import Button from "@components/Button";
 import useSWR from "swr";
 import fetcher from "../module/fetcher";
-import upperFirstWord from "../module/upperFirstWord";
-import getRandom from "../module/randomNumber";
-import Context from "../hooks/context";
+import upperFirstWord from "@module/upperFirstWord";
+import getRandom from "@module/randomNumber";
+import Context from "@hooks/context";
 import Heading from "./Heading";
-import useUser from "../hooks/useUser";
-import { DocErrors, Doc, ResourceObject } from "../types/jsonApi/index";
-import { OObject } from "../types/jsonApi/object";
+import useUser from "@hooks/useUser";
+import { DocErrors, Doc, ResourceObject } from "@typess/jsonApi/index";
+import { OObject } from "@typess/jsonApi/object";
 
 export default function Admin() {
   const {

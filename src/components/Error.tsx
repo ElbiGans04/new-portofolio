@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import Head from 'next/head'
 import Image from 'next/image'
-import Text from './Heading'
+import Text from '@components/Heading'
 
 function ErrorComponent ({message, solution, src}: {message: string, solution: string, src: string}) {
     return (<Container>

@@ -1,5 +1,5 @@
 import { NextApiResponse } from "next";
-import { DocErrors } from "../types/jsonApi";
+import { DocErrors } from "@typess/jsonApi";
 
 export default function routerErrorHandling(
   res: NextApiResponse<DocErrors>,

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import toolType from '../../types/mongoose/schemas/tool';
+import toolType from '@typess/mongoose/schemas/tool';
 
 const toolSchema = new mongoose.Schema<toolType>({
     name:  {

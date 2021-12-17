@@ -1,7 +1,7 @@
 import { NextApiResponse } from 'next';
-import withSession from "../../../middleware/withSession";
-import type { DocMeta } from '../../../types/jsonApi/index';
-import type { NextIronSessionRequest } from '../../../types/nextIronSession';
+import withSession from "@middleware/withSession";
+import type { DocMeta } from '@typess/jsonApi/index';
+import type { NextIronSessionRequest } from '@typess/nextIronSession';
 
 
 export default withSession(async function (req: NextIronSessionRequest, res: NextApiResponse<DocMeta>) {

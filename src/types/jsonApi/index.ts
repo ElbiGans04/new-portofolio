@@ -1,7 +1,7 @@
-import type { error } from './error'
-import type { meta } from './meta'
-import type { link } from './link'
-import type { OObject, OObjectWithFiles } from './object'
+import type { error } from '@typess/jsonApi/error'
+import type { meta } from '@typess/jsonApi/meta'
+import type { link } from '@typess/jsonApi/link'
+import type { OObject, OObjectWithFiles } from '@typess/jsonApi/object'
 
 type jsonApi = {
     version?: string,
