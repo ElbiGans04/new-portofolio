@@ -5,6 +5,10 @@ import Input from '@components/Input'
 import Label from '@components/Label'
 import Button from '@components/Button'
 import {FormEvent} from 'react'
+import {AiOutlineClose} from 'react-icons/ai'
+import { DocErrors, DocMeta } from '@typess/jsonApi'
+import { useState } from 'react'
+import { SetStateAction } from 'hoist-non-react-statics/node_modules/@types/react'
 
 interface EventTargetType extends FormEvent<HTMLFormElement> {
     currentTarget: EventTarget & HTMLFormElement & {
@@ -19,7 +23,7 @@ interface EventTargetType extends FormEvent<HTMLFormElement> {
 
 export default function Login () {
     const {mutateUser} = useUser({redirectTo: '/admin/projects', redirectIfFound: true});
-    
+    const [message, setMessage] = useState(null);
     async function onSubmit (event: EventTargetType) {
         try {
             event.preventDefault()
@@ -30,22 +34,23 @@ export default function Login () {
                 body.append('email', event.currentTarget.email.value);
                 body.append('password', event.currentTarget.password.value);
                 
-                await mutateUser(async () => {
-                    let {data} = await (await fetch('/api/auth/login', {
-                        method: 'post',
-                        body: body.toString(),
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                    })).json();
-        
-                    return data
-                })
+                let request = await fetch('/api/auth/login', {
+                    method: 'post',
+                    body: body.toString(),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                });
+
+                const request2 = await request.json();
+                if (!request.ok) setMessage(request2)
+                
+                mutateUser(request2)
+                
             }
             
             
         } catch (err) {
-            console.error(err);
             alert("Found a error when trigger mutation data")
         }
     };
@@ -55,6 +60,7 @@ export default function Login () {
                 <title>Login</title>
             </Head>
             <Form onSubmit={onSubmit}>
+                <MessageComponent setMessage={setMessage} message={message} />
                 <FormRow>
                     <Label size={1} minSize={1} htmlFor="email">Email :</Label>
                     <Input placeholder="Enter your email" type="email" id="email" name="email" required></Input>
@@ -70,8 +76,47 @@ export default function Login () {
             </Form>
         </Container>
     )
+};
+
+function MessageComponent ({message, setMessage} : {message: DocErrors | null, setMessage: SetStateAction<any>}) {
+    let messageText = ''
+    if(message !== null) {
+        message.errors.forEach((value) => {
+            messageText += `${value.title}, `
+        })
+    };
+   
+    return (
+        <MessageContainer visible={message === null ? false : true}>
+            {messageText}
+            <AiOutlineClose onClick={() => setMessage(null)} size="1.3rem"></AiOutlineClose>
+        </MessageContainer>
+    )
 }
 
+const MessageContainer = styled.div<{visible: boolean}>`
+    width: 100%;
+    padding: .5rem;
+    font-size: .9rem;
+    border-radius: .4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    visibility: ${({visible}) => visible ? 'visible' : 'hidden'};
+    // background-color: #F46F6F;
+    // color: #f20909;
+    // background-color: var(--dark);
+    // color: var(--pink);
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+    line-height: 1.3rem;
+    // untuk icon close
+    & svg {
+        margin-left: .3rem;
+        cursor: pointer;
+    }
+`
 
 const Container = styled.div`
     width: 50%;
@@ -110,4 +155,5 @@ const FormRow = styled.div`
 
 const NewButton = styled(Button)`
     width: 100%;
+    margin-top: 1.5rem;
 `
