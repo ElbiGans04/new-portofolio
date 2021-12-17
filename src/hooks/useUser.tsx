@@ -16,7 +16,7 @@ export default function useUser({
   const { data: user, mutate: mutateUser } = useSWR<
     DocMeta,
     DocErrors
-  >("/api/user", fetcher);
+  >("/api/auth/user", fetcher);
 
   useEffect(() => {
     // if no redirect needed, just return (example: already on /dashboard)

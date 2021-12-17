@@ -31,7 +31,7 @@ export default function Login () {
                 body.append('password', event.currentTarget.password.value);
                 
                 await mutateUser(async () => {
-                    let {data} = await (await fetch('/api/login', {
+                    let {data} = await (await fetch('/api/auth/login', {
                         method: 'post',
                         body: body.toString(),
                         headers: {
