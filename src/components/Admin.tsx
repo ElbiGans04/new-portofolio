@@ -203,7 +203,7 @@ function Row({
             timeout={500}
           >
             <RowDetails ref={ref}>
-              <RowDetailsContent>
+              <RowDetailsContent colSpan={mainRow.length + 1}>
                 <RowDetailsContentContent>
                   {detailColumns.map((detailColumn, index) => {
                     const keyRenameColumns = Object.entries(renameColumns);
