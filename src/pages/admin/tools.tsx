@@ -21,7 +21,7 @@ import ModalComponent, {
 } from "@components/Modal";
 import Context from "@hooks/context";
 import { reducer } from "@hooks/reducer";
-import fetcher from "@module/fetcherGeneric";
+import {fetcherGeneric} from "@module/fetcher";
 import type { action, admin } from "@typess/admin";
 import type { DocMeta, ResourceObjectForSendWithFiles } from "@typess/jsonApi/index";
 
@@ -194,7 +194,7 @@ const onSubmit = async (
 
       dispatch({ type: "modal/request/start" });
 
-      const request = await fetcher<DocMeta>("/api/tools", {
+      const request = await fetcherGeneric<DocMeta>("/api/tools", {
         method: "post",
         body: JSON.stringify(document),
         headers: {
@@ -222,7 +222,7 @@ const onSubmit2 = async (id: string, dispatch: Dispatch<any>, mutate: any) => {
   try {
     dispatch({ type: "modal/request/start" });
 
-    const request = await fetcher<DocMeta>(`/api/tools/${id}`, {
+    const request = await fetcherGeneric<DocMeta>(`/api/tools/${id}`, {
       method: "delete",
     });
 
@@ -261,7 +261,7 @@ const onSubmit3 = async (
       }
 
       dispatch({ type: "modal/request/start" });
-      const request = await fetcher<DocMeta>(`/api/tools/${id}`, {
+      const request = await fetcherGeneric<DocMeta>(`/api/tools/${id}`, {
         method: "PATCH",
         body: JSON.stringify(document),
         headers: {

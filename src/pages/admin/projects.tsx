@@ -19,8 +19,7 @@ import ModalComponent, {
 } from "@components/Modal";
 import Context from "@hooks/context";
 import { reducer } from "@hooks/reducer";
-import fetcherClient from "@module/fetchClient";
-import fetcher from "@module/fetcherGeneric";
+import fetcher, {fetcherGeneric}  from "@module/fetcher";
 import getRandom from "@module/randomNumber";
 import changeFirstWord from "@module/upperFirstWord";
 import type { admin } from '@typess/admin';
@@ -137,7 +136,7 @@ function SwitchModal({
   dispatch,
 } : {state: admin, dispatch: Dispatch<any>}) {
   const { mutate } = useSWRConfig();
-  const { data, error, isValidating  } = useSWR<Doc, DocErrors>("/api/tools", fetcherClient);
+  const { data, error, isValidating  } = useSWR<Doc, DocErrors>("/api/tools", fetcher);
   const row = state.row!;
 
   if (error) {
@@ -454,14 +453,14 @@ async function onSubmit(event: React.FormEvent<HTMLFormElement>, dispatch: Dispa
       if (file) form.append('images', file)
     }
 
-    const {meta} = await fetcher<DocMeta>("/api/images", {
+    const {meta} = await fetcherGeneric<DocMeta>("/api/images", {
       method: "post",
       body: form
     });
 
     if (document.attributes) document.attributes.images = meta.images;
 
-    const request = await fetcher<DocMeta>("/api/projects", {
+    const request = await fetcherGeneric<DocMeta>("/api/projects", {
       method: "post",
       body: JSON.stringify(document),
       headers: {
@@ -488,7 +487,7 @@ async function onSubmit2(id: string, dispatch: Dispatch<any>, mutate: any) {
   try {
     dispatch({ type: "modal/request/start" });
 
-    const request = await fetcher<DocMeta>(`/api/projects/${id}`, {
+    const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
       method: "delete",
     });
 
@@ -534,7 +533,7 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
         if (file) form.append('images', file)
       }
       
-      const {meta} = await fetcher<DocMeta>("/api/images", {
+      const {meta} = await fetcherGeneric<DocMeta>("/api/images", {
         method: "post",
         body: form
       });
@@ -544,7 +543,7 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
       if (document.attributes) document.attributes.images = []
     };
 
-    const request = (await fetcher<DocMeta>(`/api/projects/${id}`, {
+    const request = (await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
       method: "PATCH",
       body: JSON.stringify(document),
       headers: {
