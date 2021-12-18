@@ -121,7 +121,7 @@ function Projects() {
   const project = state.projects[modal.index];
   const disabled = state.status !== "iddle" ? true : false;
   const className = state.status !== "iddle" ? "cursor-notAllowed" : "";
-
+  
   useEffect(() => {
     // Mencegah kondisi balapan
     // Mencegah react menyetel state ketika sudah pindah halaman
@@ -236,70 +236,77 @@ function Projects() {
         </ContainerActions>
         {/* End of Action Components */}
 
-        {/* Modal */}
-        <CSSTransition
-          nodeRef={nodeRef}
-          classNames="modal"
-          in={modal.open}
-          timeout={500}
-        >
-          <Modal
-            width="100%"
-            height=""
-            ref={nodeRef}
-            updateState={setModal}
-            defaultState={{ open: false, index: 0 }}
+
+        {/* Jika project tidak kosong */}
+        {
+          project && (
+          <CSSTransition
+            nodeRef={nodeRef}
+            classNames="modal"
+            in={modal.open}
+            timeout={500}
           >
-              <ImageSlider showModal={modal.open} project={project}></ImageSlider>
-              <ModalContentContent>
-                <Heading minSize={1.5} size={2}>
-                  <span>{upperFirstWord(project?.attributes?.title)}</span>
-                </Heading>
-                <ModalContentContentList>
-                  <ModalContentContentListTitle>
-                    <Heading minSize={1} size={1}>
-                      Development Date Process
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      Tools
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      Project Type
-                    </Heading>
-                  </ModalContentContentListTitle>
-                  <ModalContentContentListValue>
-                    <Heading minSize={1} size={1}>
-                      {":"}&nbsp;{getFullDate(project?.attributes?.startDate)}
-                      {" - "}
-                      {getFullDate(project?.attributes?.endDate)}
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      {":"}&nbsp; {getTool(project?.attributes?.tools)}
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      {":"}&nbsp;
-                      {upperFirstWord(project?.attributes?.typeProject.name)}
-                    </Heading>
-                  </ModalContentContentListValue>
-                </ModalContentContentList>
-                <Paragraph
-                  minSize={1}
-                  size={1}
-                  align="start"
-                  textIndent="2rem"
-                  fontWeight="normal"
-                  lineHeight="1.5rem"
-                >
-                  {project?.attributes?.description}.{" "}
-                  {project?.attributes?.url && (
-                    <GoTo href={project?.attributes?.url}>
-                      {project?.attributes?.url}
-                    </GoTo>
-                  )}
-                </Paragraph>
-              </ModalContentContent>
-          </Modal>
-        </CSSTransition>
+            <Modal
+              width="100%"
+              height=""
+              ref={nodeRef}
+              updateState={setModal}
+              defaultState={{ open: false, index: 0 }}
+            >
+                <ImageSlider showModal={modal.open} project={project}></ImageSlider>
+                <ModalContentContent>
+                  <Heading minSize={1.5} size={2}>
+                    <span>{upperFirstWord(project?.attributes?.title)}</span>
+                  </Heading>
+                  <ModalContentContentList>
+                    <ModalContentContentListTitle>
+                      <Heading minSize={1} size={1}>
+                        Development Date Process
+                      </Heading>
+                      <Heading minSize={1} size={1}>
+                        Tools
+                      </Heading>
+                      <Heading minSize={1} size={1}>
+                        Project Type
+                      </Heading>
+                    </ModalContentContentListTitle>
+                    <ModalContentContentListValue>
+                      <Heading minSize={1} size={1}>
+                        {":"}&nbsp;{getFullDate(project?.attributes?.startDate)}
+                        {" - "}
+                        {getFullDate(project?.attributes?.endDate)}
+                      </Heading>
+                      <Heading minSize={1} size={1}>
+                        {":"}&nbsp; {getTool(project?.attributes?.tools)}
+                      </Heading>
+                      <Heading minSize={1} size={1}>
+                        {":"}&nbsp;
+                        {upperFirstWord(project?.attributes?.typeProject.name)}
+                      </Heading>
+                    </ModalContentContentListValue>
+                  </ModalContentContentList>
+                  <Paragraph
+                    minSize={1}
+                    size={1}
+                    align="start"
+                    textIndent="2rem"
+                    fontWeight="normal"
+                    lineHeight="1.5rem"
+                  >
+                    {project?.attributes?.description}.{" "}
+                    {project?.attributes?.url && (
+                      <GoTo href={project?.attributes?.url}>
+                        {project?.attributes?.url}
+                      </GoTo>
+                    )}
+                  </Paragraph>
+                </ModalContentContent>
+            </Modal>
+          </CSSTransition>
+          )
+        }
+
+        {/* Modal */}
         {/* end of Modal */}
 
         {/* Error handling */}
@@ -320,7 +327,8 @@ function Projects() {
               <div className="loader"></div>
             ) : (
               <ContainerProjects>
-                {state.projects.map((value, index) => {
+                {project !== undefined && state.projects.map((value, index) => {
+                  console.log(value)
                   return (
                     <Project
                       onClick={() => {
@@ -334,18 +342,18 @@ function Projects() {
                         <Image
                           alt="project"
                           className={projectsStyled.project}
-                          src={`/images/${value?.attributes?.images[0]?.src}`}
+                          src={`/images/${value.attributes.images[0]?.src}`}
                           layout="fill"
                         ></Image>
                       </ProjectImageContainer>
                       <ProjectTextContainer>
                         <Heading minSize={1} size={1.3}>
                           <span>
-                            {upperFirstWord(value?.attributes?.title)}
+                            {upperFirstWord(value.attributes.title)}
                           </span>
                         </Heading>
                         <Heading minSize={1} size={1}>
-                          {upperFirstWord(value?.attributes?.typeProject.name)}
+                          {upperFirstWord(value.attributes.typeProject.name)}
                         </Heading>
                       </ProjectTextContainer>
                     </Project>
@@ -362,7 +370,7 @@ function Projects() {
 
 export default Projects;
 
-function ImageSlider({ showModal, project }: {showModal: boolean, project: StateProjects[number]}) {
+function ImageSlider({ showModal, project }: {showModal: boolean, project: StateProjects[number] | undefined}) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const nodeRef = useRef(null);
 
@@ -371,73 +379,76 @@ function ImageSlider({ showModal, project }: {showModal: boolean, project: State
     if (!showModal) setSlide({ slide: 0, translateX: 0 });
   }, [showModal, setSlide]);
 
-  function changeImageAction(event: MouseEvent, action: number) {
-    if (project?.attributes.images.length > 1 && event.currentTarget.parentElement !== null && event.currentTarget.parentElement.parentElement !== null) {
-      const modal = event.currentTarget.parentElement.parentElement;
-      const { width: modalWidth } = modal.getBoundingClientRect();
-
-      // Jika nilai berikutnya ditambah lalu melebihi panjang gambar maka nilai akan menjadi ke 0
-      // Jika nilai berikutnya dikurang lalu kurang dari 0 maka nilai akan menjadi jumlah gambar
-      const result =
-        action === 0
-          ? slide.slide - 1 < 0
-            ? project?.attributes.images.length - 1
-            : slide.slide - 1
-          : slide.slide + 1 > project?.attributes.images.length - 1
-          ? 0
-          : slide.slide + 1;
-      setSlide({ slide: result, translateX: result * -modalWidth });
+  function changeImageAction(event: MouseEvent, action: number):void {
+    if (project) {
+      if (project.attributes.images.length > 1 && event.currentTarget.parentElement !== null && event.currentTarget.parentElement.parentElement !== null) {
+        const modal = event.currentTarget.parentElement.parentElement;
+        const { width: modalWidth } = modal.getBoundingClientRect();
+  
+        // Jika nilai berikutnya ditambah lalu melebihi panjang gambar maka nilai akan menjadi ke 0
+        // Jika nilai berikutnya dikurang lalu kurang dari 0 maka nilai akan menjadi jumlah gambar
+        const result =
+          action === 0
+            ? slide.slide - 1 < 0
+              ? project.attributes.images.length - 1
+              : slide.slide - 1
+            : slide.slide + 1 > project.attributes.images.length - 1
+            ? 0
+            : slide.slide + 1;
+        setSlide({ slide: result, translateX: result * -modalWidth });
+      }
     }
   }
-
-  return (
-    <ModalImage ref={nodeRef}>
-      {project?.attributes?.images?.length > 1 && (
-        <ModalImageActions>
-          <ModalImageAction
-            onClick={(event) => changeImageAction(event, 0)}
-            title="prev image"
-          >
-            <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
-            <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
-          </ModalImageAction>
-          <ModalImageAction
-            onClick={(event) => changeImageAction(event, 1)}
-            title="next image"
-          >
-            <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
-            <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
-          </ModalImageAction>
-        </ModalImageActions>
-      )}
-      {/* Content Images */}
-      <ModalImageContent translateX={slide.translateX}>
-        {project?.attributes?.images?.map((value, index) => {
-          return (
-            <ModalImageContentContent key={index}>
-              <Image
-                alt="project"
-                className={projectsStyled.project}
-                src={`/images/${value.src}`}
-                layout="fill"
-              ></Image>
-            </ModalImageContentContent>
-          );
-        })}
-      </ModalImageContent>
-      {/* Content Count */}
-      <ModalImageCount>
-        {project?.attributes?.images?.map((value, index) => {
-          return (
-            <ModalImageCountCount
-              key={getRandom(index)}
-              opacity={slide.slide === index ? "1" : "0.5"}
-            ></ModalImageCountCount>
-          );
-        })}
-      </ModalImageCount>
-    </ModalImage>
-  );
+  if (project !== undefined) {
+    return (
+      <ModalImage ref={nodeRef}>
+        {project.attributes?.images?.length > 1 && (
+          <ModalImageActions>
+            <ModalImageAction
+              onClick={(event) => changeImageAction(event, 0)}
+              title="prev image"
+            >
+              <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
+              <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
+            </ModalImageAction>
+            <ModalImageAction
+              onClick={(event) => changeImageAction(event, 1)}
+              title="next image"
+            >
+              <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
+              <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
+            </ModalImageAction>
+          </ModalImageActions>
+        )}
+        {/* Content Images */}
+        <ModalImageContent translateX={slide.translateX}>
+          {project.attributes.images.map((value, index) => {
+            return (
+              <ModalImageContentContent key={index}>
+                <Image
+                  alt="project"
+                  className={projectsStyled.project}
+                  src={`/images/${value.src}`}
+                  layout="fill"
+                ></Image>
+              </ModalImageContentContent>
+            );
+          })}
+        </ModalImageContent>
+        {/* Content Count */}
+        <ModalImageCount>
+          {project.attributes.images.map((value, index) => {
+            return (
+              <ModalImageCountCount
+                key={getRandom(index)}
+                opacity={slide.slide === index ? "1" : "0.5"}
+              ></ModalImageCountCount>
+            );
+          })}
+        </ModalImageCount>
+      </ModalImage>
+    );
+  } else return null
 }
 
 function reducer(state: State, action: Action): State {

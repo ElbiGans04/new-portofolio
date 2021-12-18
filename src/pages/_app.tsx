@@ -9,11 +9,6 @@ import ErrorComponent from '@components/Error'
 import React, {useState, ErrorInfo, ReactNode} from 'react'
 import {AppProps} from 'next/app'
 
-declare namespace JSX {
-  interface ElementAttributesProperty {
-    children: {}; // specify the property name to use
-  }
-}
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
