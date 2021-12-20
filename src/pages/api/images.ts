@@ -1,7 +1,5 @@
-import { NextApiResponse } from 'next';
 import Controller from '@controllers/images';
-import type { DocErrors, DocMeta } from '@typess/jsonApi';
-import type { NextIronSessionRequest } from '../../types/nextIronSession';
+import type { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 
 export const config = {
     api: {
@@ -9,7 +7,7 @@ export const config = {
     },
   };
 
-export default async function images (req: NextIronSessionRequest, res: NextApiResponse<DocMeta | DocErrors>) {
+export default async function images (req: RequestControllerRouter, res: RespondControllerRouter) {
     const contentType = req.headers['content-type']?.split(';')[0];
 
     if (contentType === 'multipart/form-data' && req.method === 'POST') {

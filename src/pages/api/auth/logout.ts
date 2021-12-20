@@ -1,9 +1,7 @@
-import { NextApiResponse } from 'next';
 import withSession from "@middleware/withSession";
-import type { DocMeta } from '@types/jsonApi/index';
-import type { NextIronSessionRequest } from '@typess/nextIronSession';
+import type { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 
-export default withSession(async function (req: NextIronSessionRequest, res:NextApiResponse<DocMeta>) {  
+export default withSession(async function (req: RequestControllerRouter, res:RespondControllerRouter) {  
   await req.session.destroy();
 
   res.setHeader('cache-control', 'no-store, max-age=0');

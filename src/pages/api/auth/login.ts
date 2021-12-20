@@ -1,10 +1,8 @@
-import { NextApiResponse } from 'next';
 import Controller from '@controllers/login';
 import withSession from "@middleware/withSession";
-import type { DocErrors, DocMeta } from '@typess/jsonApi/index';
-import type { NextIronSessionRequest } from '@typess/nextIronSession';
+import type { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 
-export default withSession(async function (req:NextIronSessionRequest, res:NextApiResponse<DocErrors | DocMeta>) {
+export default withSession(async function (req:RequestControllerRouter, res:RespondControllerRouter) {
   if (req.method === 'POST') {
    await Controller.postLogin(req, res); 
    return

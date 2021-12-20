@@ -1,13 +1,12 @@
-import { NextApiResponse } from "next";
-import { RequestControllerRouter } from "@typess/controllersRoutersApi";
+import { RequestControllerRouter, RespondControllerRouter } from "@typess/controllersRoutersApi";
 // Helper method to wait for a middleware to execute before continuing
 // And to throw an error when an error happens in a middleware
 export default function runMiddleware(
   req: RequestControllerRouter,
-  res: NextApiResponse,
+  res: RespondControllerRouter,
   fn: (
     req: RequestControllerRouter,
-    res: NextApiResponse,
+    res: RespondControllerRouter,
     fn: (result?: any) => void
   ) => void
 ): Promise<any> {

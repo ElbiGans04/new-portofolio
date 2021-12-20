@@ -6,7 +6,7 @@ import Controller from '@controllers/projects'
 import { NextApiResponse } from 'next'
 import type { NextIronSessionRequest } from '@typess/nextIronSession'
 import { Doc, DocErrors, DocMeta } from "@typess/jsonApi";
-
+import type { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 
 export const config = {
   api: {
@@ -15,7 +15,7 @@ export const config = {
 };
 
 
-export default withIronSession(async function handler(req:NextIronSessionRequest, res:NextApiResponse<Doc | DocMeta | DocErrors>) {
+export default withIronSession(async function handler(req:RequestControllerRouter, res:RespondControllerRouter) {
   const { method } = req;
 
   try {

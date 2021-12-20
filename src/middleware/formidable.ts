@@ -1,6 +1,5 @@
-import { RequestControllerRouter } from '@typess/controllersRoutersApi';
+import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 import formidable from 'formidable';
-import { NextApiResponse } from 'next';
 import path from 'path';
 const form = formidable({
     multiples: true,
@@ -16,7 +15,7 @@ const form = formidable({
 
 export default form;
 
-export function formidableHandler (req: RequestControllerRouter, res: NextApiResponse, fn: (arg?: any) => void) {
+export function formidableHandler (req: RequestControllerRouter, res: RespondControllerRouter, fn: (arg?: any) => void) {
     form.parse(req, (err, fields, files) => {
       if (err) return fn(err);
       

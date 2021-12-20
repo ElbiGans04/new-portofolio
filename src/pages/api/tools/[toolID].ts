@@ -1,11 +1,8 @@
-import { NextApiResponse } from 'next';
 import Controller from '@controllers/tools';
 import dbConnect from "@database/connection";
 import withIronSession from "@middleware/withSession";
 import routerErrorHandling from "@module/routerErrorHandling";
-import { Doc, DocErrors, DocMeta } from "@typess/jsonApi";
-import type { NextIronSessionRequest } from '@typess/nextIronSession';
-
+import type { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 export const config = {
   api: {
     bodyParser: false,
@@ -13,7 +10,7 @@ export const config = {
 };
 
 
-export default withIronSession(async function Handler(req: NextIronSessionRequest, res: NextApiResponse<Doc | DocMeta | DocErrors>) {
+export default withIronSession(async function Handler(req: RequestControllerRouter, res: RespondControllerRouter) {
   try {
     const { method } = req;
     await dbConnect();
