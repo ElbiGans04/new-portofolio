@@ -121,7 +121,7 @@ function Projects() {
   const project = state.projects[modal.index];
   const disabled = state.status !== "iddle" ? true : false;
   const className = state.status !== "iddle" ? "cursor-notAllowed" : "";
-  
+
   useEffect(() => {
     // Mencegah kondisi balapan
     // Mencegah react menyetel state ketika sudah pindah halaman
@@ -147,6 +147,7 @@ function Projects() {
           });
         }
       } catch (err) {
+        console.log(err);
         if (!didCancel) dispatch({ type: "request/error" });
       }
     }
@@ -186,8 +187,28 @@ function Projects() {
     dispatch({ type: "action/change", payload: { actions: newActiveActions } });
   };
 
+  if (state.status === "error") {
+    return (
+      <React.Fragment>
+        <Heading minSize={1} size={1.5}>
+          <span>Failed to retrieve data:(</span>
+        </Heading>
+        <Action onClick={() => dispatch({ type: "request/refetch" })}>
+          <Heading minSize={1} size={1.2}>
+            <span>Click here to try to retrieve data again</span>
+          </Heading>
+        </Action>
+      </React.Fragment>
+    );
+  }
+
+  if (state.status === "loading") {
+    return <div className="loader"></div>;
+  }
+
   return (
     <React.Fragment>
+      {/* Saat modal terlihat matikan overflow untuk body */}
       {modal.open && <GlobalStyle />}
       <Container>
         <Head>
@@ -216,30 +237,67 @@ function Projects() {
                   </Heading>
                 </ActionActive>
               );
-            } else {
-              return (
-                <Action
-                  className={className}
-                  disabled={disabled}
-                  key={index}
-                  onClick={(event) =>
-                    handleAction(event, value.type, value.value)
-                  }
-                >
-                  <Heading minSize={1} size={1.2}>
-                    {value.text}
-                  </Heading>
-                </Action>
-              );
-            }
+            } 
+            
+            return (
+              <Action
+                className={className}
+                disabled={disabled}
+                key={index}
+                onClick={(event) =>
+                  handleAction(event, value.type, value.value)
+                }
+              >
+                <Heading minSize={1} size={1.2}>
+                  {value.text}
+                </Heading>
+              </Action>
+            );
           })}
         </ContainerActions>
         {/* End of Action Components */}
+        
+        {/* Inti Content */}
+        <ContainerProjects>
+          {project &&
+            state.projects.map((value, index) => {
+              return (
+                <Project
+                  onClick={() => {
+                    setModal({ open: true, index });
+                  }}
+                  key={index}
+                  className={className}
+                  disabled={disabled}
+                >
+                  <ProjectImageContainer>
+                    {
+                      value.attributes.images[0] && (
+                        <Image
+                          alt="project"
+                          className={projectsStyled.project}
+                          src={`/images/${value.attributes.images[0].src}`}
+                          layout="fill"
+                        />
+                      )
+                    }
+                  </ProjectImageContainer>
+                  <ProjectTextContainer>
+                    <Heading minSize={1} size={1.3}>
+                      <span>{upperFirstWord(value.attributes.title)}</span>
+                    </Heading>
+                    <Heading minSize={1} size={1}>
+                      {upperFirstWord(value.attributes.typeProject.name)}
+                    </Heading>
+                  </ProjectTextContainer>
+                </Project>
+              );
+            })}
+        </ContainerProjects>
+        {/* Akhir dari inti Content */}
 
-
-        {/* Jika project tidak kosong */}
-        {
-          project && (
+        {/* Modal */}
+        {project && (
           <CSSTransition
             nodeRef={nodeRef}
             classNames="modal"
@@ -253,116 +311,61 @@ function Projects() {
               updateState={setModal}
               defaultState={{ open: false, index: 0 }}
             >
-                <ImageSlider showModal={modal.open} project={project}></ImageSlider>
-                <ModalContentContent>
-                  <Heading minSize={1.5} size={2}>
-                    <span>{upperFirstWord(project?.attributes?.title)}</span>
-                  </Heading>
-                  <ModalContentContentList>
-                    <ModalContentContentListTitle>
-                      <Heading minSize={1} size={1}>
-                        Development Date Process
-                      </Heading>
-                      <Heading minSize={1} size={1}>
-                        Tools
-                      </Heading>
-                      <Heading minSize={1} size={1}>
-                        Project Type
-                      </Heading>
-                    </ModalContentContentListTitle>
-                    <ModalContentContentListValue>
-                      <Heading minSize={1} size={1}>
-                        {":"}&nbsp;{getFullDate(project?.attributes?.startDate)}
-                        {" - "}
-                        {getFullDate(project?.attributes?.endDate)}
-                      </Heading>
-                      <Heading minSize={1} size={1}>
-                        {":"}&nbsp; {getTool(project?.attributes?.tools)}
-                      </Heading>
-                      <Heading minSize={1} size={1}>
-                        {":"}&nbsp;
-                        {upperFirstWord(project?.attributes?.typeProject.name)}
-                      </Heading>
-                    </ModalContentContentListValue>
-                  </ModalContentContentList>
-                  <Paragraph
-                    minSize={1}
-                    size={1}
-                    align="start"
-                    textIndent="2rem"
-                    fontWeight="normal"
-                    lineHeight="1.5rem"
-                  >
-                    {project?.attributes?.description}.{" "}
-                    {project?.attributes?.url && (
-                      <GoTo href={project?.attributes?.url}>
-                        {project?.attributes?.url}
-                      </GoTo>
-                    )}
-                  </Paragraph>
-                </ModalContentContent>
+              <ImageSlider
+                showModal={modal.open}
+                project={project}
+              ></ImageSlider>
+              <ModalContentContent>
+                <Heading minSize={1.5} size={2}>
+                  <span>{upperFirstWord(project.attributes.title)}</span>
+                </Heading>
+                <ModalContentContentList>
+                  <ModalContentContentListTitle>
+                    <Heading minSize={1} size={1}>
+                      Development Date Process
+                    </Heading>
+                    <Heading minSize={1} size={1}>
+                      Tools
+                    </Heading>
+                    <Heading minSize={1} size={1}>
+                      Project Type
+                    </Heading>
+                  </ModalContentContentListTitle>
+                  <ModalContentContentListValue>
+                    <Heading minSize={1} size={1}>
+                      {":"}&nbsp;{getFullDate(project.attributes.startDate)}
+                      {" - "}
+                      {getFullDate(project.attributes.endDate)}
+                    </Heading>
+                    <Heading minSize={1} size={1}>
+                      {":"}&nbsp; {getStringOfTools(project.attributes.tools)}
+                    </Heading>
+                    <Heading minSize={1} size={1}>
+                      {":"}&nbsp;
+                      {upperFirstWord(project.attributes.typeProject.name)}
+                    </Heading>
+                  </ModalContentContentListValue>
+                </ModalContentContentList>
+                <Paragraph
+                  minSize={1}
+                  size={1}
+                  align="start"
+                  textIndent="2rem"
+                  fontWeight="normal"
+                  lineHeight="1.5rem"
+                >
+                  {project.attributes.description}.{" "}
+                  {project.attributes.url && (
+                    <GoTo href={project.attributes.url}>
+                      {project.attributes.url}
+                    </GoTo>
+                  )}
+                </Paragraph>
+              </ModalContentContent>
             </Modal>
           </CSSTransition>
-          )
-        }
-
-        {/* Modal */}
-        {/* end of Modal */}
-
-        {/* Error handling */}
-        {state.status === "error" ? (
-          <>
-            <Heading minSize={1} size={1.5}>
-              <span>Failed to retrieve data:(</span>
-            </Heading>
-            <Action onClick={() => dispatch({ type: "request/refetch" })}>
-              <Heading minSize={1} size={1.2}>
-                <span>Click here to try to retrieve data again</span>
-              </Heading>
-            </Action>
-          </>
-        ) : (
-          <React.Fragment>
-            {state.status === "loading" ? (
-              <div className="loader"></div>
-            ) : (
-              <ContainerProjects>
-                {project !== undefined && state.projects.map((value, index) => {
-                  console.log(value)
-                  return (
-                    <Project
-                      onClick={() => {
-                        setModal({ open: true, index });
-                      }}
-                      key={index}
-                      className={className}
-                      disabled={disabled}
-                    >
-                      <ProjectImageContainer>
-                        <Image
-                          alt="project"
-                          className={projectsStyled.project}
-                          src={`/images/${value.attributes.images[0]?.src}`}
-                          layout="fill"
-                        ></Image>
-                      </ProjectImageContainer>
-                      <ProjectTextContainer>
-                        <Heading minSize={1} size={1.3}>
-                          <span>
-                            {upperFirstWord(value.attributes.title)}
-                          </span>
-                        </Heading>
-                        <Heading minSize={1} size={1}>
-                          {upperFirstWord(value.attributes.typeProject.name)}
-                        </Heading>
-                      </ProjectTextContainer>
-                    </Project>
-                  );
-                })}
-              </ContainerProjects>
-            )}
-          </React.Fragment>
         )}
+        {/* end of Modal */}
       </Container>
     </React.Fragment>
   );
@@ -370,7 +373,13 @@ function Projects() {
 
 export default Projects;
 
-function ImageSlider({ showModal, project }: {showModal: boolean, project: StateProjects[number] | undefined}) {
+function ImageSlider({
+  showModal,
+  project,
+}: {
+  showModal: boolean;
+  project: StateProjects[number];
+}) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const nodeRef = useRef(null);
 
@@ -379,76 +388,76 @@ function ImageSlider({ showModal, project }: {showModal: boolean, project: State
     if (!showModal) setSlide({ slide: 0, translateX: 0 });
   }, [showModal, setSlide]);
 
-  function changeImageAction(event: MouseEvent, action: number):void {
-    if (project) {
-      if (project.attributes.images.length > 1 && event.currentTarget.parentElement !== null && event.currentTarget.parentElement.parentElement !== null) {
-        const modal = event.currentTarget.parentElement.parentElement;
-        const { width: modalWidth } = modal.getBoundingClientRect();
-  
-        // Jika nilai berikutnya ditambah lalu melebihi panjang gambar maka nilai akan menjadi ke 0
-        // Jika nilai berikutnya dikurang lalu kurang dari 0 maka nilai akan menjadi jumlah gambar
-        const result =
-          action === 0
-            ? slide.slide - 1 < 0
-              ? project.attributes.images.length - 1
-              : slide.slide - 1
-            : slide.slide + 1 > project.attributes.images.length - 1
-            ? 0
-            : slide.slide + 1;
-        setSlide({ slide: result, translateX: result * -modalWidth });
-      }
+  function changeImageAction(event: MouseEvent, action: number): void {
+    if (
+      project.attributes.images.length > 1 &&
+      event.currentTarget.parentElement !== null &&
+      event.currentTarget.parentElement.parentElement !== null
+    ) {
+      const modal = event.currentTarget.parentElement.parentElement;
+      const { width: modalWidth } = modal.getBoundingClientRect();
+
+      // Jika nilai berikutnya ditambah lalu melebihi panjang gambar maka nilai akan menjadi ke 0
+      // Jika nilai berikutnya dikurang lalu kurang dari 0 maka nilai akan menjadi jumlah gambar
+      const result =
+        action === 0
+          ? slide.slide - 1 < 0
+            ? project.attributes.images.length - 1
+            : slide.slide - 1
+          : slide.slide + 1 > project.attributes.images.length - 1
+          ? 0
+          : slide.slide + 1;
+      setSlide({ slide: result, translateX: result * -modalWidth });
     }
   }
-  if (project !== undefined) {
-    return (
-      <ModalImage ref={nodeRef}>
-        {project.attributes?.images?.length > 1 && (
-          <ModalImageActions>
-            <ModalImageAction
-              onClick={(event) => changeImageAction(event, 0)}
-              title="prev image"
-            >
-              <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
-              <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
-            </ModalImageAction>
-            <ModalImageAction
-              onClick={(event) => changeImageAction(event, 1)}
-              title="next image"
-            >
-              <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
-              <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
-            </ModalImageAction>
-          </ModalImageActions>
-        )}
-        {/* Content Images */}
-        <ModalImageContent translateX={slide.translateX}>
-          {project.attributes.images.map((value, index) => {
-            return (
-              <ModalImageContentContent key={index}>
-                <Image
-                  alt="project"
-                  className={projectsStyled.project}
-                  src={`/images/${value.src}`}
-                  layout="fill"
-                ></Image>
-              </ModalImageContentContent>
-            );
-          })}
-        </ModalImageContent>
-        {/* Content Count */}
-        <ModalImageCount>
-          {project.attributes.images.map((value, index) => {
-            return (
-              <ModalImageCountCount
-                key={getRandom(index)}
-                opacity={slide.slide === index ? "1" : "0.5"}
-              ></ModalImageCountCount>
-            );
-          })}
-        </ModalImageCount>
-      </ModalImage>
-    );
-  } else return null
+  return (
+    <ModalImage ref={nodeRef}>
+      {project.attributes.images.length > 1 && (
+        <ModalImageActions>
+          <ModalImageAction
+            onClick={(event) => changeImageAction(event, 0)}
+            title="prev image"
+          >
+            <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
+            <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
+          </ModalImageAction>
+          <ModalImageAction
+            onClick={(event) => changeImageAction(event, 1)}
+            title="next image"
+          >
+            <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
+            <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
+          </ModalImageAction>
+        </ModalImageActions>
+      )}
+      {/* Content Images */}
+      <ModalImageContent translateX={slide.translateX}>
+        {project.attributes.images.map((value, index) => {
+          return (
+            <ModalImageContentContent key={index}>
+              <Image
+                alt="project"
+                className={projectsStyled.project}
+                src={`/images/${value.src}`}
+                layout="fill"
+              ></Image>
+            </ModalImageContentContent>
+          );
+        })}
+      </ModalImageContent>
+      {/* Content Count */}
+      <ModalImageCount>
+        {project.attributes.images.map((value, index) => {
+          return (
+            <ModalImageCountCount
+              key={getRandom(index)}
+              opacity={slide.slide === index ? "1" : "0.5"}
+            ></ModalImageCountCount>
+          );
+        })}
+      </ModalImageCount>
+    </ModalImage>
+  );
 }
 
 function reducer(state: State, action: Action): State {
@@ -482,7 +491,7 @@ function getFullDate(data: string) {
   return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 }
 
-function getTool(
+function getStringOfTools(
   data: Array<{
     _id: string;
     name: string;
@@ -490,16 +499,14 @@ function getTool(
     _v: number;
   }>
 ) {
-  if (data) {
-    let result = ``;
-    data.forEach((value, index) => {
-      result += `${upperFirstWord(value.name)}`;
-      if (value.as) result += ` as ${value.as}`;
-      if (index !== data.length - 1) result += `, `;
-    });
+  let result = ``;
+  data.forEach((value, index) => {
+    result += `${upperFirstWord(value.name)}`;
+    if (value.as) result += ` as ${value.as}`;
+    if (index !== data.length - 1) result += `, `;
+  });
 
-    return result;
-  }
+  return result;
 }
 
 const GlobalStyle = createGlobalStyle`
