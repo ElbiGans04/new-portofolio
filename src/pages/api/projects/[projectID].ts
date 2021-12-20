@@ -26,6 +26,19 @@ export default withIronSession(async function handler(req: RequestControllerRout
 
       switch (method) {
         case "PATCH": {
+          if (req.headers["content-type"] !== "application/vnd.api+json")
+            return res
+              .status(406)
+              .json({
+                errors: [
+                  {
+                    title: "content-type headers not supported",
+                    detail:
+                      "if you try to send JSON:API document please you try to change the content-type headers to application/vnd.api+json",
+                    status: "406",
+                  },
+                ],
+              });
           await Controller.patchProject(req, res);
           break;
         }

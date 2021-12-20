@@ -23,7 +23,20 @@ export default withIronSession(async function Handler (req: RequestControllerRou
             if (!req.session.get('user')) return res.status(403).json({errors: [{title: 'please login ahead', detail: `can't fulfill the request because access is not allowed`, status: '403'}]});
 
             switch (method) {
-                case 'POST': {               
+                case 'POST': {         
+                    if (req.headers["content-type"] !== "application/vnd.api+json")
+                        return res
+                        .status(406)
+                        .json({
+                            errors: [
+                            {
+                                title: "content-type headers not supported",
+                                detail:
+                                "if you try to send JSON:API document please you try to change the content-type headers to application/vnd.api+json",
+                                status: "406",
+                            },
+                            ],
+                        });      
                     await Controller.postTools(req, res);
                     break;
                 }
