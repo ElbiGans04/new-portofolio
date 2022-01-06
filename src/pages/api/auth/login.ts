@@ -5,6 +5,12 @@ import type {
   RespondControllerRouter,
 } from "@typess/controllersRoutersApi";
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default withSession(async function (
   req: RequestControllerRouter,
   res: RespondControllerRouter

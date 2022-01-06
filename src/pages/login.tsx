@@ -27,18 +27,22 @@ export default function Login () {
     async function onSubmit (event: EventTargetType) {
         try {
             event.preventDefault()
-            const body = new URLSearchParams();
         
             // Value
             if (event.currentTarget !== null) {
-                body.append('email', event.currentTarget.email.value);
-                body.append('password', event.currentTarget.password.value);
+                let body = {
+                    type: 'account',
+                    attributes : {
+                        email : event.currentTarget.email.value,
+                        password: event.currentTarget.password.value
+                    }
+                }
                 
                 let request = await fetch('/api/auth/login', {
                     method: 'post',
-                    body: body.toString(),
+                    body: JSON.stringify(body),
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/vnd.api+json',
                     },
                 });
 
