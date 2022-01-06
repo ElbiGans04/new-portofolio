@@ -67,11 +67,11 @@ export default function Login () {
                 <MessageComponent setMessage={setMessage} message={message} />
                 <FormRow>
                     <Label size={1} minSize={1} htmlFor="email">Email :</Label>
-                    <Input placeholder="Enter your email" type="email" id="email" name="email" required></Input>
+                    <Input placeholder="Enter your email" type="email" id="email" name="email" ></Input>
                 </FormRow>
                 <FormRow>
                     <Label size={1} minSize={1} htmlFor="password">Password :</Label>
-                    <Input placeholder="Enter your password" type="password" id="password" name="password" required></Input>
+                    <Input placeholder="Enter your password" type="password" id="password" name="password" ></Input>
                 </FormRow>
                 
                     <NewButton type="submit">Enter</NewButton>              

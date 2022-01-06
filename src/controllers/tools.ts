@@ -5,7 +5,7 @@ import runMiddleware from "@middleware/runMiddleware";
 import formatResource from "@module/formatResource";
 import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 import ToolValidationSchema from "@validation/tools";
-
+import {formidableHandler} from '@middleware/formidable'
 class Tools {
     async getTool (req: RequestControllerRouter, res: RespondControllerRouter) {
       const { toolID } = req.query;
@@ -27,7 +27,7 @@ class Tools {
     }
 
     async postTools(req: RequestControllerRouter, res: RespondControllerRouter) {
-      await runMiddleware(req, res, bodyParse.json({type: 'application/vnd.api+json'}));
+      await runMiddleware(req, res, formidableHandler);
       const valid = joi.attempt(req.body, ToolValidationSchema);
       const tool = new ToolsSchema(valid.attributes);
       await tool.save();
@@ -38,7 +38,7 @@ class Tools {
     }
 
     async patchTool (req: RequestControllerRouter, res: RespondControllerRouter) {
-        await runMiddleware(req, res, bodyParse.json({type: 'application/vnd.api+json'}));
+        await runMiddleware(req, res, formidableHandler);
         const { toolID } = req.query;
         let valid = joi.attempt(req.body, ToolValidationSchema);
 

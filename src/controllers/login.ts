@@ -1,10 +1,14 @@
 import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 import runMiddleware from '@middleware/runMiddleware';
-import bodyParser from 'body-parser';
+import {formidableHandler} from '@middleware/formidable'
+
 class Login {
     async postLogin (req: RequestControllerRouter, res: RespondControllerRouter) {
-        await runMiddleware(req, res, bodyParser.json({type: 'application/vnd.api+json'}));
-        const { attributes } = req.body as {type: string, attributes: {email: string, password: string }};
+        await runMiddleware(req, res, formidableHandler);
+    
+        const { attributes } = req.body;
+
+        if (!attributes) return res.status(406).json({ errors: [{ title: "Entity not found", detail: 'This happens because the email and password not sent to server', status: '406' }] });
   
         if (process.env.EMAIL !== attributes.email || process.env.PW !== attributes.password)
           return res.status(404).json({ errors: [{ title: "password or email does not match", detail: 'This happens because the email and password sent is not the same as the one stored', status: '404' }] });

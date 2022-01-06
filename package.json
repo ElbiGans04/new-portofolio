@@ -10,7 +10,6 @@
     "test2": "ts-node test.ts"
   },
   "dependencies": {
-    "body-parser": "^1.19.0",
     "formidable": "^2.0.1",
     "joi": "^17.4.2",
     "mongoose": "^5.13.8",

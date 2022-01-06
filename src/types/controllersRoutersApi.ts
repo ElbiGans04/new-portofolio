@@ -1,11 +1,10 @@
+import { Doc, DocErrors, DocMeta, ResourceObjectForSend } from "@typess/jsonApi";
+import { Files } from 'formidable';
 import { NextApiRequest, NextApiResponse } from "next";
-import {Fields, Files} from 'formidable'
-import { Doc, DocErrors, DocMeta } from "@typess/jsonApi";
 import { Session } from "next-iron-session";
-
 export interface RequestControllerRouter extends NextApiRequest{
     files: Files,
-    body: Fields | null,
+    body: ResourceObjectForSend,
     session: Session
 }
 
