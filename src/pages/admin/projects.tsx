@@ -174,7 +174,7 @@ function SwitchModal({
                 id="title"
                 placeholder="enter the project title"
                 name="title"
-                required
+                
               ></Input>
             </ModalFormContentRow>
 
@@ -185,7 +185,7 @@ function SwitchModal({
                 id="startDate"
                 placeholder="enter the start date of development"
                 name="startDate"
-                required
+                
               ></Input>
             </ModalFormContentRow>
 
@@ -196,7 +196,7 @@ function SwitchModal({
                 type="date"
                 placeholder="enter the end date of development"
                 name="endDate"
-                required
+                
               ></Input>
             </ModalFormContentRow>
 
@@ -218,7 +218,7 @@ function SwitchModal({
                 id="url"
                 placeholder="enter url"
                 name="url"
-                required
+                
               ></Input>
             </ModalFormContentRow>
 
@@ -229,7 +229,7 @@ function SwitchModal({
                 id="description"
                 name="description"
                 placeholder="enter description of project"
-                required
+                
               ></Input>
             </ModalFormContentRow>
 
@@ -242,7 +242,7 @@ function SwitchModal({
                     type="radio"
                     id="work"
                     value="A2"
-                    required
+                    
                   ></Input>
                   <Label size={1} minSize={1} htmlFor="work">Work project</Label>
                 </Checkbox>
@@ -252,7 +252,7 @@ function SwitchModal({
                     type="radio"
                     id="personal"
                     value="A1"
-                    required
+                    
                   ></Input>
                   <Label size={1} minSize={1} htmlFor="work">Personal Project</Label>
                 </Checkbox>
@@ -442,10 +442,23 @@ async function onSubmit(event: React.FormEvent<HTMLFormElement>, dispatch: Dispa
 
     for (let [fieldName, fieldValue] of form2.entries()) {
       if (document.attributes) {
-        document.attributes[fieldName] = fieldValue
-      }
-    }
+        // Check Jika tools properti sudah diisi
+        if (document.attributes.tools) {
+          // Jika sudah diganti sebelumnya
+          if (Array.isArray(document.attributes.tools)) {
+            document.attributes.tools.push(fieldValue as OObject);
+          } else {
+            document.attributes.tools = [document.attributes.tools as OObject, fieldValue as OObject];
+          }
 
+          continue;
+          
+        };
+
+        document.attributes[fieldName] = fieldValue;
+      }
+    } 
+    
     // Logic
     dispatch({ type: "modal/request/start" });
     for (let i = 0; i <  fileImage.length; i++) {

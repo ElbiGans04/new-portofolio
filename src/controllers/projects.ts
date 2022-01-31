@@ -83,7 +83,7 @@ class Projects {
         throw { title: "invalid tool id", code: 404 };
       }
     }
-
+    
     // Simpan Ke database
     const project = new Project(validReqBody.attributes);
 
@@ -108,7 +108,6 @@ class Projects {
     // Pindahkan Gambar
     const images = req.body.attributes.images;
     if (images) {
-      console.log(images)
       if (Array.isArray(images)) {
         let validFormat = true;
         // Check jika ada yang formatnya bukan string
@@ -134,7 +133,7 @@ class Projects {
     return res.end(
       JSON.stringify({
         meta: { code: 200, title: "The project has created" },
-        data: formatResource(project, Project.modelName),
+        // data: formatResource(project, Project.modelName),
       })
     );
   }
