@@ -41,6 +41,7 @@ export function reducer(state: admin, action: action): admin {
         ...state,
         status: "iddle",
         modal: null,
+        message: null
       };
     };
     default: {

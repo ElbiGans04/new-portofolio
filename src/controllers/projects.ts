@@ -1,11 +1,14 @@
 import Project from "@database/schemas/projects";
 import Tools from "@database/schemas/tools";
 import TypeProject from "@database/schemas/typeProject";
-import { formidableHandler } from '@middleware/formidable';
+import { formidableHandler } from "@middleware/formidable";
 import runMiddleware from "@middleware/runMiddleware";
 import { moveImages } from "@module/files";
 import formatResource from "@module/formatResource";
-import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
+import {
+  RequestControllerRouter,
+  RespondControllerRouter
+} from "@typess/controllersRoutersApi";
 import ProjectValidationSchema from "@validation/projects";
 import fsPromise from "fs/promises";
 import Joi from "joi";
@@ -14,7 +17,7 @@ const pathImage = path.resolve(process.cwd(), "public/images");
 
 class Projects {
   async getProject(req: RequestControllerRouter, res: RespondControllerRouter) {
-    const { projectID } = req.query as {projectID: string};
+    const { projectID } = req.query as { projectID: string };
     const result = await Project.findById(projectID)
       .populate("tools")
       .populate("typeProject");
@@ -32,7 +35,10 @@ class Projects {
     );
   }
 
-  async getProjects(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async getProjects(
+    req: RequestControllerRouter,
+    res: RespondControllerRouter
+  ) {
     const { type = "ALL", order = "ASC" } = req.query;
     let results = await Project.find()
       .sort({ title: order === "ASC" ? 1 : -1 })
@@ -49,12 +55,11 @@ class Projects {
     );
   }
 
-  async postProjects(req: RequestControllerRouter, res: RespondControllerRouter) {
-    await runMiddleware(
-      req,
-      res,
-      formidableHandler
-    );
+  async postProjects(
+    req: RequestControllerRouter,
+    res: RespondControllerRouter
+  ) {
+    await runMiddleware(req, res, formidableHandler);
 
     // Validasi
     const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
@@ -84,8 +89,42 @@ class Projects {
 
     await project.save();
 
+    if (
+      typeof req.body.attributes !== "object" ||
+      Array.isArray(req.body.attributes) ||
+      req.body.attributes === null
+    )
+      return res.status(406).json({
+        errors: [
+          {
+            title: "Entity not valid",
+            detail:
+              "This happens because Entity not sent to server or not valid",
+            status: "406",
+          },
+        ],
+      });
+
     // Pindahkan Gambar
-    if (req.body.attributes.images) await moveImages(req.body.attributes.images);
+    const images = req.body.attributes.images;
+    if (images) {
+      console.log(images)
+      if (Array.isArray(images)) {
+        let validFormat = true;
+        // Check jika ada yang formatnya bukan string
+        images.forEach((image) => {
+          if (
+            typeof image === "object" &&
+            !Array.isArray(image) &&
+            image !== null
+          ) {
+            if (typeof image.src !== "string") validFormat = false;
+          } else validFormat = false;
+        });
+
+        if (validFormat) await moveImages(images as { src: string }[]);
+      }
+    }
 
     // atur headers
     res.setHeader("Location", `/api/projects/${project._id}`);
@@ -100,16 +139,15 @@ class Projects {
     );
   }
 
-  async patchProject(req: RequestControllerRouter, res: RespondControllerRouter) {
-    await runMiddleware(
-      req,
-      res,
-      formidableHandler
-    );
+  async patchProject(
+    req: RequestControllerRouter,
+    res: RespondControllerRouter
+  ) {
+    await runMiddleware(req, res, formidableHandler);
 
     const { projectID } = req.query;
 
-    console.log(req.body)
+    console.log(req.body);
 
     // Validasi
     const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
@@ -152,14 +190,46 @@ class Projects {
       throw { title: "project not found", code: 404 };
     }
 
-    // Hapus gambar lama
-    if (req.body.attributes.images.length > 0) {
-      for (let image of result2Old.images) {
-        await fsPromise.unlink(`${pathImage}/${image.src}`);
-      }
+    if (
+      typeof req.body.attributes !== "object" ||
+      Array.isArray(req.body.attributes) ||
+      req.body.attributes === null
+    )
+      return res.status(406).json({
+        errors: [
+          {
+            title: "Entity not valid",
+            detail:
+              "This happens because Entity not sent to server or not valid",
+            status: "406",
+          },
+        ],
+      });
 
-      // pindahkan gambar
-      await moveImages(req.body.attributes.images);
+    // Hapus gambar lama
+    const images = req.body.attributes.images;
+    if (Array.isArray(images)) {
+      if (images.length > 0) {
+        for (let image of result2Old.images) {
+          await fsPromise.unlink(`${pathImage}/${image.get('src') as string}`);
+        }
+
+        // pindahkan gambar
+        let validFormat = true;
+
+        // Check jika ada yang formatnya bukan string
+        images.forEach((image) => {
+          if (
+            typeof image === "object" &&
+            !Array.isArray(image) &&
+            image !== null
+          ) {
+            if (typeof image.src !== "string") validFormat = false;
+          } else validFormat = false;
+        });
+
+        if (validFormat) await moveImages(images as { src: string }[]);
+      }
     }
 
     res.setHeader("content-type", "application/vnd.api+json");
@@ -169,15 +239,18 @@ class Projects {
     );
   }
 
-  async deleteProject(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async deleteProject(
+    req: RequestControllerRouter,
+    res: RespondControllerRouter
+  ) {
     const { projectID } = req.query;
     const result = await Project.findByIdAndDelete(projectID);
-
+  
     if (!result) throw { title: "project not found", code: 404 };
 
     // Hapus imagenya juga
     for (let image of result.images) {
-      await fsPromise.unlink(`${pathImage}/${image.src}`);
+      await fsPromise.unlink(`${pathImage}/${image.get('src') as string}`);
     }
 
     res.setHeader("content-type", "application/vnd.api+json");

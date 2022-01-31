@@ -309,6 +309,7 @@ function getAndFilterColumns(
   visibleColumns: string[],
   visibleValue: number
 ): string[] {
+  if (data === undefined) return []
   if (data.attributes === undefined) return [];
 
   return Object.keys(data.attributes).filter((column) => {

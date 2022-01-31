@@ -1,6 +1,7 @@
 import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
-import formidable from 'formidable';
 import path from 'path';
+import formidable from 'formidable';
+
 const form = formidable({
     multiples: true,
     filename: (name, ext, part, form) => {
@@ -18,10 +19,10 @@ export default form;
 export function formidableHandler (req: RequestControllerRouter, res: RespondControllerRouter, fn: (arg?: any) => void) {
     form.parse(req, (err, fields, files) => {
       if (err) return fn(err);
-      
-      // Jika ga errror
-      req.files = files;
-      req.body = fields
+
+      // Masukan kedalam properti agar dapat diakses dikemudian
+      req.files = files
+      req.body = fields;
       fn();
     })
 }

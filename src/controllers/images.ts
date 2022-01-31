@@ -1,13 +1,15 @@
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from "@middleware/runMiddleware";
 import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
+
 class Images {
     async postImages(req: RequestControllerRouter, res: RespondControllerRouter) {
         await runMiddleware(req, res, formidableHandler);
-        let images = [] as {src: string}[];
+      
+        let images: Array<{src: string}> = [];
         
         // Lakukan looping
-        if (req.files.images) {
+        if (req.files && req.files.images) {
           if (Array.isArray(req.files.images)) {
             req.files.images.forEach((image) => {
               images.push({src: image.newFilename!});

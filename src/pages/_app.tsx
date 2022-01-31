@@ -42,7 +42,7 @@ function Layout ({children} : {children: ReactNode}) {
 };
 
 
-class ErrorBoundary extends React.Component<{}, { hasError: false }> {
+class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
   constructor(props: {}) {
     super(props);
     this.state = { hasError: false };

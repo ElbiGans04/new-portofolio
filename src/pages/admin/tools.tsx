@@ -1,29 +1,37 @@
-import Head from "next/head";
-import React, {
-  Dispatch,
-  FormEvent, useReducer,
-  useRef,
-  useState
-} from "react";
-import { CSSTransition } from "react-transition-group";
-import { useSWRConfig } from "swr";
 import Admin from "@components/Admin";
 import Button from "@components/Button";
 import Heading from "@components/Heading";
 import Input from "@components/Input";
 import Label from "@components/Label";
 import ModalComponent, {
-  GlobalStyle, ModalAdmin, ModalContent2,
-  ModalFooter, ModalForm,
+  GlobalStyle,
+  ModalAdmin,
+  ModalContent2,
+  ModalFooter,
+  ModalForm,
   ModalFormContent,
   ModalFormContentRow,
-  ModalFormFooter, ModalMain2
+  ModalFormFooter,
+  ModalMain2,
 } from "@components/Modal";
 import Context from "@hooks/context";
 import { reducer } from "@hooks/reducer";
-import {fetcherGeneric} from "@module/fetcher";
+import { fetcherGeneric } from "@module/fetcher";
 import type { action, admin } from "@typess/admin";
-import type { DocMeta, ResourceObjectForSendWithFiles } from "@typess/jsonApi/index";
+import type {
+  DocMeta,
+  ResourceObjectForSendWithFiles,
+} from "@typess/jsonApi/index";
+import Head from "next/head";
+import React, {
+  Dispatch,
+  FormEvent,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
+import { CSSTransition } from "react-transition-group";
+import { useSWRConfig } from "swr";
 
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {
@@ -40,7 +48,7 @@ export default function Tools() {
       visibleColumns: ["_id", "__v"],
     },
   });
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   return (
     <Context.Provider value={state2}>
@@ -129,7 +137,9 @@ function SwitchModal({
     }
     case "update": {
       if (row.columns !== null && row.columnsValue !== null) {
-        const nameValue = row.columnsValue[row.columns.indexOf("name")] as string;
+        const nameValue = row.columnsValue[
+          row.columns.indexOf("name")
+        ] as string;
         const asValue = row.columnsValue[row.columns.indexOf("as")] as string;
         return (
           <ModalForm

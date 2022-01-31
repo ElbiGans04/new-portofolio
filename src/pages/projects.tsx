@@ -18,6 +18,7 @@ import getRandom from "@module/randomNumber";
 
 type StateProjects = Array<{
   id: string;
+  type: string;
   attributes: {
     tools: Array<{
       _id: string;
@@ -71,14 +72,6 @@ type Action =
       };
     };
 
-const initState: State = {
-  // status : iddle, loding, error
-  status: "iddle",
-  projects: [],
-  activeActions: ["ALL", "ASC"],
-  refetch: false,
-};
-
 const listActions: {
   text: string;
   value: ListActionsValue;
@@ -113,7 +106,12 @@ const listActions: {
 
 function Projects() {
   // React hooks
-  const [state, dispatch] = useReducer(reducer, initState);
+  const [state, dispatch] = useReducer(reducer, {
+    status: "iddle",
+    projects: [],
+    activeActions: ["ALL", "ASC"],
+    refetch: false,
+  });
   const [modal, setModal] = useState({ open: false, index: 0 });
   const nodeRef = useRef<HTMLDivElement>(null);
 
@@ -123,7 +121,6 @@ function Projects() {
   const className = state.status !== "iddle" ? "cursor-notAllowed" : "";
 
   useEffect(() => {
-    // Mencegah kondisi balapan
     // Mencegah react menyetel state ketika sudah pindah halaman
     let didCancel = false;
     async function getData() {
@@ -162,21 +159,9 @@ function Projects() {
 
   // Event Handler untuk tombol aksi
   const handleAction = (
-    e: MouseEvent,
     typeButton: ListActionsType,
     buttonValue: ListActionsValue
   ) => {
-    let validValue = false;
-    let validType = false;
-
-    // Check jika nilai valid
-    for (let index = 0; index < listActions.length; index++) {
-      if (listActions[index]["value"] === buttonValue) validValue = true;
-      if (listActions[index]["type"] === typeButton) validType = true;
-    }
-
-    // Untuk sementara kita abaikan dulu jika tidak valid
-    if (!validValue || !validType) return alert("Error invalid value");
 
     // Setel state terbaru
     const newActiveActions = [...state.activeActions];
@@ -210,6 +195,7 @@ function Projects() {
     <React.Fragment>
       {/* Saat modal terlihat matikan overflow untuk body */}
       {modal.open && <GlobalStyle />}
+
       <Container>
         <Head>
           <title>Projects I&apos;ve made</title>
@@ -220,7 +206,6 @@ function Projects() {
         <ContainerActions>
           {listActions.map((value, index) => {
             if (
-              value.value === state.activeActions[0] ||
               value.value === state.activeActions[1]
             ) {
               return (
@@ -228,25 +213,21 @@ function Projects() {
                   className={className}
                   disabled={disabled}
                   key={index}
-                  onClick={(event) =>
-                    handleAction(event, value.type, value.value)
-                  }
+                  onClick={() => handleAction(value.type, value.value)}
                 >
                   <Heading minSize={1} size={1.2}>
                     {value.text}
                   </Heading>
                 </ActionActive>
               );
-            } 
-            
+            }
+
             return (
               <Action
                 className={className}
                 disabled={disabled}
                 key={index}
-                onClick={(event) =>
-                  handleAction(event, value.type, value.value)
-                }
+                onClick={() => handleAction(value.type, value.value)}
               >
                 <Heading minSize={1} size={1.2}>
                   {value.text}
@@ -256,7 +237,7 @@ function Projects() {
           })}
         </ContainerActions>
         {/* End of Action Components */}
-        
+
         {/* Inti Content */}
         <ContainerProjects>
           {project &&
@@ -271,17 +252,16 @@ function Projects() {
                   disabled={disabled}
                 >
                   <ProjectImageContainer>
-                    {
-                      value.attributes.images[0] && (
-                        <Image
-                          alt="project"
-                          className={projectsStyled.project}
-                          src={`/images/${value.attributes.images[0].src}`}
-                          layout="fill"
-                        />
-                      )
-                    }
+                    {value.attributes.images[0] && (
+                      <Image
+                        alt="project"
+                        className={projectsStyled.project}
+                        src={`/images/${value.attributes.images[0].src}`}
+                        layout="fill"
+                      />
+                    )}
                   </ProjectImageContainer>
+
                   <ProjectTextContainer>
                     <Heading minSize={1} size={1.3}>
                       <span>{upperFirstWord(value.attributes.title)}</span>
@@ -381,8 +361,8 @@ function ImageSlider({
   project: StateProjects[number];
 }) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
-  const nodeRef = useRef(null);
-
+  const nodeRef = useRef<HTMLDivElement>(null);
+  
   // Reset state saat modal diclose
   useEffect(() => {
     if (!showModal) setSlide({ slide: 0, translateX: 0 });
@@ -399,14 +379,18 @@ function ImageSlider({
 
       // Jika nilai berikutnya ditambah lalu melebihi panjang gambar maka nilai akan menjadi ke 0
       // Jika nilai berikutnya dikurang lalu kurang dari 0 maka nilai akan menjadi jumlah gambar
-      const result =
-        action === 0
-          ? slide.slide - 1 < 0
-            ? project.attributes.images.length - 1
-            : slide.slide - 1
-          : slide.slide + 1 > project.attributes.images.length - 1
-          ? 0
-          : slide.slide + 1;
+      let result = 0;
+      if ( action === 0 ) {
+        // // Jika hasil Operasi berikutnya kurang dari 0 maka setel ke jumlah gambar dikurangi 1
+        if ( ( slide.slide - 1 ) < 0 ) result = project.attributes.images.length - 1;
+        else result = slide.slide - 1;
+
+      } else {
+        // Jika hasil Operasi berikutnya melebihi panjang gambar
+        if ( ( slide.slide + 1 ) > ( project.attributes.images.length - 1 ) ) result = 0;
+        else result = slide.slide + 1;
+      }
+
       setSlide({ slide: result, translateX: result * -modalWidth });
     }
   }
@@ -430,11 +414,12 @@ function ImageSlider({
           </ModalImageAction>
         </ModalImageActions>
       )}
+
       {/* Content Images */}
       <ModalImageContent translateX={slide.translateX}>
         {project.attributes.images.map((value, index) => {
           return (
-            <ModalImageContentContent key={index}>
+            <ModalImageContentContent key={getRandom(index)}>
               <Image
                 alt="project"
                 className={projectsStyled.project}
@@ -445,6 +430,7 @@ function ImageSlider({
           );
         })}
       </ModalImageContent>
+
       {/* Content Count */}
       <ModalImageCount>
         {project.attributes.images.map((value, index) => {
@@ -482,7 +468,7 @@ function reducer(state: State, action: Action): State {
         refetch: false,
       };
     default:
-      return { ...state };
+      return state;
   }
 }
 

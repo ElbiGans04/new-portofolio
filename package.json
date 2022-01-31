@@ -10,6 +10,7 @@
     "test2": "ts-node test.ts"
   },
   "dependencies": {
+    "@types/formidable": "^2.0.3",
     "formidable": "^2.0.1",
     "joi": "^17.4.2",
     "mongoose": "^5.13.8",
@@ -26,7 +27,6 @@
     "swr": "^1.0.0"
   },
   "devDependencies": {
-    "@types/formidable": "^2.0.0",
     "@types/multer": "^1.4.7",
     "@types/react": "^17.0.34",
     "@types/react-transition-group": "^4.4.4",

@@ -43,9 +43,9 @@ export function ModalAdmin({
   message: string | null;
   Children: () => JSX.Element;
   dispatch: Dispatch<any>;
-}) {
+}): JSX.Element {
   switch (status) {
-    case "loading":
+    case "loading": {
       return (
         <ModalMain2>
           <ModalContent2>
@@ -53,25 +53,30 @@ export function ModalAdmin({
           </ModalContent2>
         </ModalMain2>
       );
-    case "finish":
-      return (
-        <ModalMain2>
-          <ModalContent2>
-            <Heading size={1} minSize={1}>
-              {message}
-            </Heading>
-          </ModalContent2>
-          <ModalFooter>
-            <Button onClick={() => dispatch({ type: "modal/close" })}>
-              CLOSE
-            </Button>
-          </ModalFooter>
-        </ModalMain2>
-      );
-    case "iddle":
+    }
+
+    case "iddle": {
+      if (message) {
+        return (
+          <ModalMain2>
+            <ModalContent2>
+              <Heading size={1} minSize={1}>
+                {message}
+              </Heading>
+            </ModalContent2>
+            <ModalFooter>
+              <Button onClick={() => dispatch({ type: "modal/close" })}>
+                CLOSE
+              </Button>
+            </ModalFooter>
+          </ModalMain2>
+        );
+      };
+      
       return <Children {...props} />;
+    }
     default:
-      throw new Error("not match with anything");
+      return <></>
   }
 }
 

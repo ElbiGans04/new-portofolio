@@ -4,7 +4,7 @@ import type { link } from '@typess/jsonApi/link'
 import type { OObject, OObjectWithFiles } from '@typess/jsonApi/object'
 
 type jsonApi = {
-    version?: string,
+    version: string,
     meta?: meta
 }
 
@@ -15,7 +15,7 @@ type ResourceIdentifierObjects = {
 }
 
 export type ResourceObject = ResourceIdentifierObjects & {
-    attributes?: {
+    attributes: {
         [index: string]: OObject
     },
     relationships?: {
@@ -40,7 +40,7 @@ export type ResourceObjectForSend = {
     id?: string,
     type: string,
     meta?: meta,
-    attributes?: {
+    attributes: {
         [index: string]: OObject
     },
     relationships?: {
@@ -65,7 +65,7 @@ export type ResourceObjectForSendWithFiles = {
     id?: string,
     type: string,
     meta?: meta,
-    attributes?: {
+    attributes: {
         [index: string]: OObjectWithFiles
     },
     relationships?: {
@@ -100,23 +100,10 @@ type baseDoc = {
 }
 
 export type Doc = {
-    data: ResourceObject | null | ResourceObject[],
+    data: ResourceObject | null | ResourceObject[] | never[]
     included?: ResourceObject[],
     meta?: meta
 };
-
-
-export type DocMany = {
-    data: ResourceObject[] | [],
-    included?: ResourceObject[],
-    meta?: meta
-}
-
-export type DocSingle = {
-    data: ResourceObject | null,
-    included?: ResourceObject[],
-    meta?: meta
-}
 
 export type DocMeta = { meta: meta } & baseDoc
 

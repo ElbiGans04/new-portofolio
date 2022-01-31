@@ -1,10 +1,3 @@
-import { Dispatch } from "hoist-non-react-statics/node_modules/@types/react";
-import Head from "next/head";
-import React, { useReducer, useRef, useState } from "react";
-import { IoAddOutline } from "react-icons/io5";
-import { CSSTransition } from "react-transition-group";
-import styled from "styled-components";
-import useSWR, { useSWRConfig } from "swr";
 import Admin from "@components/Admin";
 import Button from "@components/Button";
 import Heading from "@components/Heading";
@@ -19,12 +12,19 @@ import ModalComponent, {
 } from "@components/Modal";
 import Context from "@hooks/context";
 import { reducer } from "@hooks/reducer";
-import fetcher, {fetcherGeneric}  from "@module/fetcher";
+import fetcher, { fetcherGeneric } from "@module/fetcher";
 import getRandom from "@module/randomNumber";
 import changeFirstWord from "@module/upperFirstWord";
 import type { admin } from '@typess/admin';
 import type { Doc, DocErrors, DocMeta, ResourceObject, ResourceObjectForSendWithFiles } from "@typess/jsonApi";
 import { OObject } from "@typess/jsonApi/object";
+import { Dispatch } from "hoist-non-react-statics/node_modules/@types/react";
+import Head from "next/head";
+import React, { useReducer, useRef, useState } from "react";
+import { IoAddOutline } from "react-icons/io5";
+import { CSSTransition } from "react-transition-group";
+import styled from "styled-components";
+import useSWR, { useSWRConfig } from "swr";
 
 
 export default function Projects() {

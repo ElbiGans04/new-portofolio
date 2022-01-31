@@ -1,11 +1,10 @@
-import bodyParse from "body-parser";
-import joi from "joi";
 import ToolsSchema from "@database/schemas/tools";
+import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from "@middleware/runMiddleware";
 import formatResource from "@module/formatResource";
 import { RequestControllerRouter, RespondControllerRouter } from '@typess/controllersRoutersApi';
 import ToolValidationSchema from "@validation/tools";
-import {formidableHandler} from '@middleware/formidable'
+import joi from "joi";
 class Tools {
     async getTool (req: RequestControllerRouter, res: RespondControllerRouter) {
       const { toolID } = req.query;

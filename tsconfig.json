@@ -22,6 +22,7 @@
     "baseUrl": ".",
     "paths": {
       "@public/*": ["public/*"],
+      "@src/*": ["src/*"],
       "@components/*": ["src/components/*"],
       "@controllers/*": ["src/controllers/*"],
       "@database/*": ["src/database/*"],
@@ -31,7 +32,7 @@
       "@style/*": ["src/style/*"],
       "@typess/*": ["src/types/*"],
       "@validation/*": ["src/validation/*"]
-    }
+    },
   },
   "include": [
     "next-env.d.ts",
