@@ -25,13 +25,7 @@ import { IoAddOutline } from "react-icons/io5";
 import { CSSTransition } from "react-transition-group";
 import styled from "styled-components";
 import useSWR, { useSWRConfig } from "swr";
-
-interface ToolsDefaulValue {
-  as : string,
-  name: string,
-  __v: number,
-  _id: string,
-}
+import imagesInterface from "@src/types/mongoose/schemas/image";
 
 export default function Projects() {
   const ref = useRef(null);
@@ -306,10 +300,11 @@ function SwitchModal({
         const descriptionValue = row.columnsValue[row.columns.indexOf("description")] as string;
         const typeProject = row.columnsValue[row.columns.indexOf("typeProject")];
         const toolsValue = row.columnsValue[row.columns.indexOf("tools")];
+        
     
         if (typeof typeProject === 'object' && typeProject !== null && !Array.isArray(typeProject) && toolsValue) {   
           return (
-            <ModalForm onSubmit={(event) => onSubmit3(event, row.id, dispatch, mutate)}>
+            <ModalForm onSubmit={(event) => onSubmit3(event, row.id, dispatch, mutate)} >
               <ModalFormContent>
                 <ModalFormContentRow>
                   <Label size={1} minSize={1} htmlFor="title">Title: </Label>
@@ -536,7 +531,7 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
       id,
       type: 'project',
       attributes: {
-        images: [],
+        
       }
     };
 
@@ -555,11 +550,12 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
           continue;
           
         };
-
-        document.attributes[fieldName] = fieldValue;
+        
+        if(fieldName !== 'images') document.attributes[fieldName] = fieldValue;
       }
-    } 
-
+    };
+    
+    
     // Logic
     dispatch({ type: "modal/request/start" });
     if (fileImage.length > 0) {
@@ -574,10 +570,8 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
       });
       
       if (document.attributes) document.attributes.images = meta.images;
-    } else {
-      if (document.attributes) document.attributes.images = []
-    };
-
+    }
+    
     const request = (await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
       method: "PATCH",
       body: JSON.stringify(document),
@@ -736,7 +730,8 @@ function changeFormatDate(data: string) {
       ? `0${date.getMonth() + 1}`
       : `${date.getMonth() + 1}`;
   return `${date.getFullYear()}-${month}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`;
-}
+};
+
 
 // Styled Component
 
