@@ -26,6 +26,12 @@ import { CSSTransition } from "react-transition-group";
 import styled from "styled-components";
 import useSWR, { useSWRConfig } from "swr";
 
+interface ToolsDefaulValue {
+  as : string,
+  name: string,
+  __v: number,
+  _id: string,
+}
 
 export default function Projects() {
   const ref = useRef(null);
@@ -300,7 +306,7 @@ function SwitchModal({
         const descriptionValue = row.columnsValue[row.columns.indexOf("description")] as string;
         const typeProject = row.columnsValue[row.columns.indexOf("typeProject")];
         const toolsValue = row.columnsValue[row.columns.indexOf("tools")];
-        console.log(toolsValue)
+    
         if (typeof typeProject === 'object' && typeProject !== null && !Array.isArray(typeProject) && toolsValue) {   
           return (
             <ModalForm onSubmit={(event) => onSubmit3(event, row.id, dispatch, mutate)}>
@@ -408,7 +414,7 @@ function SwitchModal({
                   <Label size={1} minSize={1} htmlFor="tools">Tools :</Label>
                   <InputCollections
                     name="tools"
-                    defaultValues={toolsValue as ResourceObject[]}
+                    defaultValues={toolsValue}
                     data={data.data as ResourceObject[]}
                   ></InputCollections>
                 </ModalFormContentRow>
@@ -648,22 +654,27 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
 
 // data: { data: result = [] } = {},
 // defaultValues = [],
+
 function InputCollections({
   data,
   defaultValues,
   name
-}: {data: ResourceObject[], name: string, defaultValues?: ResourceObject[]}) {
+}: {data: ResourceObject[], name: string, defaultValues?: OObject}) {
   const [inputState, setInputState] = useState(() => {
     if(defaultValues) {
-      return defaultValues.map((value) => {
-        if (value.attributes) return value.id as string
-        return undefined;
-      })
+      if (Array.isArray(defaultValues)) {
+        return defaultValues.map((value) => {
+          if (typeof value == "object" && !Array.isArray(value) && value !== null) {
+            return value._id as string
+          }
+        })
+      }
     } 
 
     // Jika tidak ada nilai dafault
     return [data[0]?.id]
   });
+
   const collectionInput = [];
 
   // callback
