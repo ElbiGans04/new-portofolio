@@ -534,9 +534,25 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
       }
     };
 
+
     for (let [fieldName, fieldValue] of form2.entries()) {
-      if (document.attributes) document.attributes[fieldName] = fieldValue
-    }
+      if (document.attributes) {
+        // Check Jika tools properti sudah diisi
+        if (document.attributes.tools) {
+          // Jika sudah diganti sebelumnya
+          if (Array.isArray(document.attributes.tools)) {
+            document.attributes.tools.push(fieldValue as OObject);
+          } else {
+            document.attributes.tools = [document.attributes.tools as OObject, fieldValue as OObject];
+          }
+
+          continue;
+          
+        };
+
+        document.attributes[fieldName] = fieldValue;
+      }
+    } 
 
     // Logic
     dispatch({ type: "modal/request/start" });
