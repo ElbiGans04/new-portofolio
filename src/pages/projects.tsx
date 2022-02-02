@@ -374,6 +374,7 @@ function ImageSlider({
       event.currentTarget.parentElement !== null &&
       event.currentTarget.parentElement.parentElement !== null
     ) {
+    
       const modal = event.currentTarget.parentElement.parentElement;
       const { width: modalWidth } = modal.getBoundingClientRect();
 
@@ -664,7 +665,7 @@ const ModalImageContent = styled.div<{ translateX: number }>`
   height: 350px;
   white-space: nowrap;
   transition: var(--transition);
-  transform: translateX(${({ translateX }) => translateX});
+  transform: translateX(${({ translateX }) => translateX}px);
 
   @media (max-width: 768px) {
     & {
