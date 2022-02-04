@@ -1,41 +1,41 @@
-import { CSSTransition } from "react-transition-group";
-import React, { useState, useRef, useMemo, useContext } from "react";
-import styled from "styled-components";
+import Button from '@components/Button';
+import Context from '@hooks/context';
+import useUser from '@hooks/useUser';
+import getRandom from '@module/randomNumber';
+import upperFirstWord from '@module/upperFirstWord';
+import { Doc, DocErrors, ResourceObject } from '@typess/jsonApi/index';
+import { OObject } from '@typess/jsonApi/object';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 import {
-  IoTrashBinOutline,
   IoAddOutline,
   IoPencilSharp,
-} from "react-icons/io5";
-import Button from "@components/Button";
-import useSWR from "swr";
-import fetcher from "../module/fetcher";
-import upperFirstWord from "@module/upperFirstWord";
-import getRandom from "@module/randomNumber";
-import Context from "@hooks/context";
-import Heading from "./Heading";
-import useUser from "@hooks/useUser";
-import { DocErrors, Doc, ResourceObject } from "@typess/jsonApi/index";
-import { OObject } from "@typess/jsonApi/object";
+  IoTrashBinOutline,
+} from 'react-icons/io5';
+import { CSSTransition } from 'react-transition-group';
+import styled from 'styled-components';
+import useSWR from 'swr';
+import fetcher from '../module/fetcher';
+import Heading from './Heading';
 
 export default function Admin() {
   const {
-    url = "",
+    url = '',
     columns = [],
     visible: { visibleColumns = [], visibleValue = 0 } = {},
     renameColumns = {},
     dispatch,
   } = useContext(Context);
   const { data, error } = useSWR<Doc, DocErrors>(url, fetcher);
-  const user = useUser({ redirectTo: "/login", redirectIfFound: false });
+  const user = useUser({ redirectTo: '/login', redirectIfFound: false });
 
   // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah
   const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(
     () => filter(data, columns, visibleColumns, visibleValue),
-    [data, columns, visibleColumns, visibleValue]
+    [data, columns, visibleColumns, visibleValue],
   );
 
   // Jika dispatch tidak ada
-  if (dispatch === undefined) throw new Error("dispatch not found");
+  if (dispatch === undefined) throw new Error('dispatch not found');
 
   // Jika ada error
   if (error) {
@@ -54,17 +54,18 @@ export default function Admin() {
   }
 
   // Jika sedang memverifikasi data atau saat sedang mengambil data
-  if (!user)
+  if (!user) {
     return (
       <Container>
-        <div className="loader"></div>
+        <div className="loader" />
       </Container>
     );
+  }
 
   return (
     <Container>
       <ContainerButtons>
-        <Button onClick={() => dispatch({ type: "modal/open/add" })}>
+        <Button onClick={() => dispatch({ type: 'modal/open/add' })}>
           <IoAddOutline />
           Add Entity
         </Button>
@@ -74,13 +75,13 @@ export default function Admin() {
           <thead>
             <tr>
               {/* Jika Column kurang dari 4 maka jangan tampilkna detail */}
-              {detailColumns.length > 0 && <th></th>}
+              {detailColumns.length > 0 && <th />}
               {/* Looping element yang diijinkan */}
               {mainColumns.map((value, index) => {
                 // Check apakah field tertentu harus direname
                 const keyRenameColumns = Object.entries(renameColumns);
                 const shouldRename = keyRenameColumns.find(
-                  (column) => column[0] === value
+                  (column) => column[0] === value,
                 );
 
                 if (shouldRename)
@@ -88,22 +89,20 @@ export default function Admin() {
                 return <th key={getRandom(index)}>{upperFirstWord(value)}</th>;
               })}
               {/* Beri th kosong untuk action */}
-              <th></th>
+              <th />
             </tr>
           </thead>
           <tbody>
-            {mainRows.map((mainRow, index) => {
-              return (
-                <Row
-                  key={getRandom(index)}
-                  id={rowsId[index]}
-                  detailColumns={detailColumns}
-                  detailRow={detailRows[index]}
-                  mainRow={mainRow}
-                  mainColumns={mainColumns}
-                />
-              );
-            })}
+            {mainRows.map((mainRow, index) => (
+              <Row
+                key={getRandom(index)}
+                id={rowsId[index]}
+                detailColumns={detailColumns}
+                detailRow={detailRows[index]}
+                mainRow={mainRow}
+                mainColumns={mainColumns}
+              />
+            ))}
           </tbody>
         </Table>
       </ContainerTable>
@@ -133,11 +132,11 @@ function Row({
   const ref = useRef(null);
   const keySpecialTreatment = Object.entries(specialTreatment);
 
-  if (dispatch === undefined) throw new Error("dispatch function not found");
+  if (dispatch === undefined) throw new Error('dispatch function not found');
 
   if (mainRow instanceof Array && detailRow instanceof Array) {
     return (
-      <React.Fragment>
+      <>
         <tr>
           {detailColumns.length > 0 && (
             <td>
@@ -154,7 +153,7 @@ function Row({
           {mainRow.map((value, index) => {
             // Check jika column harus diperlakukan secara khusus
             const special = keySpecialTreatment.find(
-              (keySpecial) => keySpecial[0] === mainColumns[index]
+              (keySpecial) => keySpecial[0] === mainColumns[index],
             );
 
             if (special) {
@@ -162,23 +161,25 @@ function Row({
             }
 
             // Perlakuan Default
-            return <td key={getRandom(index)}>{upperFirstWord(value as string)}</td>;
+            return (
+              <td key={getRandom(index)}>{upperFirstWord(value as string)}</td>
+            );
           })}
 
           <td>
             <TdActions>
               <Button
                 onClick={() =>
-                  dispatch({ type: "modal/open/delete", payload: { id } })
+                  dispatch({ type: 'modal/open/delete', payload: { id } })
                 }
                 title="delete the row"
               >
-                <IoTrashBinOutline></IoTrashBinOutline>
+                <IoTrashBinOutline />
               </Button>
               <Button
                 onClick={() =>
                   dispatch({
-                    type: "modal/open/update",
+                    type: 'modal/open/update',
                     payload: {
                       id,
                       columns: [...mainColumns, ...detailColumns],
@@ -188,7 +189,7 @@ function Row({
                 }
                 title="update the row"
               >
-                <IoPencilSharp></IoPencilSharp>
+                <IoPencilSharp />
               </Button>
             </TdActions>
           </td>
@@ -209,16 +210,16 @@ function Row({
                     const keyRenameColumns = Object.entries(renameColumns);
                     // check jika ada column yang harus direname
                     const specialField = keyRenameColumns.find(
-                      (keySpecial) => keySpecial[0] === detailColumn
+                      (keySpecial) => keySpecial[0] === detailColumn,
                     );
 
-                    let fieldName = specialField
+                    const fieldName = specialField
                       ? specialField[1]
                       : upperFirstWord(detailColumn);
 
                     // Check jika nilai column harus diperlakukan secara khusus
                     const special = keySpecialTreatment.find(
-                      (keySpecial) => keySpecial[0] === detailColumn
+                      (keySpecial) => keySpecial[0] === detailColumn,
                     );
 
                     if (special) {
@@ -243,11 +244,11 @@ function Row({
             </RowDetails>
           </CSSTransition>
         )}
-      </React.Fragment>
+      </>
     );
   }
 
-  return (<tr></tr>)
+  return <tr />;
 }
 
 //
@@ -264,7 +265,7 @@ function filter(
   data: Doc | undefined,
   columns: string[],
   visibleColumns: string[],
-  visibleValue = 0
+  visibleValue = 0,
 ) {
   const results: filterResults = {
     mainColumns: [],
@@ -274,7 +275,7 @@ function filter(
     rowsId: [],
   };
 
-  if (typeof data === "undefined" || data.data === null) return results;
+  if (typeof data === 'undefined' || data.data === null) return results;
 
   // Dapatkan columns
   // Filter mana column yang boleh ditampilkan mana yang tidak
@@ -307,18 +308,18 @@ function filter(
 function getAndFilterColumns(
   data: ResourceObject,
   visibleColumns: string[],
-  visibleValue: number
+  visibleValue: number,
 ): string[] {
-  if (data === undefined) return []
+  if (data === undefined) return [];
   if (data.attributes === undefined) return [];
 
   return Object.keys(data.attributes).filter((column) => {
     // Temukan column yang diberi batasan
     const foundColumn = visibleColumns.find((value) => value === column);
     // Jika column yang dibatasi memiliki nilai 0 berarti column tsb tidak boleh ditampilkan
-    if (foundColumn !== undefined) return visibleValue === 0 ? false : true;
+    if (foundColumn !== undefined) return visibleValue !== 0;
 
-    return visibleValue === 0 ? true : false;
+    return visibleValue === 0;
   });
 }
 
@@ -331,21 +332,21 @@ function decideRow(results: filterResults, row: ResourceObject) {
   // Ubah Object menjadi array
   const columns = Object.entries(row.attributes);
 
-  let passColumns: OObject[] = [];
-  let passDetails: OObject[] = [];
+  const passColumns: OObject[] = [];
+  const passDetails: OObject[] = [];
 
   // Untuk setiap column kita lakukan Filtering
   columns.forEach((column) => {
     // Berikan Kondisi
     // Ambil Nilai untuk main columns
     const ifMatch = results.mainColumns.find(
-      (matchColumn) => matchColumn === column[0]
+      (matchColumn) => matchColumn === column[0],
     );
     if (ifMatch !== undefined) passColumns.push(column[1]);
 
     // Ambil Nilai Untuk details column
     const ifMatch2 = results.detailColumns.find(
-      (matchColumn) => matchColumn === column[0]
+      (matchColumn) => matchColumn === column[0],
     );
     if (ifMatch2 !== undefined) passDetails.push(column[1]);
   });

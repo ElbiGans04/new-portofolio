@@ -1,4 +1,24 @@
 {
   "presets": ["next/babel"],
-  "plugins": [["styled-components", { "ssr": true }]]
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "root": ["./"],
+        "alias": {
+          "@public/*": ["public"],
+          "@src": ["./src"],
+          "@components": ["./src/components"],
+          "@controllers": ["./src/controllers"],
+          "@database": ["./src/database"],
+          "@hooks": ["./src/hooks"],
+          "@middleware": ["./src/middleware"],
+          "@module": ["./src/module"],
+          "@style": ["./src/style"],
+          "@typess": ["./src/types"],
+          "@validation": ["./src/validation"]
+        }
+      }
+    ]
+  ]
 }

@@ -3,10 +3,10 @@
 }
 
 :root {
-  --pink : #FFA7C4;
-  --dark : #282C35;
-  --dark2 : #1f2127;
-  --transition: .5s;
+  --pink: #ffa7c4;
+  --dark: #282c35;
+  --dark2: #1f2127;
+  --transition: 0.5s;
   --text: white;
 }
 
@@ -40,50 +40,56 @@ a {
 }
 
 .cursor-notAllowed {
-  cursor: not-allowed!important;
-  opacity: .8;
+  cursor: not-allowed !important;
+  opacity: 0.8;
 }
 
-.modal-enter-active, .modal-enter-done {
+.modal-enter-active,
+.modal-enter-done {
   z-index: 9999;
-  opacity: 1!important;
-  top: 0!important;
-  left: 0!important;
-  width: 100%!important;
-  height: 100%!important;
-  margin: 0!important;
+  opacity: 1 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
 }
 .modal-exit {
-  z-index: 9999!important;
+  z-index: 9999 !important;
 }
 .modal-exit-active {
-  opacity: 0!important;
-  width: 50px!important;
-  height: 50px!important;
-  top: 50%!important;
-  left: 50%!important;
-  margin-top: -25px!important;
-  margin-left: -25px!important;  
+  opacity: 0 !important;
+  width: 50px !important;
+  height: 50px !important;
+  top: 50% !important;
+  left: 50% !important;
+  margin-top: -25px !important;
+  margin-left: -25px !important;
 }
 
 .modal-exit-done {
-  z-index: -9999!important;
+  z-index: -9999 !important;
 }
 
 /* Modal For Row details */
 
-.row-details-enter, .row-details-enter-active, .row-details-enter-done {
-  line-height: inherit!important;
-  height: 100%!important;
-  font-size: 1rem!important;
+.row-details-enter,
+.row-details-enter-active,
+.row-details-enter-done {
+  line-height: inherit !important;
+  height: 100% !important;
+  font-size: 1rem !important;
 }
 
-.row-details-enter td , .row-details-enter-active td , .row-details-enter-done td {
-  height: 100%!important;
-  padding: 1rem!important
+.row-details-enter td,
+.row-details-enter-active td,
+.row-details-enter-done td {
+  height: 100% !important;
+  padding: 1rem !important;
 }
 
-.row-details-enter-active td div, .row-details-enter-done td div{
+.row-details-enter-active td div,
+.row-details-enter-done td div {
   /* height: 100%!important;
   padding: 1rem!important; */
   gap: 1rem;

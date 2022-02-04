@@ -1,20 +1,20 @@
-import Head from "next/head";
-import Heading from "@components/Heading";
-import styled, { createGlobalStyle } from "styled-components";
+import Head from 'next/head';
+import Heading from '@components/Heading';
+import styled, { createGlobalStyle } from 'styled-components';
 import React, {
   useEffect,
   useReducer,
   useState,
   useRef,
   MouseEvent,
-} from "react";
-import Image from "next/image";
-import projectsStyled from "../styles/projects.module.css";
-import { CSSTransition } from "react-transition-group";
-import upperFirstWord from "@module/upperFirstWord";
-import Paragraph from "@components/Paragraph";
-import Modal from "@components/Modal";
-import getRandom from "@module/randomNumber";
+} from 'react';
+import Image from 'next/image';
+import { CSSTransition } from 'react-transition-group';
+import upperFirstWord from '@module/upperFirstWord';
+import Paragraph from '@components/Paragraph';
+import Modal from '@components/Modal';
+import getRandom from '@module/randomNumber';
+import projectsStyled from '../styles/projects.module.css';
 
 type StateProjects = Array<{
   id: string;
@@ -45,28 +45,28 @@ type StateProjects = Array<{
   };
 }>;
 
-type ListActionsValue = "ALL" | "A1" | "A2" | "ASC" | "DESC";
-type ListActionsType = "project-type" | "sort";
+type ListActionsValue = 'ALL' | 'A1' | 'A2' | 'ASC' | 'DESC';
+type ListActionsType = 'project-type' | 'sort';
 
 type State = {
-  status: "iddle" | "loading" | "error";
+  status: 'iddle' | 'loading' | 'error';
   projects: StateProjects;
   activeActions: string[];
   refetch: boolean;
 };
 
 type Action =
-  | { type: "request/start" }
+  | { type: 'request/start' }
   | {
-      type: "request/finish";
+      type: 'request/finish';
       payload: {
         projects: StateProjects;
       };
     }
-  | { type: "request/error" }
-  | { type: "request/refetch" }
+  | { type: 'request/error' }
+  | { type: 'request/refetch' }
   | {
-      type: "action/change";
+      type: 'action/change';
       payload: {
         actions: string[];
       };
@@ -93,23 +93,23 @@ const listActions: {
   //   type: "project-type",
   // },
   {
-    text: "A-Z",
-    value: "ASC",
-    type: "sort",
+    text: 'A-Z',
+    value: 'ASC',
+    type: 'sort',
   },
   {
-    text: "Z-A",
-    value: "DESC",
-    type: "sort",
+    text: 'Z-A',
+    value: 'DESC',
+    type: 'sort',
   },
 ];
 
 function Projects() {
   // React hooks
   const [state, dispatch] = useReducer(reducer, {
-    status: "iddle",
+    status: 'iddle',
     projects: [],
-    activeActions: ["ALL", "ASC"],
+    activeActions: ['ALL', 'ASC'],
     refetch: false,
   });
   const [modal, setModal] = useState({ open: false, index: 0 });
@@ -117,8 +117,8 @@ function Projects() {
 
   // Variabel Biasa
   const project = state.projects[modal.index];
-  const disabled = state.status !== "iddle" ? true : false;
-  const className = state.status !== "iddle" ? "cursor-notAllowed" : "";
+  const disabled = state.status !== 'iddle';
+  const className = state.status !== 'iddle' ? 'cursor-notAllowed' : '';
 
   useEffect(() => {
     // Mencegah react menyetel state ketika sudah pindah halaman
@@ -127,25 +127,25 @@ function Projects() {
       try {
         if (!didCancel) {
           // ubah state
-          dispatch({ type: "request/start" });
+          dispatch({ type: 'request/start' });
         }
 
         const fetchProjects = await (
           await fetch(
-            `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`
+            `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`,
           )
         ).json();
 
         // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
         if (!didCancel) {
           dispatch({
-            type: "request/finish",
+            type: 'request/finish',
             payload: { projects: fetchProjects.data },
           });
         }
       } catch (err) {
         console.log(err);
-        if (!didCancel) dispatch({ type: "request/error" });
+        if (!didCancel) dispatch({ type: 'request/error' });
       }
     }
 
@@ -160,39 +160,38 @@ function Projects() {
   // Event Handler untuk tombol aksi
   const handleAction = (
     typeButton: ListActionsType,
-    buttonValue: ListActionsValue
+    buttonValue: ListActionsValue,
   ) => {
-
     // Setel state terbaru
     const newActiveActions = [...state.activeActions];
-    typeButton === "sort"
+    typeButton === 'sort'
       ? (newActiveActions[1] = buttonValue)
       : (newActiveActions[0] = buttonValue);
 
-    dispatch({ type: "action/change", payload: { actions: newActiveActions } });
+    dispatch({ type: 'action/change', payload: { actions: newActiveActions } });
   };
 
-  if (state.status === "error") {
+  if (state.status === 'error') {
     return (
-      <React.Fragment>
+      <>
         <Heading minSize={1} size={1.5}>
           <span>Failed to retrieve data:(</span>
         </Heading>
-        <Action onClick={() => dispatch({ type: "request/refetch" })}>
+        <Action onClick={() => dispatch({ type: 'request/refetch' })}>
           <Heading minSize={1} size={1.2}>
             <span>Click here to try to retrieve data again</span>
           </Heading>
         </Action>
-      </React.Fragment>
+      </>
     );
   }
 
-  if (state.status === "loading") {
-    return <div className="loader"></div>;
+  if (state.status === 'loading') {
+    return <div className="loader" />;
   }
 
   return (
-    <React.Fragment>
+    <>
       {/* Saat modal terlihat matikan overflow untuk body */}
       {modal.open && <GlobalStyle />}
 
@@ -205,9 +204,7 @@ function Projects() {
         {/* Check Kondisi Jika merupakan button yang aktif maka kita bedakan */}
         <ContainerActions>
           {listActions.map((value, index) => {
-            if (
-              value.value === state.activeActions[1]
-            ) {
+            if (value.value === state.activeActions[1]) {
               return (
                 <ActionActive
                   className={className}
@@ -241,38 +238,36 @@ function Projects() {
         {/* Inti Content */}
         <ContainerProjects>
           {project &&
-            state.projects.map((value, index) => {
-              return (
-                <Project
-                  onClick={() => {
-                    setModal({ open: true, index });
-                  }}
-                  key={index}
-                  className={className}
-                  disabled={disabled}
-                >
-                  <ProjectImageContainer>
-                    {value.attributes.images[0] && (
-                      <Image
-                        alt="project"
-                        className={projectsStyled.project}
-                        src={`/images/${value.attributes.images[0].src}`}
-                        layout="fill"
-                      />
-                    )}
-                  </ProjectImageContainer>
+            state.projects.map((value, index) => (
+              <Project
+                onClick={() => {
+                  setModal({ open: true, index });
+                }}
+                key={index}
+                className={className}
+                disabled={disabled}
+              >
+                <ProjectImageContainer>
+                  {value.attributes.images[0] && (
+                    <Image
+                      alt="project"
+                      className={projectsStyled.project}
+                      src={`/images/${value.attributes.images[0].src}`}
+                      layout="fill"
+                    />
+                  )}
+                </ProjectImageContainer>
 
-                  <ProjectTextContainer>
-                    <Heading minSize={1} size={1.3}>
-                      <span>{upperFirstWord(value.attributes.title)}</span>
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      {upperFirstWord(value.attributes.typeProject.name)}
-                    </Heading>
-                  </ProjectTextContainer>
-                </Project>
-              );
-            })}
+                <ProjectTextContainer>
+                  <Heading minSize={1} size={1.3}>
+                    <span>{upperFirstWord(value.attributes.title)}</span>
+                  </Heading>
+                  <Heading minSize={1} size={1}>
+                    {upperFirstWord(value.attributes.typeProject.name)}
+                  </Heading>
+                </ProjectTextContainer>
+              </Project>
+            ))}
         </ContainerProjects>
         {/* Akhir dari inti Content */}
 
@@ -291,10 +286,7 @@ function Projects() {
               updateState={setModal}
               defaultState={{ open: false, index: 0 }}
             >
-              <ImageSlider
-                showModal={modal.open}
-                project={project}
-              ></ImageSlider>
+              <ImageSlider showModal={modal.open} project={project} />
               <ModalContentContent>
                 <Heading minSize={1.5} size={2}>
                   <span>{upperFirstWord(project.attributes.title)}</span>
@@ -313,15 +305,16 @@ function Projects() {
                   </ModalContentContentListTitle>
                   <ModalContentContentListValue>
                     <Heading minSize={1} size={1}>
-                      {":"}&nbsp;{getFullDate(project.attributes.startDate)}
-                      {" - "}
+                      :&nbsp;
+                      {getFullDate(project.attributes.startDate)}
+                      {' - '}
                       {getFullDate(project.attributes.endDate)}
                     </Heading>
                     <Heading minSize={1} size={1}>
-                      {":"}&nbsp; {getStringOfTools(project.attributes.tools)}
+                      :&nbsp; {getStringOfTools(project.attributes.tools)}
                     </Heading>
                     <Heading minSize={1} size={1}>
-                      {":"}&nbsp;
+                      :&nbsp;
                       {upperFirstWord(project.attributes.typeProject.name)}
                     </Heading>
                   </ModalContentContentListValue>
@@ -334,7 +327,7 @@ function Projects() {
                   fontWeight="normal"
                   lineHeight="1.5rem"
                 >
-                  {project.attributes.description}.{" "}
+                  {project.attributes.description}.{' '}
                   {project.attributes.url && (
                     <GoTo href={project.attributes.url}>
                       {project.attributes.url}
@@ -347,7 +340,7 @@ function Projects() {
         )}
         {/* end of Modal */}
       </Container>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -362,7 +355,7 @@ function ImageSlider({
 }) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const nodeRef = useRef<HTMLDivElement>(null);
-  
+
   // Reset state saat modal diclose
   useEffect(() => {
     if (!showModal) setSlide({ slide: 0, translateX: 0 });
@@ -374,21 +367,19 @@ function ImageSlider({
       event.currentTarget.parentElement !== null &&
       event.currentTarget.parentElement.parentElement !== null
     ) {
-    
       const modal = event.currentTarget.parentElement.parentElement;
       const { width: modalWidth } = modal.getBoundingClientRect();
 
       // Jika nilai berikutnya ditambah lalu melebihi panjang gambar maka nilai akan menjadi ke 0
       // Jika nilai berikutnya dikurang lalu kurang dari 0 maka nilai akan menjadi jumlah gambar
       let result = 0;
-      if ( action === 0 ) {
+      if (action === 0) {
         // // Jika hasil Operasi berikutnya kurang dari 0 maka setel ke jumlah gambar dikurangi 1
-        if ( ( slide.slide - 1 ) < 0 ) result = project.attributes.images.length - 1;
+        if (slide.slide - 1 < 0) result = project.attributes.images.length - 1;
         else result = slide.slide - 1;
-
       } else {
         // Jika hasil Operasi berikutnya melebihi panjang gambar
-        if ( ( slide.slide + 1 ) > ( project.attributes.images.length - 1 ) ) result = 0;
+        if (slide.slide + 1 > project.attributes.images.length - 1) result = 0;
         else result = slide.slide + 1;
       }
 
@@ -403,45 +394,41 @@ function ImageSlider({
             onClick={(event) => changeImageAction(event, 0)}
             title="prev image"
           >
-            <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)"></ModalImageActionSpan>
-            <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)"></ModalImageActionSpan>
+            <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)" />
+            <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)" />
           </ModalImageAction>
           <ModalImageAction
             onClick={(event) => changeImageAction(event, 1)}
             title="next image"
           >
-            <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)"></ModalImageActionSpan>
-            <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)"></ModalImageActionSpan>
+            <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)" />
+            <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)" />
           </ModalImageAction>
         </ModalImageActions>
       )}
 
       {/* Content Images */}
       <ModalImageContent translateX={slide.translateX}>
-        {project.attributes.images.map((value, index) => {
-          return (
-            <ModalImageContentContent key={getRandom(index)}>
-              <Image
-                alt="project"
-                className={projectsStyled.project}
-                src={`/images/${value.src}`}
-                layout="fill"
-              ></Image>
-            </ModalImageContentContent>
-          );
-        })}
+        {project.attributes.images.map((value, index) => (
+          <ModalImageContentContent key={getRandom(index)}>
+            <Image
+              alt="project"
+              className={projectsStyled.project}
+              src={`/images/${value.src}`}
+              layout="fill"
+            />
+          </ModalImageContentContent>
+        ))}
       </ModalImageContent>
 
       {/* Content Count */}
       <ModalImageCount>
-        {project.attributes.images.map((value, index) => {
-          return (
-            <ModalImageCountCount
-              key={getRandom(index)}
-              opacity={slide.slide === index ? "1" : "0.5"}
-            ></ModalImageCountCount>
-          );
-        })}
+        {project.attributes.images.map((value, index) => (
+          <ModalImageCountCount
+            key={getRandom(index)}
+            opacity={slide.slide === index ? '1' : '0.5'}
+          />
+        ))}
       </ModalImageCount>
     </ModalImage>
   );
@@ -449,20 +436,20 @@ function ImageSlider({
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "request/start":
-      return { ...state, status: "loading" };
-    case "request/finish":
+    case 'request/start':
+      return { ...state, status: 'loading' };
+    case 'request/finish':
       return {
         ...state,
         projects: action.payload.projects,
-        status: "iddle",
+        status: 'iddle',
         refetch: false,
       };
-    case "request/error":
-      return { ...state, status: "error", refetch: false };
-    case "request/refetch":
+    case 'request/error':
+      return { ...state, status: 'error', refetch: false };
+    case 'request/refetch':
       return { ...state, refetch: true };
-    case "action/change":
+    case 'action/change':
       return {
         ...state,
         activeActions: action.payload.actions,
@@ -484,13 +471,13 @@ function getStringOfTools(
     name: string;
     as: string;
     _v: number;
-  }>
+  }>,
 ) {
-  let result = ``;
+  let result = '';
   data.forEach((value, index) => {
     result += `${upperFirstWord(value.name)}`;
     if (value.as) result += ` as ${value.as}`;
-    if (index !== data.length - 1) result += `, `;
+    if (index !== data.length - 1) result += ', ';
   });
 
   return result;
@@ -647,7 +634,7 @@ const ModalImageAction = styled.div<{ backgroundColor?: string }>`
   width: 10%;
   height: 100%;
   background-color: ${({ backgroundColor }) =>
-    backgroundColor || "rgba(31,33,39,0.8)"};
+    backgroundColor || 'rgba(31,33,39,0.8)'};
   display: flex;
   justify-content: center;
   align-items: center;

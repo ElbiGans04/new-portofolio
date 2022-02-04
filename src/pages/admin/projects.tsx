@@ -1,91 +1,110 @@
-import Admin from "@components/Admin";
-import Button from "@components/Button";
-import Heading from "@components/Heading";
-import Input from "@components/Input";
-import Label from "@components/Label";
+import Admin from '@components/Admin';
+import Button from '@components/Button';
+import Heading from '@components/Heading';
+import Input from '@components/Input';
+import Label from '@components/Label';
 import ModalComponent, {
-  GlobalStyle, ModalAdmin, ModalContent2,
-  ModalFooter, ModalForm,
+  GlobalStyle,
+  ModalAdmin,
+  ModalContent2,
+  ModalFooter,
+  ModalForm,
   ModalFormContent,
   ModalFormContentRow,
-  ModalFormFooter, ModalMain2
-} from "@components/Modal";
-import Context from "@hooks/context";
-import { reducer } from "@hooks/reducer";
-import fetcher, { fetcherGeneric } from "@module/fetcher";
-import getRandom from "@module/randomNumber";
-import changeFirstWord from "@module/upperFirstWord";
+  ModalFormFooter,
+  ModalMain2,
+} from '@components/Modal';
+import Context from '@hooks/context';
+import { reducer } from '@hooks/reducer';
+import fetcher, { fetcherGeneric } from '@module/fetcher';
+import getRandom from '@module/randomNumber';
+import changeFirstWord from '@module/upperFirstWord';
 import type { admin } from '@typess/admin';
-import type { Doc, DocErrors, DocMeta, ResourceObject, ResourceObjectForSendWithFiles } from "@typess/jsonApi";
-import { OObject } from "@typess/jsonApi/object";
-import { Dispatch } from "hoist-non-react-statics/node_modules/@types/react";
-import Head from "next/head";
-import React, { useReducer, useRef, useState } from "react";
-import { IoAddOutline } from "react-icons/io5";
-import { CSSTransition } from "react-transition-group";
-import styled from "styled-components";
-import useSWR, { useSWRConfig } from "swr";
-import imagesInterface from "@src/types/mongoose/schemas/image";
+import type {
+  Doc,
+  DocErrors,
+  DocMeta,
+  ResourceObject,
+  ResourceObjectForSendWithFiles,
+} from '@typess/jsonApi';
+import { OObject } from '@typess/jsonApi/object';
+import { Dispatch } from 'hoist-non-react-statics/node_modules/@types/react';
+import Head from 'next/head';
+import React, { useReducer, useRef, useState } from 'react';
+import { IoAddOutline } from 'react-icons/io5';
+import { CSSTransition } from 'react-transition-group';
+import styled from 'styled-components';
+import useSWR, { useSWRConfig } from 'swr';
+import imagesInterface from '@src/types/mongoose/schemas/image';
 
 export default function Projects() {
   const ref = useRef(null);
   const [state, dispatch] = useReducer(reducer, {
     // iddle, loading, finish
-    status: "iddle",
+    status: 'iddle',
     message: null,
     modal: null,
     row: null,
   });
   const [state2] = useState({
     dispatch,
-    url: "/api/projects",
-    columns: ["title", "description"],
+    url: '/api/projects',
+    columns: ['title', 'description'],
     visible: {
       visibleValue: 0,
-      visibleColumns: ["_id", "__v"],
+      visibleColumns: ['_id', '__v'],
     },
     renameColumns: {
-      startDate: "Date",
+      startDate: 'Date',
     },
     specialTreatment: {
-      tools: function tools (value: OObject) {
-        let textResult = ``;
+      tools: function tools(value: OObject) {
+        let textResult = '';
         if (Array.isArray(value)) {
           value.forEach((text, index) => {
-            if (typeof text === 'object' && text !== null && !Array.isArray(text)) {
+            if (
+              typeof text === 'object' &&
+              text !== null &&
+              !Array.isArray(text)
+            ) {
               textResult += changeFirstWord(text.name as string);
-              if (index !== value.length - 1) textResult += `, `;
+              if (index !== value.length - 1) textResult += ', ';
             }
           });
         }
 
         return <div>{textResult}</div>;
       },
-      typeProject: function typeProject (value: OObject) {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) return <div>{changeFirstWord(value.name as string)}</div>;
-        else return <div></div>
+      typeProject: function typeProject(value: OObject) {
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          !Array.isArray(value)
+        )
+          return <div>{changeFirstWord(value.name as string)}</div>;
+        return <div />;
       },
-      images: function images (value: OObject) {
-        let textResult = ``;
+      images: function images(value: OObject) {
+        let textResult = '';
         if (Array.isArray(value)) {
           value.forEach((text, index) => {
             if (typeof text === 'object' && text !== null) {
-              if (Array.isArray(text)) return
+              if (Array.isArray(text)) return;
               textResult += text.src as string;
-              if (index !== value.length - 1) textResult += `, `;
+              if (index !== value.length - 1) textResult += ', ';
             }
           });
         }
 
         return <div>{textResult}</div>;
       },
-      startDate: function startDate (value: OObject){
-        if (typeof value === 'string') return changeFormatDate(value)
-        return ''
+      startDate: function startDate(value: OObject) {
+        if (typeof value === 'string') return changeFormatDate(value);
+        return '';
       },
-      endDate: function endDate (value: OObject){
-        if (typeof value === 'string') return changeFormatDate(value)
-        return ''
+      endDate: function endDate(value: OObject) {
+        if (typeof value === 'string') return changeFormatDate(value);
+        return '';
       },
     },
   });
@@ -105,14 +124,14 @@ export default function Projects() {
       <CSSTransition
         nodeRef={ref}
         classNames="modal"
-        in={state.modal !== null ? true : false}
+        in={state.modal !== null}
         timeout={500}
       >
         <ModalComponent
           width="700px"
           height=""
           updateState={dispatch}
-          defaultState={{ type: "modal/close" }}
+          defaultState={{ type: 'modal/close' }}
           ref={ref}
         >
           <ModalAdmin
@@ -120,7 +139,7 @@ export default function Projects() {
             message={state.message}
             dispatch={dispatch}
             Children={() => <SwitchModal dispatch={dispatch} state={state} />}
-          ></ModalAdmin>
+          />
         </ModalComponent>
       </CSSTransition>
     </Context.Provider>
@@ -134,74 +153,83 @@ export default function Projects() {
 function SwitchModal({
   state,
   dispatch,
-} : {state: admin, dispatch: Dispatch<any>}) {
+}: {
+  state: admin;
+  dispatch: Dispatch<any>;
+}) {
   const { mutate } = useSWRConfig();
-  const { data, error  } = useSWR<Doc, DocErrors>("/api/tools", fetcher);
-  const row = state.row!;
+  const { data, error } = useSWR<Doc, DocErrors>('/api/tools', fetcher);
+  const row = state.row;
 
   if (error) {
     return (
       <ModalMain2>
         <ModalContent2>
           <Heading size={1} minSize={1}>
-            <span>Error </span>when try <span> fetching data</span>
+            <span>Error </span>
+            when try
+            <span> fetching data</span>
           </Heading>
         </ModalContent2>
       </ModalMain2>
     );
   }
-  
 
-  if (!data ) {
+  if (!data) {
     return (
       <ModalMain2>
         <ModalContent2>
-          <div className="loader"></div>
+          <div className="loader" />
         </ModalContent2>
       </ModalMain2>
     );
   }
 
   switch (state.modal) {
-    case "add":
+    case 'add':
       return (
         <ModalForm onSubmit={(event) => onSubmit(event, dispatch, mutate)}>
           <ModalFormContent>
             <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="title">Title: </Label>
+              <Label size={1} minSize={1} htmlFor="title">
+                Title:{' '}
+              </Label>
               <Input
                 type="text"
                 id="title"
                 placeholder="enter the project title"
                 name="title"
-                
-              ></Input>
+              />
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="startDate">Date start of development: </Label>
+              <Label size={1} minSize={1} htmlFor="startDate">
+                Date start of development:{' '}
+              </Label>
               <Input
                 type="date"
                 id="startDate"
                 placeholder="enter the start date of development"
                 name="startDate"
-                
-              ></Input>
+              />
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="endDate">Date end of development:</Label>
+              <Label size={1} minSize={1} htmlFor="endDate">
+                Date end of development:
+              </Label>
               <Input
                 id="endDate"
                 type="date"
                 placeholder="enter the end date of development"
                 name="endDate"
-                
-              ></Input>
+              />
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="file">Images:</Label>
+              <Label size={1} minSize={1} htmlFor="file">
+                Images:
+              </Label>
               <Input
                 name="images"
                 type="file"
@@ -212,39 +240,34 @@ function SwitchModal({
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="url">Url of website:</Label>
-              <Input
-                type="text"
-                id="url"
-                placeholder="enter url"
-                name="url"
-                
-              ></Input>
+              <Label size={1} minSize={1} htmlFor="url">
+                Url of website:
+              </Label>
+              <Input type="text" id="url" placeholder="enter url" name="url" />
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="description">Description :</Label>
+              <Label size={1} minSize={1} htmlFor="description">
+                Description :
+              </Label>
               <Input
                 type="text"
                 id="description"
                 name="description"
                 placeholder="enter description of project"
-                
-              ></Input>
+              />
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label size={1} minSize={1}>Type of project :</Label>
+              <Label size={1} minSize={1}>
+                Type of project :
+              </Label>
               <ContainerCheckbox>
                 <Checkbox>
-                  <Input
-                    name="typeProject"
-                    type="radio"
-                    id="work"
-                    value="A2"
-                    
-                  ></Input>
-                  <Label size={1} minSize={1} htmlFor="work">Work project</Label>
+                  <Input name="typeProject" type="radio" id="work" value="A2" />
+                  <Label size={1} minSize={1} htmlFor="work">
+                    Work project
+                  </Label>
                 </Checkbox>
                 <Checkbox>
                   <Input
@@ -252,19 +275,22 @@ function SwitchModal({
                     type="radio"
                     id="personal"
                     value="A1"
-                    
-                  ></Input>
-                  <Label size={1} minSize={1} htmlFor="work">Personal Project</Label>
+                  />
+                  <Label size={1} minSize={1} htmlFor="work">
+                    Personal Project
+                  </Label>
                 </Checkbox>
               </ContainerCheckbox>
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="tools">tool :</Label>
+              <Label size={1} minSize={1} htmlFor="tools">
+                tool :
+              </Label>
               <InputCollections
                 name="tools"
                 data={data.data as ResourceObject[]}
-              ></InputCollections>
+              />
             </ModalFormContentRow>
           </ModalFormContent>
           <ModalFormFooter>
@@ -272,7 +298,7 @@ function SwitchModal({
           </ModalFormFooter>
         </ModalForm>
       );
-    case "delete":
+    case 'delete':
       return (
         <ModalMain2>
           <ModalContent2>
@@ -287,27 +313,40 @@ function SwitchModal({
           </ModalFooter>
         </ModalMain2>
       );
-    case "update":
+    case 'update':
       if (row && row.columns && row.columnsValue) {
-        const titleValue = row.columnsValue[row.columns.indexOf("title")] as string;
+        const titleValue = row.columnsValue[
+          row.columns.indexOf('title')
+        ] as string;
         const startDateValue = changeFormatDate(
-          row.columnsValue[row.columns.indexOf("startDate")] as string
+          row.columnsValue[row.columns.indexOf('startDate')] as string,
         );
         const endDateValue = changeFormatDate(
-          row.columnsValue[row.columns.indexOf("endDate")] as string
+          row.columnsValue[row.columns.indexOf('endDate')] as string,
         );
-        const urlValue = row.columnsValue[row.columns.indexOf("url")] as string;
-        const descriptionValue = row.columnsValue[row.columns.indexOf("description")] as string;
-        const typeProject = row.columnsValue[row.columns.indexOf("typeProject")];
-        const toolsValue = row.columnsValue[row.columns.indexOf("tools")];
-        
-    
-        if (typeof typeProject === 'object' && typeProject !== null && !Array.isArray(typeProject) && toolsValue) {   
+        const urlValue = row.columnsValue[row.columns.indexOf('url')] as string;
+        const descriptionValue = row.columnsValue[
+          row.columns.indexOf('description')
+        ] as string;
+        const typeProject =
+          row.columnsValue[row.columns.indexOf('typeProject')];
+        const toolsValue = row.columnsValue[row.columns.indexOf('tools')];
+
+        if (
+          typeof typeProject === 'object' &&
+          typeProject !== null &&
+          !Array.isArray(typeProject) &&
+          toolsValue
+        ) {
           return (
-            <ModalForm onSubmit={(event) => onSubmit3(event, row.id, dispatch, mutate)} >
+            <ModalForm
+              onSubmit={(event) => onSubmit3(event, row.id, dispatch, mutate)}
+            >
               <ModalFormContent>
                 <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="title">Title: </Label>
+                  <Label size={1} minSize={1} htmlFor="title">
+                    Title:{' '}
+                  </Label>
                   <Input
                     type="text"
                     id="title"
@@ -315,11 +354,13 @@ function SwitchModal({
                     name="title"
                     required
                     defaultValue={titleValue}
-                  ></Input>
+                  />
                 </ModalFormContentRow>
-    
+
                 <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="startDate">Date start of development: </Label>
+                  <Label size={1} minSize={1} htmlFor="startDate">
+                    Date start of development:{' '}
+                  </Label>
                   <Input
                     type="date"
                     id="startDate"
@@ -327,11 +368,13 @@ function SwitchModal({
                     name="startDate"
                     required
                     defaultValue={startDateValue}
-                  ></Input>
+                  />
                 </ModalFormContentRow>
-    
+
                 <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="endDate">Date end of development:</Label>
+                  <Label size={1} minSize={1} htmlFor="endDate">
+                    Date end of development:
+                  </Label>
                   <Input
                     id="endDate"
                     type="date"
@@ -339,11 +382,13 @@ function SwitchModal({
                     name="endDate"
                     required
                     defaultValue={endDateValue}
-                  ></Input>
+                  />
                 </ModalFormContentRow>
-    
+
                 <ModalFormContentRow>
-                  <Label size={1} minSize={1}>Images:</Label>
+                  <Label size={1} minSize={1}>
+                    Images:
+                  </Label>
                   <Input
                     name="images"
                     type="file"
@@ -352,9 +397,11 @@ function SwitchModal({
                     accept=".jpg, .png, .jpeg"
                   />
                 </ModalFormContentRow>
-    
+
                 <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="url">Url of website:</Label>
+                  <Label size={1} minSize={1} htmlFor="url">
+                    Url of website:
+                  </Label>
                   <Input
                     type="text"
                     id="url"
@@ -362,11 +409,13 @@ function SwitchModal({
                     name="url"
                     required
                     defaultValue={urlValue}
-                  ></Input>
+                  />
                 </ModalFormContentRow>
-    
+
                 <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="description">Description :</Label>
+                  <Label size={1} minSize={1} htmlFor="description">
+                    Description :
+                  </Label>
                   <Input
                     type="text"
                     id="description"
@@ -374,11 +423,13 @@ function SwitchModal({
                     placeholder="enter description of project"
                     required
                     defaultValue={descriptionValue}
-                  ></Input>
+                  />
                 </ModalFormContentRow>
-    
+
                 <ModalFormContentRow>
-                  <Label size={1} minSize={1}>Type of project :</Label>
+                  <Label size={1} minSize={1}>
+                    Type of project :
+                  </Label>
                   <ContainerCheckbox>
                     <Checkbox>
                       <Input
@@ -387,9 +438,11 @@ function SwitchModal({
                         id="work"
                         value="A2"
                         required
-                        defaultChecked={typeProject._id === "A2" ? true : false}
-                      ></Input>
-                      <Label size={1} minSize={1} htmlFor="work">Work project</Label>
+                        defaultChecked={typeProject._id === 'A2'}
+                      />
+                      <Label size={1} minSize={1} htmlFor="work">
+                        Work project
+                      </Label>
                     </Checkbox>
                     <Checkbox>
                       <Input
@@ -398,20 +451,24 @@ function SwitchModal({
                         id="personal"
                         value="A1"
                         required
-                        defaultChecked={typeProject._id === "A1" ? true : false}
-                      ></Input>
-                      <Label size={1} minSize={1} htmlFor="work">Personal Project</Label>
+                        defaultChecked={typeProject._id === 'A1'}
+                      />
+                      <Label size={1} minSize={1} htmlFor="work">
+                        Personal Project
+                      </Label>
                     </Checkbox>
                   </ContainerCheckbox>
                 </ModalFormContentRow>
-    
+
                 <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="tools">Tools :</Label>
+                  <Label size={1} minSize={1} htmlFor="tools">
+                    Tools :
+                  </Label>
                   <InputCollections
                     name="tools"
                     defaultValues={toolsValue}
                     data={data.data as ResourceObject[]}
-                  ></InputCollections>
+                  />
                 </ModalFormContentRow>
               </ModalFormContent>
               <ModalFormFooter>
@@ -420,28 +477,30 @@ function SwitchModal({
             </ModalForm>
           );
         }
-
       }
     default:
       return <> </>;
   }
 }
 
-async function onSubmit(event: React.FormEvent<HTMLFormElement>, dispatch: Dispatch<any>, mutate: any) {
+async function onSubmit(
+  event: React.FormEvent<HTMLFormElement>,
+  dispatch: Dispatch<any>,
+  mutate: any,
+) {
   try {
     event.preventDefault();
     const form = new FormData();
     const form2 = new FormData(event.currentTarget);
     const inputFiles = event.currentTarget[3] as HTMLInputElement;
-    const fileImage = inputFiles.files!;
-    
+    const fileImage = inputFiles.files;
+
     const document: ResourceObjectForSendWithFiles = {
       type: 'project',
-      attributes: {}
+      attributes: {},
     };
 
-
-    for (let [fieldName, fieldValue] of form2.entries()) {
+    for (const [fieldName, fieldValue] of form2.entries()) {
       if (document.attributes) {
         // Check Jika tools properti sudah diisi
         if (document.attributes.tools) {
@@ -449,94 +508,98 @@ async function onSubmit(event: React.FormEvent<HTMLFormElement>, dispatch: Dispa
           if (Array.isArray(document.attributes.tools)) {
             document.attributes.tools.push(fieldValue as OObject);
           } else {
-            document.attributes.tools = [document.attributes.tools as OObject, fieldValue as OObject];
+            document.attributes.tools = [
+              document.attributes.tools as OObject,
+              fieldValue as OObject,
+            ];
           }
 
           continue;
-          
-        };
+        }
 
         document.attributes[fieldName] = fieldValue;
       }
-    } 
-    
-    // Logic
-    dispatch({ type: "modal/request/start" });
-    for (let i = 0; i <  fileImage.length; i++) {
-      let file = fileImage.item(i);
-      if (file) form.append('images', file)
     }
 
-    const {meta} = await fetcherGeneric<DocMeta>("/api/images", {
-      method: "post",
-      body: form
+    // Logic
+    dispatch({ type: 'modal/request/start' });
+    for (let i = 0; i < fileImage.length; i++) {
+      const file = fileImage.item(i);
+      if (file) form.append('images', file);
+    }
+
+    const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
+      method: 'post',
+      body: form,
     });
 
     if (document.attributes) document.attributes.images = meta.images;
 
-    const request = await fetcherGeneric<DocMeta>("/api/projects", {
-      method: "post",
+    const request = await fetcherGeneric<DocMeta>('/api/projects', {
+      method: 'post',
       body: JSON.stringify(document),
       headers: {
-        'content-type': 'application/vnd.api+json'
-      }
+        'content-type': 'application/vnd.api+json',
+      },
     });
 
     dispatch({
-      type: "modal/request/finish",
+      type: 'modal/request/finish',
       payload: { message: request.meta.title },
     });
-    mutate("/api/projects");
+    mutate('/api/projects');
   } catch (err) {
     console.log(err);
     dispatch({
-      type: "modal/request/finish",
+      type: 'modal/request/finish',
       payload: { message: 'error happend' },
     });
-    mutate("/api/projects");
+    mutate('/api/projects');
   }
 }
 
 async function onSubmit2(id: string, dispatch: Dispatch<any>, mutate: any) {
   try {
-    dispatch({ type: "modal/request/start" });
+    dispatch({ type: 'modal/request/start' });
 
     const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
-      method: "delete",
+      method: 'delete',
     });
 
     dispatch({
-      type: "modal/request/finish",
+      type: 'modal/request/finish',
       payload: { message: request.meta.title as string },
     });
-    mutate("/api/projects");
+    mutate('/api/projects');
   } catch (err) {
     console.log(err);
     dispatch({
-      type: "modal/request/finish",
+      type: 'modal/request/finish',
       payload: { message: 'error happend' },
     });
-    mutate("/api/projects");
+    mutate('/api/projects');
   }
 }
 
-async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, dispatch: Dispatch<any>, mutate: any) {
+async function onSubmit3(
+  event: React.FormEvent<HTMLFormElement>,
+  id: string,
+  dispatch: Dispatch<any>,
+  mutate: any,
+) {
   try {
     event.preventDefault();
     const form = new FormData();
     const form2 = new FormData(event.currentTarget);
     const inputFiles = event.currentTarget[3] as HTMLInputElement;
-    const fileImage = inputFiles.files!
+    const fileImage = inputFiles.files;
     const document: ResourceObjectForSendWithFiles = {
       id,
       type: 'project',
-      attributes: {
-        
-      }
+      attributes: {},
     };
 
-
-    for (let [fieldName, fieldValue] of form2.entries()) {
+    for (const [fieldName, fieldValue] of form2.entries()) {
       if (document.attributes) {
         // Check Jika tools properti sudah diisi
         if (document.attributes.tools) {
@@ -544,54 +607,55 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
           if (Array.isArray(document.attributes.tools)) {
             document.attributes.tools.push(fieldValue as OObject);
           } else {
-            document.attributes.tools = [document.attributes.tools as OObject, fieldValue as OObject];
+            document.attributes.tools = [
+              document.attributes.tools as OObject,
+              fieldValue as OObject,
+            ];
           }
 
           continue;
-          
-        };
-        
-        if(fieldName !== 'images') document.attributes[fieldName] = fieldValue;
+        }
+
+        if (fieldName !== 'images') document.attributes[fieldName] = fieldValue;
       }
-    };
-    
-    
+    }
+
     // Logic
-    dispatch({ type: "modal/request/start" });
+    dispatch({ type: 'modal/request/start' });
     if (fileImage.length > 0) {
-      for (let i = 0; i <  fileImage.length; i++) {
-        let file = fileImage.item(i);
-        if (file) form.append('images', file)
+      for (let i = 0; i < fileImage.length; i++) {
+        const file = fileImage.item(i);
+        if (file) form.append('images', file);
       }
-      
-      const {meta} = await fetcherGeneric<DocMeta>("/api/images", {
-        method: "post",
-        body: form
+
+      const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
+        method: 'post',
+        body: form,
       });
-      
+
       if (document.attributes) document.attributes.images = meta.images;
     }
-    
-    const request = (await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
-      method: "PATCH",
+
+    const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
+      method: 'PATCH',
       body: JSON.stringify(document),
       headers: {
-        'content-type': 'application/vnd.api+json'
-      }
-    }));
+        'content-type': 'application/vnd.api+json',
+      },
+    });
 
     dispatch({
-      type: "modal/request/finish",
+      type: 'modal/request/finish',
       payload: { message: request.meta.title },
     });
-    mutate("/api/projects");
+    mutate('/api/projects');
   } catch (err) {
     console.log(err);
     dispatch({
-      type: "modal/request/finish",
+      type: 'modal/request/finish',
       payload: { message: 'error happend' },
     });
-    mutate("/api/projects");
+    mutate('/api/projects');
   }
 }
 
@@ -652,41 +716,55 @@ async function onSubmit3(event: React.FormEvent<HTMLFormElement>, id: string, di
 function InputCollections({
   data,
   defaultValues,
-  name
-}: {data: ResourceObject[], name: string, defaultValues?: OObject}) {
+  name,
+}: {
+  data: ResourceObject[];
+  name: string;
+  defaultValues?: OObject;
+}) {
   const [inputState, setInputState] = useState(() => {
-    if(defaultValues) {
+    if (defaultValues) {
       if (Array.isArray(defaultValues)) {
         return defaultValues.map((value) => {
-          if (typeof value == "object" && !Array.isArray(value) && value !== null) {
-            return value._id as string
+          if (
+            typeof value === 'object' &&
+            !Array.isArray(value) &&
+            value !== null
+          ) {
+            return value._id as string;
           }
-        })
+        });
       }
-    } 
+    }
 
     // Jika tidak ada nilai dafault
-    return [data[0]?.id]
+    return [data[0]?.id];
   });
 
   const collectionInput = [];
 
   // callback
-  function onChange(event: React.ChangeEvent<HTMLSelectElement>, index: number) {
+  function onChange(
+    event: React.ChangeEvent<HTMLSelectElement>,
+    index: number,
+  ) {
     const arrayBaru = [...inputState];
     arrayBaru[index] = event.currentTarget.value;
     setInputState(arrayBaru);
   }
 
-  function onRemoveItem (event: React.MouseEvent<HTMLButtonElement>, index: number) {
-    const newInputState = [...inputState].filter((value, idx) => index !== idx ? true : false);
-    if (newInputState.length > 0) setInputState(newInputState)
+  function onRemoveItem(
+    event: React.MouseEvent<HTMLButtonElement>,
+    index: number,
+  ) {
+    const newInputState = [...inputState].filter((value, idx) => index !== idx);
+    if (newInputState.length > 0) setInputState(newInputState);
   }
 
-  function onAddItem () {
+  function onAddItem() {
     const newInputState = [...inputState];
-    newInputState.push(data[0]?.id)
-    setInputState(newInputState)
+    newInputState.push(data[0]?.id);
+    setInputState(newInputState);
   }
 
   // Looping untuk select element yang diperlukan
@@ -700,7 +778,9 @@ function InputCollections({
           name={name}
         >
           {data.map((value) => {
-            const textOption = value.attributes ? value.attributes.name : 'undefined';
+            const textOption = value.attributes
+              ? value.attributes.name
+              : 'undefined';
             return (
               <option key={getRandom(i)} value={value.id}>
                 {textOption}
@@ -708,7 +788,9 @@ function InputCollections({
             );
           })}
         </select>
-        <Button type="button" onClick={event => onRemoveItem(event, i)}>X</Button>
+        <Button type="button" onClick={(event) => onRemoveItem(event, i)}>
+          X
+        </Button>
       </ContainerInput>
     );
     collectionInput.push(element);
@@ -729,9 +811,10 @@ function changeFormatDate(data: string) {
     date.getMonth() + 1 < 10
       ? `0${date.getMonth() + 1}`
       : `${date.getMonth() + 1}`;
-  return `${date.getFullYear()}-${month}-${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`;
-};
-
+  return `${date.getFullYear()}-${month}-${
+    date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
+  }`;
+}
 
 // Styled Component
 
@@ -758,8 +841,8 @@ const Checkbox = styled.div`
   justify-content: center;
   align-items: center;
 
-  & input[type=radio] {
-    margin: 0 .3rem;
+  & input[type='radio'] {
+    margin: 0 0.3rem;
   }
 `;
 

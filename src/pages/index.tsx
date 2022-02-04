@@ -1,11 +1,10 @@
-import Head from "next/head";
-import Image from "next/image";
-import React from "react";
-import styleIndex from "../styles/index.module.css";
-import styled from "styled-components";
-import Heading from "@components/Heading";
-import ProfileImage from "@public/images/profile.jpg";
-
+import Head from 'next/head';
+import Image from 'next/image';
+import React from 'react';
+import styled from 'styled-components';
+import Heading from '@components/Heading';
+import ProfileImage from '@public/images/profile.jpg';
+import styleIndex from '../styles/index.module.css';
 
 export default function Home() {
   return (
@@ -20,7 +19,7 @@ export default function Home() {
           placeholder="blur"
           src={ProfileImage}
           alt="profile"
-        ></Image>
+        />
       </ContainerImage>
       <TextParent>
         <Heading size={2.5} minSize={1.5}>

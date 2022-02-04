@@ -1,16 +1,16 @@
-import mongoose, {Schema} from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import typeProject from '@typess/mongoose/schemas/typeProject';
 
 const typeProjectSchema = new Schema<typeProject>({
-    _id:  {
-        type: String,
-        required: true,
-    },
-    name: {
-        type: String,
-        required: true,
-    },
+  _id: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
 });
 
-
-export default mongoose.models.typeProjects as mongoose.Model<typeProject> || mongoose.model<typeProject>('typeProjects', typeProjectSchema)
+export default (mongoose.models.typeProjects as mongoose.Model<typeProject>) ||
+  mongoose.model<typeProject>('typeProjects', typeProjectSchema);

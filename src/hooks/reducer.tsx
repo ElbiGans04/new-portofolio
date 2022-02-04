@@ -1,14 +1,14 @@
-import type { admin, action } from "@typess/admin";
+import type { admin, action } from '@typess/admin';
 // Reducer
 export function reducer(state: admin, action: action): admin {
   switch (action.type) {
-    case "modal/open/add": {
-      return { ...state, modal: "add" };
+    case 'modal/open/add': {
+      return { ...state, modal: 'add' };
     }
-    case "modal/open/update": {
+    case 'modal/open/update': {
       return {
         ...state,
-        modal: "update",
+        modal: 'update',
         row: {
           columns: [...action.payload.columns],
           columnsValue: [...action.payload.columnsValue],
@@ -16,34 +16,34 @@ export function reducer(state: admin, action: action): admin {
         },
       };
     }
-    case "modal/open/delete": {
+    case 'modal/open/delete': {
       return {
         ...state,
-        modal: "delete",
+        modal: 'delete',
         row: { columns: null, columnsValue: null, id: action.payload.id },
       };
     }
-    case "modal/request/start": {
+    case 'modal/request/start': {
       return {
         ...state,
-        status: "loading",
+        status: 'loading',
       };
     }
-    case "modal/request/finish": {
+    case 'modal/request/finish': {
       return {
         ...state,
-        status: "iddle",
+        status: 'iddle',
         message: action.payload.message,
       };
     }
-    case "modal/close": {
+    case 'modal/close': {
       return {
         ...state,
-        status: "iddle",
+        status: 'iddle',
         modal: null,
-        message: null
+        message: null,
       };
-    };
+    }
     default: {
       return state;
     }

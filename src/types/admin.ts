@@ -1,4 +1,4 @@
-import type {OObject} from '@typess/jsonApi/object'
+import type { OObject } from '@typess/jsonApi/object';
 
 interface Data {
   id: string;
@@ -6,24 +6,24 @@ interface Data {
   columnsValue: OObject[] | null;
 }
 export interface admin {
-  status: "iddle" | "loading" | "error";
-  modal: "add" | "update" | "delete" | null;
+  status: 'iddle' | 'loading' | 'error';
+  modal: 'add' | 'update' | 'delete' | null;
   message: string | null;
   row: Data | null;
 }
 
 export type action =
-  | { type: "modal/open/add" }
+  | { type: 'modal/open/add' }
   | {
-      type: "modal/open/update";
+      type: 'modal/open/update';
       payload: { id: string; columns: string[]; columnsValue: string[] };
     }
-  | { type: "modal/open/delete"; payload: { id: string } }
-  | { type: "modal/request/start" }
+  | { type: 'modal/open/delete'; payload: { id: string } }
+  | { type: 'modal/request/start' }
   | {
-      type: "modal/request/finish";
+      type: 'modal/request/finish';
       payload: {
         message: string;
       };
     }
-  | { type: "modal/close" };
+  | { type: 'modal/close' };

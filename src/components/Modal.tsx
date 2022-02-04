@@ -1,7 +1,7 @@
-import React, { Dispatch, SetStateAction } from "react";
-import styled, { createGlobalStyle } from "styled-components";
-import Heading from "@components/Heading";
-import Button from "@components/Button";
+import React, { Dispatch } from 'react';
+import styled, { createGlobalStyle } from 'styled-components';
+import Heading from '@components/Heading';
+import Button from '@components/Button';
 
 const ModalComponent = React.forwardRef<
   HTMLDivElement,
@@ -10,25 +10,23 @@ const ModalComponent = React.forwardRef<
     height: string;
     updateState: Dispatch<any>;
     defaultState: any;
-    children: React.ReactNode
+    children: React.ReactNode;
   }
->(({ defaultState, children, updateState, width, height }, ref) => {
-  return (
-    <Modal ref={ref}>
-      <ModalMain width={width} height={height}>
-        <ModalAction>
-          <ModalClose onClick={() => updateState(defaultState)}>
-            <span></span>
-            <span></span>
-          </ModalClose>
-        </ModalAction>
-        <ModalContent>{children}</ModalContent>
-      </ModalMain>
-    </Modal>
-  );
-});
+>(({ defaultState, children, updateState, width, height }, ref) => (
+  <Modal ref={ref}>
+    <ModalMain width={width} height={height}>
+      <ModalAction>
+        <ModalClose onClick={() => updateState(defaultState)}>
+          <span />
+          <span />
+        </ModalClose>
+      </ModalAction>
+      <ModalContent>{children}</ModalContent>
+    </ModalMain>
+  </Modal>
+));
 
-ModalComponent.displayName = "Modal";
+ModalComponent.displayName = 'Modal';
 
 export default ModalComponent;
 
@@ -45,7 +43,7 @@ export function ModalAdmin({
   dispatch: Dispatch<any>;
 }): JSX.Element {
   switch (status) {
-    case "loading": {
+    case 'loading': {
       return (
         <ModalMain2>
           <ModalContent2>
@@ -55,7 +53,7 @@ export function ModalAdmin({
       );
     }
 
-    case "iddle": {
+    case 'iddle': {
       if (message) {
         return (
           <ModalMain2>
@@ -65,18 +63,18 @@ export function ModalAdmin({
               </Heading>
             </ModalContent2>
             <ModalFooter>
-              <Button onClick={() => dispatch({ type: "modal/close" })}>
+              <Button onClick={() => dispatch({ type: 'modal/close' })}>
                 CLOSE
               </Button>
             </ModalFooter>
           </ModalMain2>
         );
-      };
-      
+      }
+
       return <Children {...props} />;
     }
     default:
-      return <></>
+      return <></>;
   }
 }
 

@@ -1,4 +1,5 @@
-import type {OObject} from '@typess/jsonApi/object'
+import type { OObject } from '@typess/jsonApi/object';
+
 export interface meta {
-    [index: string]: OObject
+  [index: string]: OObject;
 }

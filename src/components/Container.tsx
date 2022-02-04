@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from 'styled-components';
 
 const Container = styled.div`
   display: grid;
@@ -20,5 +20,4 @@ const Container = styled.div`
   }
 `;
 
-
-export default Container
+export default Container;

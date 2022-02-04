@@ -1,7 +1,7 @@
-import { Types } from 'mongoose'
+import { Types } from 'mongoose';
 
 export default interface tool {
-    _id: Types.ObjectId
-    name: string,
-    as: string,
+  _id: Types.ObjectId;
+  name: string;
+  as: string;
 }
