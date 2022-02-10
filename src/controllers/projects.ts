@@ -13,7 +13,12 @@ import ProjectValidationSchema from '@validation/projects';
 import fsPromise from 'fs/promises';
 import Joi from 'joi';
 import path from 'path';
-
+import ProjectInterface from '@typess/mongoose/schemas/project';
+import {
+  TransformToDocClient,
+  TransformToDocServer,
+} from '@src/module/typescript/transformSchemeToDoc';
+import { Types } from 'mongoose';
 const pathImage = path.resolve(process.cwd(), 'public/images');
 
 class Projects {
@@ -63,11 +68,15 @@ class Projects {
     await runMiddleware(req, res, formidableHandler);
 
     // Validasi
-    const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
+    const validReqBody = Joi.attempt(
+      req.body,
+      ProjectValidationSchema,
+    ) as TransformToDocClient<ProjectInterface>;
 
     // Jika hanya mengirim satu data tools
-    if (validReqBody.attributes.tools instanceof Array === false) {
-      validReqBody.attributes.tools = [validReqBody.attributes.tools];
+    if (!Array.isArray(validReqBody.attributes.tools)) {
+      const tools = validReqBody.attributes.tools as Types.ObjectId;
+      validReqBody.attributes.tools = [tools] as Types.Array<Types.ObjectId>;
     }
 
     // Check Apakah typeProject dengan id tertentu ada
@@ -128,7 +137,7 @@ class Projects {
     }
 
     // atur headers
-    res.setHeader('Location', `/api/projects/${project._id}`);
+    res.setHeader('Location', `/api/projects/${project._id as string}`);
     res.setHeader('content-type', 'application/vnd.api+json');
 
     res.statusCode = 200;
@@ -148,18 +157,20 @@ class Projects {
 
     const { projectID } = req.query;
 
-    console.log(req.body);
-
     // Validasi
-    const validReqBody = Joi.attempt(req.body, ProjectValidationSchema);
+    const validReqBody = Joi.attempt(
+      req.body,
+      ProjectValidationSchema,
+    ) as TransformToDocServer<ProjectInterface>;
 
     // Jika tidak memasukan field id
     if (!validReqBody.id)
       throw { title: 'missing id property in request document', code: 404 };
 
     // Jika hanya mengirim satu data tools
-    if (validReqBody.attributes.tools instanceof Array === false) {
-      validReqBody.attributes.tools = [validReqBody.attributes.tools];
+    if (!Array.isArray(validReqBody.attributes.tools)) {
+      const tools = validReqBody.attributes.tools as Types.ObjectId;
+      validReqBody.attributes.tools = [tools] as Types.Array<Types.ObjectId>;
     }
 
     // Check Apakah typeProject dengan id tertentu ada
@@ -180,11 +191,10 @@ class Projects {
     // Ambil Daftar gambar lama
     const result2Old = await Project.findById(projectID, { images: 1 });
 
-    const result2 = await Project.findByIdAndUpdate(
-      projectID,
-      validReqBody.attributes,
-      { new: true },
-    );
+    // Lakukan Perubahan
+    await Project.findByIdAndUpdate(projectID, validReqBody.attributes, {
+      new: true,
+    });
 
     // Jika ga ada
     if (!result2Old) {

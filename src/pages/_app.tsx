@@ -43,13 +43,19 @@ function Layout({ children }: { children: ReactNode }) {
   );
 }
 
-class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
-  constructor(props: {}) {
+interface ErrorBoundaryProp {
+  childern?: Element;
+}
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProp,
+  { hasError: boolean }
+> {
+  constructor(props: ErrorBoundaryProp) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 

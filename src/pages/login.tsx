@@ -6,7 +6,7 @@ import Button from '@components/Button';
 import { FormEvent, useState } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
 import { DocErrors, DocMeta } from '@typess/jsonApi';
-import { SetStateAction } from 'hoist-non-react-statics/node_modules/@types/react';
+import { Dispatch, SetStateAction } from 'react';
 import useUser from '../hooks/useUser';
 
 interface EventTargetType extends FormEvent<HTMLFormElement> {
@@ -26,7 +26,7 @@ export default function Login() {
     redirectTo: '/admin/projects',
     redirectIfFound: true,
   });
-  const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState<null | DocErrors>(null);
   async function onSubmit(event: EventTargetType) {
     try {
       event.preventDefault();
@@ -41,6 +41,7 @@ export default function Login() {
           },
         };
 
+        // Mengembalikan Doc error atau metta
         const request = await fetch('/api/auth/login', {
           method: 'post',
           body: JSON.stringify(body),
@@ -49,10 +50,14 @@ export default function Login() {
           },
         });
 
-        const request2 = await request.json();
-        if (!request.ok) setMessage(request2);
+        if (!request.ok) {
+          const request2 = (await request.json()) as DocErrors;
+          setMessage(request2);
+        }
 
-        mutateUser(request2);
+        const request2 = (await request.json()) as DocMeta;
+
+        await mutateUser(request2);
       }
     } catch (err) {
       alert('Found a error when trigger mutation data');
@@ -99,7 +104,7 @@ function MessageComponent({
   setMessage,
 }: {
   message: DocErrors | null;
-  setMessage: SetStateAction<any>;
+  setMessage: Dispatch<SetStateAction<DocErrors>>;
 }) {
   let messageText = '';
   if (message !== null) {

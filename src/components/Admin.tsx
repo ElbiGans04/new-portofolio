@@ -14,7 +14,7 @@ import {
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useSWR from 'swr';
-import fetcher from '../module/fetcher';
+import { fetcherGeneric } from '../module/fetcher';
 import Heading from './Heading';
 
 export default function Admin() {
@@ -25,7 +25,7 @@ export default function Admin() {
     renameColumns = {},
     dispatch,
   } = useContext(Context);
-  const { data, error } = useSWR<Doc, DocErrors>(url, fetcher);
+  const { data, error } = useSWR<Doc, DocErrors>(url, fetcherGeneric);
   const user = useUser({ redirectTo: '/login', redirectIfFound: false });
 
   // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah

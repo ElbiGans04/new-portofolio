@@ -33,6 +33,8 @@ import React, {
 import { CSSTransition } from 'react-transition-group';
 import { useSWRConfig } from 'swr';
 
+type mutateSWRCustom = <T>(key: string) => Promise<T>;
+
 export default function Tools() {
   const [state, dispatch] = useReducer(reducer, {
     status: 'iddle',
@@ -93,7 +95,7 @@ function SwitchModal({
   state: admin;
   dispatch: Dispatch<action>;
 }) {
-  const { mutate } = useSWRConfig();
+  const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
   const row = state.row;
   switch (state.modal) {
     case 'add': {
@@ -175,7 +177,8 @@ function SwitchModal({
           </ModalForm>
         );
       }
-      <> </>;
+
+      break;
     }
     default:
       return <> </>;
@@ -186,7 +189,7 @@ function SwitchModal({
 const onSubmit = async (
   event: FormEvent<HTMLFormElement>,
   dispatch: Dispatch<any>,
-  mutate: any,
+  mutate: mutateSWRCustom,
 ) => {
   try {
     event.preventDefault();
@@ -215,7 +218,8 @@ const onSubmit = async (
         type: 'modal/request/finish',
         payload: { message: request.meta.title },
       });
-      mutate('/api/tools');
+
+      await mutate('/api/tools');
     }
   } catch (err) {
     alert('Error');
@@ -227,7 +231,11 @@ const onSubmit = async (
   }
 };
 
-const onSubmit2 = async (id: string, dispatch: Dispatch<any>, mutate: any) => {
+const onSubmit2 = async (
+  id: string,
+  dispatch: Dispatch<any>,
+  mutate: mutateSWRCustom,
+) => {
   try {
     dispatch({ type: 'modal/request/start' });
 
@@ -239,7 +247,8 @@ const onSubmit2 = async (id: string, dispatch: Dispatch<any>, mutate: any) => {
       type: 'modal/request/finish',
       payload: { message: request.meta.title },
     });
-    mutate('/api/tools');
+
+    await mutate('/api/tools');
   } catch (err) {
     alert('Error');
     console.log(err);
@@ -254,7 +263,7 @@ const onSubmit3 = async (
   event: FormEvent<HTMLFormElement>,
   id: string,
   dispatch: Dispatch<any>,
-  mutate: any,
+  mutate: mutateSWRCustom,
 ) => {
   try {
     event.preventDefault();
@@ -282,7 +291,8 @@ const onSubmit3 = async (
         type: 'modal/request/finish',
         payload: { message: request.meta.title },
       });
-      mutate('/api/tools');
+
+      await mutate('/api/tools');
     }
   } catch (err) {
     alert('Error');

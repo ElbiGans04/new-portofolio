@@ -16,7 +16,7 @@ import ModalComponent, {
 } from '@components/Modal';
 import Context from '@hooks/context';
 import { reducer } from '@hooks/reducer';
-import fetcher, { fetcherGeneric } from '@module/fetcher';
+import { fetcherGeneric } from '@module/fetcher';
 import getRandom from '@module/randomNumber';
 import changeFirstWord from '@module/upperFirstWord';
 import type { admin } from '@typess/admin';
@@ -35,7 +35,8 @@ import { IoAddOutline } from 'react-icons/io5';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
-import imagesInterface from '@src/types/mongoose/schemas/image';
+
+type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
 export default function Projects() {
   const ref = useRef(null);
@@ -157,8 +158,8 @@ function SwitchModal({
   state: admin;
   dispatch: Dispatch<any>;
 }) {
-  const { mutate } = useSWRConfig();
-  const { data, error } = useSWR<Doc, DocErrors>('/api/tools', fetcher);
+  const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
+  const { data, error } = useSWR<Doc, DocErrors>('/api/tools', fetcherGeneric);
   const row = state.row;
 
   if (error) {
@@ -478,6 +479,7 @@ function SwitchModal({
           );
         }
       }
+      break;
     default:
       return <> </>;
   }
@@ -486,7 +488,7 @@ function SwitchModal({
 async function onSubmit(
   event: React.FormEvent<HTMLFormElement>,
   dispatch: Dispatch<any>,
-  mutate: any,
+  mutate: mutateSWRCustom,
 ) {
   try {
     event.preventDefault();
@@ -547,18 +549,22 @@ async function onSubmit(
       type: 'modal/request/finish',
       payload: { message: request.meta.title },
     });
-    mutate('/api/projects');
+    await mutate('/api/projects');
   } catch (err) {
     console.log(err);
     dispatch({
       type: 'modal/request/finish',
       payload: { message: 'error happend' },
     });
-    mutate('/api/projects');
+    await mutate('/api/projects');
   }
 }
 
-async function onSubmit2(id: string, dispatch: Dispatch<any>, mutate: any) {
+async function onSubmit2(
+  id: string,
+  dispatch: Dispatch<any>,
+  mutate: mutateSWRCustom,
+) {
   try {
     dispatch({ type: 'modal/request/start' });
 
@@ -570,14 +576,14 @@ async function onSubmit2(id: string, dispatch: Dispatch<any>, mutate: any) {
       type: 'modal/request/finish',
       payload: { message: request.meta.title as string },
     });
-    mutate('/api/projects');
+    await mutate('/api/projects');
   } catch (err) {
     console.log(err);
     dispatch({
       type: 'modal/request/finish',
       payload: { message: 'error happend' },
     });
-    mutate('/api/projects');
+    await mutate('/api/projects');
   }
 }
 
@@ -585,7 +591,7 @@ async function onSubmit3(
   event: React.FormEvent<HTMLFormElement>,
   id: string,
   dispatch: Dispatch<any>,
-  mutate: any,
+  mutate: mutateSWRCustom,
 ) {
   try {
     event.preventDefault();
@@ -648,14 +654,16 @@ async function onSubmit3(
       type: 'modal/request/finish',
       payload: { message: request.meta.title },
     });
-    mutate('/api/projects');
+
+    await mutate('/api/projects');
   } catch (err) {
     console.log(err);
     dispatch({
       type: 'modal/request/finish',
       payload: { message: 'error happend' },
     });
-    mutate('/api/projects');
+
+    await mutate('/api/projects');
   }
 }
 

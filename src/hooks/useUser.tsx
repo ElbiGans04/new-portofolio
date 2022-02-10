@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import Router from 'next/router';
-import fetcher from '@module/fetcher';
+import { fetcherGeneric } from '@module/fetcher';
 import useSWR from 'swr';
 import { DocErrors, DocMeta } from '@typess/jsonApi';
 
@@ -15,7 +15,7 @@ export default function useUser({
 }: argument) {
   const { data: user, mutate: mutateUser } = useSWR<DocMeta, DocErrors>(
     '/api/auth/user',
-    fetcher,
+    fetcherGeneric,
   );
 
   useEffect(() => {
@@ -48,7 +48,9 @@ export default function useUser({
         typeof user?.meta?.isLoggedIn === 'boolean' &&
         user?.meta?.isLoggedIn === true)
     ) {
-      Router.push(redirectTo);
+      Router.push(redirectTo).catch((err) => {
+        console.log(err);
+      });
     }
   }, [user, redirectIfFound, redirectTo]);
 

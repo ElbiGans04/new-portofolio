@@ -1,24 +1,25 @@
 {
   "presets": ["next/babel"],
   "plugins": [
-    [
-      "module-resolver",
-      {
-        "root": ["./"],
-        "alias": {
-          "@public/*": ["public"],
-          "@src": ["./src"],
-          "@components": ["./src/components"],
-          "@controllers": ["./src/controllers"],
-          "@database": ["./src/database"],
-          "@hooks": ["./src/hooks"],
-          "@middleware": ["./src/middleware"],
-          "@module": ["./src/module"],
-          "@style": ["./src/style"],
-          "@typess": ["./src/types"],
-          "@validation": ["./src/validation"]
-        }
-      }
-    ]
+    ["styled-components", { "ssr": true }]
+    // [
+    //   "module-resolver",
+    //   {
+    //     "root": ["./"],
+    //     "alias": {
+    //       "@public/*": ["public"],
+    //       "@src": ["./src"],
+    //       "@components": ["./src/components"],
+    //       "@controllers": ["./src/controllers"],
+    //       "@database": ["./src/database"],
+    //       "@hooks": ["./src/hooks"],
+    //       "@middleware": ["./src/middleware"],
+    //       "@module": ["./src/module"],
+    //       "@style": ["./src/style"],
+    //       "@typess": ["./src/types"],
+    //       "@validation": ["./src/validation"]
+    //     }
+    //   }
+    // ]
   ]
 }

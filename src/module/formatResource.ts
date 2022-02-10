@@ -1,4 +1,4 @@
-import { Document, Model, QueryWithHelpers } from 'mongoose';
+import { Document } from 'mongoose';
 import { OObject } from '@typess/jsonApi/object';
 
 interface ResultType {
@@ -31,9 +31,9 @@ export default function formatResource<T>(
 
     for (const [key, value] of Object.entries(newDataMentah)) {
       if (key !== '__v') {
-        if (key === '_id') result.id = value;
-        else if (newDataMentah.hasOwnProperty(key)) {
-          result.attributes[key] = value;
+        if (key === '_id') result.id = value as string;
+        else if (Object.prototype.hasOwnProperty.call(newDataMentah, key)) {
+          result.attributes[key] = value as string;
         }
       }
     }

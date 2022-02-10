@@ -26,9 +26,11 @@
         "@style/*": ["./src/style/*"],
         "@typess/*": ["./src/types/*"],
         "@validation/*": ["./src/validation/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./src/types/definition-file"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
-  "exclude": ["node_modules", ".next", ".vercel", "out"]
+  "exclude": ["node_modules", ".next", ".vercel", "out"],
+
   
 }

@@ -7,7 +7,7 @@ import formidable from 'formidable';
 
 const form = formidable({
   multiples: true,
-  filename: (name, ext, part, form) => `${name}-elbi-${Date.now()}.png`,
+  filename: (name) => `${name}-elbi-${Date.now()}.png`,
   // filter: ({ name, originalFilename, mimetype }) => {
   //   return mimetype && mimetype.includes("image");
   // },

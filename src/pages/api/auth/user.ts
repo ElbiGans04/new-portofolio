@@ -5,8 +5,8 @@ import type {
 } from '@typess/controllersRoutersApi';
 
 export default withSession(
-  async (req: RequestControllerRouter, res: RespondControllerRouter) => {
-    const user = req.session ? req.session.get('user') : undefined;
+  (req: RequestControllerRouter, res: RespondControllerRouter) => {
+    const user = req.session ? req.session.get<string>('user') : undefined;
 
     return res.json({
       meta: {

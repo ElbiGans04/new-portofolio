@@ -8,7 +8,7 @@ export default function withSession(
   handler: (
     req: RequestControllerRouter,
     res: RespondControllerRouter,
-  ) => Promise<void>,
+  ) => Promise<void> | void,
 ) {
   if (process.env.SECRET_COOKIE_PASSWORD === undefined)
     throw new Error('SECRET PASSWORD NOT FOUND');

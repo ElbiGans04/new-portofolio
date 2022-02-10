@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-
 const { MONGODB_URI } = process.env;
 
 if (typeof MONGODB_URI === 'undefined') {
@@ -20,32 +19,37 @@ if (!cached) {
 }
 
 async function dbConnect() {
-  if (cached.conn) {
+  try {
+    if (cached.conn !== null) {
+      return cached.conn;
+    }
+
+    if (typeof MONGODB_URI === 'undefined') {
+      throw new Error(
+        'Please define the MONGODB_URI environment variable inside .env.local',
+      );
+    }
+
+    if (cached.promise == null) {
+      const opts = {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        bufferCommands: false,
+        bufferMaxEntries: 0,
+        useFindAndModify: false,
+        useCreateIndex: true,
+      };
+
+      cached.promise = mongoose
+        .connect(MONGODB_URI, opts)
+        .then((mongoose) => mongoose);
+    }
+
+    cached.conn = await cached.promise;
     return cached.conn;
+  } catch (err) {
+    console.log(`\n\n\nDB CONNECTION FAILED\n\n\n`);
   }
-
-  if (typeof MONGODB_URI === 'undefined') {
-    throw new Error(
-      'Please define the MONGODB_URI environment variable inside .env.local',
-    );
-  }
-
-  if (!cached.promise) {
-    const opts = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      bufferCommands: false,
-      bufferMaxEntries: 0,
-      useFindAndModify: false,
-      useCreateIndex: true,
-    };
-
-    cached.promise = mongoose
-      .connect(MONGODB_URI, opts)
-      .then((mongoose) => mongoose);
-  }
-  cached.conn = await cached.promise;
-  return cached.conn;
 }
 
 export default dbConnect;

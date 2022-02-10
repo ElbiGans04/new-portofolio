@@ -8,6 +8,11 @@ import {
 } from '@typess/controllersRoutersApi';
 import ToolValidationSchema from '@validation/tools';
 import joi from 'joi';
+import type {
+  TransformToDocClient,
+  TransformToDocServer,
+} from '@module/typescript/transformSchemeToDoc';
+import ToolInterface from '@src/types/mongoose/schemas/tool';
 
 class Tools {
   async getTool(req: RequestControllerRouter, res: RespondControllerRouter) {
@@ -38,7 +43,11 @@ class Tools {
 
   async postTools(req: RequestControllerRouter, res: RespondControllerRouter) {
     await runMiddleware(req, res, formidableHandler);
-    const valid = joi.attempt(req.body, ToolValidationSchema);
+    const valid = joi.attempt(
+      req.body,
+      ToolValidationSchema,
+    ) as TransformToDocClient<ToolInterface>;
+
     const tool = new ToolsSchema(valid.attributes);
     await tool.save();
 
@@ -55,8 +64,12 @@ class Tools {
   async patchTool(req: RequestControllerRouter, res: RespondControllerRouter) {
     await runMiddleware(req, res, formidableHandler);
     const { toolID } = req.query;
-    const valid = joi.attempt(req.body, ToolValidationSchema);
+    const valid = joi.attempt(
+      req.body,
+      ToolValidationSchema,
+    ) as TransformToDocServer<ToolInterface>;
 
+    // Check karena di joi validation attribute id merupakan optional
     if (!valid.id)
       throw { title: 'missing id property in request document', code: 404 };
 

@@ -15,6 +15,12 @@ import Paragraph from '@components/Paragraph';
 import Modal from '@components/Modal';
 import getRandom from '@module/randomNumber';
 import projectsStyled from '../styles/projects.module.css';
+import { fetcherGeneric } from '@module/fetcher';
+
+type requestProject = {
+  data: StateProjects;
+  code: string;
+};
 
 type StateProjects = Array<{
   id: string;
@@ -130,11 +136,9 @@ function Projects() {
           dispatch({ type: 'request/start' });
         }
 
-        const fetchProjects = await (
-          await fetch(
-            `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`,
-          )
-        ).json();
+        const fetchProjects = await fetcherGeneric<requestProject>(
+          `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`,
+        );
 
         // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
         if (!didCancel) {
@@ -149,7 +153,10 @@ function Projects() {
       }
     }
 
-    getData();
+    getData().catch((err) => {
+      console.log(`\n\n\n ERROR WHEN REQUEST DATA`);
+      console.log(err);
+    });
 
     // Setel true variabel did cancel
     return () => {
