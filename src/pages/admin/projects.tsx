@@ -196,6 +196,7 @@ function SwitchModal({
                 Title:{' '}
               </Label>
               <Input
+                required
                 type="text"
                 id="title"
                 placeholder="enter the project title"
@@ -208,6 +209,7 @@ function SwitchModal({
                 Date start of development:{' '}
               </Label>
               <Input
+                required
                 type="date"
                 id="startDate"
                 placeholder="enter the start date of development"
@@ -220,6 +222,7 @@ function SwitchModal({
                 Date end of development:
               </Label>
               <Input
+                required
                 id="endDate"
                 type="date"
                 placeholder="enter the end date of development"
@@ -232,6 +235,7 @@ function SwitchModal({
                 Images:
               </Label>
               <Input
+                required
                 name="images"
                 type="file"
                 id="file"
@@ -244,7 +248,13 @@ function SwitchModal({
               <Label size={1} minSize={1} htmlFor="url">
                 Url of website:
               </Label>
-              <Input type="text" id="url" placeholder="enter url" name="url" />
+              <Input
+                required
+                type="text"
+                id="url"
+                placeholder="enter url"
+                name="url"
+              />
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -252,6 +262,7 @@ function SwitchModal({
                 Description :
               </Label>
               <Input
+                required
                 type="text"
                 id="description"
                 name="description"
