@@ -16,7 +16,7 @@ export type action =
   | { type: 'modal/open/add' }
   | {
       type: 'modal/open/update';
-      payload: { id: string; columns: string[]; columnsValue: string[] };
+      payload: { id: string; columns: string[]; columnsValue: OObject[] };
     }
   | { type: 'modal/open/delete'; payload: { id: string } }
   | { type: 'modal/request/start' }

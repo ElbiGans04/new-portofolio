@@ -35,6 +35,7 @@ import { IoAddOutline } from 'react-icons/io5';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
+import { isObject } from '@module/typescript/narrowing';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
@@ -63,11 +64,7 @@ export default function Projects() {
         let textResult = '';
         if (Array.isArray(value)) {
           value.forEach((text, index) => {
-            if (
-              typeof text === 'object' &&
-              text !== null &&
-              !Array.isArray(text)
-            ) {
+            if (isObject(text)) {
               textResult += changeFirstWord(text.name as string);
               if (index !== value.length - 1) textResult += ', ';
             }
@@ -77,11 +74,7 @@ export default function Projects() {
         return <div>{textResult}</div>;
       },
       typeProject: function typeProject(value: OObject) {
-        if (
-          typeof value === 'object' &&
-          value !== null &&
-          !Array.isArray(value)
-        )
+        if (isObject(value))
           return <div>{changeFirstWord(value.name as string)}</div>;
         return <div />;
       },
@@ -344,12 +337,7 @@ function SwitchModal({
           row.columnsValue[row.columns.indexOf('typeProject')];
         const toolsValue = row.columnsValue[row.columns.indexOf('tools')];
 
-        if (
-          typeof typeProject === 'object' &&
-          typeProject !== null &&
-          !Array.isArray(typeProject) &&
-          toolsValue
-        ) {
+        if (isObject(typeProject) && toolsValue) {
           return (
             <ModalForm
               onSubmit={(event) => onSubmit3(event, row.id, dispatch, mutate)}
@@ -745,11 +733,7 @@ function InputCollections({
     if (defaultValues) {
       if (Array.isArray(defaultValues)) {
         return defaultValues.map((value) => {
-          if (
-            typeof value === 'object' &&
-            !Array.isArray(value) &&
-            value !== null
-          ) {
+          if (isObject(value)) {
             return value._id as string;
           }
         });

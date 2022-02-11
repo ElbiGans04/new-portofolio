@@ -4,6 +4,7 @@ import {
 } from '@typess/controllersRoutersApi';
 import runMiddleware from '@middleware/runMiddleware';
 import { formidableHandler } from '@middleware/formidable';
+import { isObject } from '@module/typescript/narrowing';
 
 class Login {
   async postLogin(req: RequestControllerRouter, res: RespondControllerRouter) {
@@ -11,11 +12,7 @@ class Login {
 
     const { attributes } = req.body;
 
-    if (
-      typeof attributes !== 'object' ||
-      attributes === null ||
-      Array.isArray(attributes)
-    ) {
+    if (!isObject(attributes)) {
       return res.status(406).json({
         errors: [
           {

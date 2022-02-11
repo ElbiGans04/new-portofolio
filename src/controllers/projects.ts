@@ -19,6 +19,8 @@ import {
   TransformToDocServer,
 } from '@src/module/typescript/transformSchemeToDoc';
 import { Types } from 'mongoose';
+import { isObject } from '@module/typescript/narrowing';
+
 const pathImage = path.resolve(process.cwd(), 'public/images');
 
 class Projects {
@@ -99,11 +101,7 @@ class Projects {
 
     await project.save();
 
-    if (
-      typeof req.body.attributes !== 'object' ||
-      Array.isArray(req.body.attributes) ||
-      req.body.attributes === null
-    ) {
+    if (!isObject(req.body.attributes)) {
       return res.status(406).json({
         errors: [
           {
@@ -123,11 +121,7 @@ class Projects {
         let validFormat = true;
         // Check jika ada yang formatnya bukan string
         images.forEach((image) => {
-          if (
-            typeof image === 'object' &&
-            !Array.isArray(image) &&
-            image !== null
-          ) {
+          if (isObject(image)) {
             if (typeof image.src !== 'string') validFormat = false;
           } else validFormat = false;
         });
@@ -201,11 +195,7 @@ class Projects {
       throw { title: 'project not found', code: 404 };
     }
 
-    if (
-      typeof req.body.attributes !== 'object' ||
-      Array.isArray(req.body.attributes) ||
-      req.body.attributes === null
-    ) {
+    if (!isObject(req.body.attributes)) {
       return res.status(406).json({
         errors: [
           {
@@ -231,11 +221,7 @@ class Projects {
 
         // Check jika ada yang formatnya bukan string
         images.forEach((image) => {
-          if (
-            typeof image === 'object' &&
-            !Array.isArray(image) &&
-            image !== null
-          ) {
+          if (isObject(image)) {
             if (typeof image.src !== 'string') validFormat = false;
           } else validFormat = false;
         });

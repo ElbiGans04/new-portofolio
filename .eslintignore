@@ -13,3 +13,8 @@ coverage
 **/out/*
 next-env.d.ts
 # next.config.js
+
+# CUSTOM 
+.babelrc
+.lintstagedrc.js
+commitlint.config.js
