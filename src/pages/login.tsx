@@ -8,6 +8,7 @@ import { AiOutlineClose } from 'react-icons/ai';
 import { DocErrors, DocMeta } from '@typess/jsonApi';
 import { Dispatch, SetStateAction } from 'react';
 import useUser from '../hooks/useUser';
+import { CSSTransition } from 'react-transition-group';
 
 interface EventTargetType extends FormEvent<HTMLFormElement> {
   currentTarget: EventTarget &
@@ -68,8 +69,18 @@ export default function Login() {
       <Head>
         <title>Login</title>
       </Head>
+
+      {/* Transition */}
+      <CSSTransition
+        in={message === null ? false : true}
+        timeout={500}
+        classNames="message-login"
+      >
+        <MessageParent>
+          <MessageComponent setMessage={setMessage} message={message} />
+        </MessageParent>
+      </CSSTransition>
       <Form onSubmit={onSubmit}>
-        <MessageComponent setMessage={setMessage} message={message} />
         <FormRow>
           <Label size={1} minSize={1} htmlFor="email">
             Email :
@@ -120,24 +131,32 @@ function MessageComponent({
     </MessageContainer>
   );
 }
-
-const MessageContainer = styled.div<{ visible: boolean }>`
+const MessageParent = styled.div`
   width: 100%;
-  padding: 0.5rem;
-  font-size: 0.9rem;
-  border-radius: 0.4rem;
+  height: 0;
+  overflow: hidden;
+  transition: 0.5s;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
-  // background-color: #F46F6F;
-  // color: #f20909;
-  // background-color: var(--dark);
-  // color: var(--pink);
+  margin-bottom: 0.5rem;
+
+  // From Message container
   color: #842029;
   background-color: #f8d7da;
   border-color: #f5c2c7;
   line-height: 1.3rem;
+  border-radius: 0.4rem;
+`;
+const MessageContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  font-size: 0.9rem;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.5s;
   // untuk icon close
   & svg {
     margin-left: 0.3rem;
@@ -147,7 +166,7 @@ const MessageContainer = styled.div<{ visible: boolean }>`
 
 const Container = styled.div`
   width: 50%;
-  height: 50vh;
+  // height: 50vh;
   background-color: var(--dark2);
   padding: 2rem;
   border-radius: 1rem;
@@ -184,5 +203,5 @@ const FormRow = styled.div`
 
 const NewButton = styled(Button)`
   width: 100%;
-  margin-top: 1.5rem;
+  margin-top: 0.3rem;
 `;
