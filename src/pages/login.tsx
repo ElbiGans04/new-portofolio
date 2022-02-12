@@ -140,8 +140,6 @@ const MessageParent = styled.div`
   justify-content: center;
   align-items: center;
   margin-bottom: 0.5rem;
-
-  // From Message container
   color: #842029;
   background-color: #f8d7da;
   border-color: #f5c2c7;
@@ -157,7 +155,7 @@ const MessageContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   transition: 0.5s;
-  // untuk icon close
+
   & svg {
     margin-left: 0.3rem;
     cursor: pointer;
@@ -166,7 +164,6 @@ const MessageContainer = styled.div`
 
 const Container = styled.div`
   width: 50%;
-  // height: 50vh;
   background-color: var(--dark2);
   padding: 2rem;
   border-radius: 1rem;
@@ -194,11 +191,6 @@ const FormRow = styled.div`
   display: grid;
   grid-template-rows: 1fr 1fr;
   align-items: center;
-  // display: flex;
-  // justify-content: space-between;
-  // align-items: flex-start;
-  // flex-wrap: wrap;
-  // flex-direction: column;
 `;
 
 const NewButton = styled(Button)`
