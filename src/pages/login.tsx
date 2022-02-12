@@ -125,7 +125,7 @@ function MessageComponent({
   }
 
   return (
-    <MessageContainer visible={message !== null}>
+    <MessageContainer>
       {messageText}
       <AiOutlineClose onClick={() => setMessage(null)} size="1.3rem" />
     </MessageContainer>
