@@ -401,15 +401,27 @@ function ImageSlider({
             onClick={(event) => changeImageAction(event, 0)}
             title="prev image"
           >
-            <ModalImageActionSpan transform="translate(0px, -17px) rotate(-45deg)" />
-            <ModalImageActionSpan transform="translate(0px, 0px) rotate(45deg)" />
+            <ModalImageActionSpanLeft
+              transform="translate(0px, -17px) rotate(-45deg)"
+              rotate={-45}
+            />
+            <ModalImageActionSpanLeft
+              transform="translate(0px, 0px) rotate(45deg)"
+              rotate={45}
+            />
           </ModalImageAction>
           <ModalImageAction
             onClick={(event) => changeImageAction(event, 1)}
             title="next image"
           >
-            <ModalImageActionSpan transform="translate(0px,-17px) rotate(45deg)" />
-            <ModalImageActionSpan transform="translate(0px, 0px) rotate(-45deg)" />
+            <ModalImageActionSpanRight
+              transform="translate(0px,-17px) rotate(45deg)"
+              rotate={45}
+            />
+            <ModalImageActionSpanRight
+              transform="translate(0px, 0px) rotate(-45deg)"
+              rotate={-45}
+            />
           </ModalImageAction>
         </ModalImageActions>
       )}
@@ -635,25 +647,71 @@ const ModalImageActions = styled.div`
   justify-content: space-between;
   align-items: center;
   z-index: 2;
+
+  @media (max-width: 768px) {
+    & {
+      height: 250px;
+    }
+  }
 `;
 
-const ModalImageAction = styled.div<{ backgroundColor?: string }>`
+const ModalImageAction = styled.div`
   width: 10%;
   height: 100%;
-  background-color: ${({ backgroundColor }) =>
-    backgroundColor || 'rgba(31,33,39,0.8)'};
+  background-color: rgba(31, 33, 39, 0.8); // rgba(0, 0, 0, 0.32)
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 `;
-const ModalImageActionSpan = styled.span<{ transform: string }>`
+const ModalImageActionSpan = styled.span`
   width: 32px;
   height: 4px;
   background-color: var(--pink);
   cursor: pointer;
-  transform: ${({ transform }) => transform};
+
+  @media (max-width: 576px) {
+    & {
+      width: 25px;
+      height: 4px;
+    }
+  }
 `;
+
+const ModalImageActionSpanLeft = styled(ModalImageActionSpan)<{
+  rotate: number;
+}>`
+  transform: translate(0px, ${({ rotate }) => (rotate >= 0 ? `0px` : `-17px`)})
+    rotate(${({ rotate }) => `${rotate}deg`});
+
+  @media (max-width: 576px) {
+    & {
+      transform: translate(
+          0px,
+          ${({ rotate }) => (rotate >= 0 ? `0px` : `-12px`)}
+        )
+        rotate(${({ rotate }) => `${rotate}deg`});
+    }
+  }
+`;
+
+const ModalImageActionSpanRight = styled(ModalImageActionSpan)<{
+  rotate: number;
+}>`
+  transform: translate(0px, ${({ rotate }) => (rotate >= 0 ? `-17px` : `0px`)})
+    rotate(${({ rotate }) => `${rotate}deg`});
+
+  @media (max-width: 576px) {
+    & {
+      transform: translate(
+          0px,
+          ${({ rotate }) => (rotate >= 0 ? `-12px` : `0px`)}
+        )
+        rotate(${({ rotate }) => `${rotate}deg`});
+    }
+  }
+`;
+
 const ModalImageContent = styled.div<{ translateX: number }>`
   position: relative;
   height: 350px;
@@ -691,6 +749,20 @@ const ModalImageCountCount = styled.span<{ opacity: string }>`
   opacity: ${({ opacity }) => opacity};
   & h1 {
     text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    & {
+      width: 8px;
+      height: 8px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    & {
+      width: 7px;
+      height: 7px;
+    }
   }
 `;
 const ModalContentContent = styled.div`
