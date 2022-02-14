@@ -10,12 +10,12 @@ import React, {
 } from 'react';
 import Image from 'next/image';
 import { CSSTransition } from 'react-transition-group';
-import upperFirstWord from '@module/upperFirstWord';
+import upperFirstWord from '@utils/upperFirstWord';
 import Paragraph from '@components/Paragraph';
 import Modal from '@components/Modal';
-import getRandom from '@module/randomNumber';
+import getRandom from '@utils/randomNumber';
 import projectsStyled from '../styles/projects.module.css';
-import { fetcherGeneric } from '@module/fetcher';
+import { fetcherGeneric } from '@utils/fetcher';
 
 type requestProject = {
   data: StateProjects;
@@ -401,27 +401,15 @@ function ImageSlider({
             onClick={(event) => changeImageAction(event, 0)}
             title="prev image"
           >
-            <ModalImageActionSpanLeft
-              transform="translate(0px, -17px) rotate(-45deg)"
-              rotate={-45}
-            />
-            <ModalImageActionSpanLeft
-              transform="translate(0px, 0px) rotate(45deg)"
-              rotate={45}
-            />
+            <ModalImageActionSpanLeft rotate={-45} />
+            <ModalImageActionSpanLeft rotate={45} />
           </ModalImageAction>
           <ModalImageAction
             onClick={(event) => changeImageAction(event, 1)}
             title="next image"
           >
-            <ModalImageActionSpanRight
-              transform="translate(0px,-17px) rotate(45deg)"
-              rotate={45}
-            />
-            <ModalImageActionSpanRight
-              transform="translate(0px, 0px) rotate(-45deg)"
-              rotate={-45}
-            />
+            <ModalImageActionSpanRight rotate={45} />
+            <ModalImageActionSpanRight rotate={-45} />
           </ModalImageAction>
         </ModalImageActions>
       )}

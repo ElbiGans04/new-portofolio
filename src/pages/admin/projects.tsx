@@ -16,9 +16,9 @@ import ModalComponent, {
 } from '@components/Modal';
 import Context from '@hooks/context';
 import { reducer } from '@hooks/reducer';
-import { fetcherGeneric } from '@module/fetcher';
-import getRandom from '@module/randomNumber';
-import changeFirstWord from '@module/upperFirstWord';
+import { fetcherGeneric } from '@utils/fetcher';
+import getRandom from '@utils/randomNumber';
+import changeFirstWord from '@utils/upperFirstWord';
 import type { admin } from '@typess/admin';
 import type {
   Doc,
@@ -35,7 +35,7 @@ import { IoAddOutline } from 'react-icons/io5';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
-import { isObject } from '@module/typescript/narrowing';
+import { isObject } from '@utils/typescript/narrowing';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 

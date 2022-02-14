@@ -4,7 +4,7 @@ import {
 } from '@typess/controllersRoutersApi';
 import runMiddleware from '@middleware/runMiddleware';
 import { formidableHandler } from '@middleware/formidable';
-import { isObject } from '@module/typescript/narrowing';
+import { isObject } from '@utils/typescript/narrowing';
 
 class Login {
   async postLogin(req: RequestControllerRouter, res: RespondControllerRouter) {

@@ -1,8 +1,8 @@
 import Button from '@components/Button';
 import Context from '@hooks/context';
 import useUser from '@hooks/useUser';
-import getRandom from '@module/randomNumber';
-import upperFirstWord from '@module/upperFirstWord';
+import getRandom from '@utils/randomNumber';
+import upperFirstWord from '@utils/upperFirstWord';
 import { Doc, DocErrors, ResourceObject } from '@typess/jsonApi/index';
 import { OObject } from '@typess/jsonApi/object';
 import React, { useContext, useMemo, useRef, useState } from 'react';
@@ -14,7 +14,7 @@ import {
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useSWR from 'swr';
-import { fetcherGeneric } from '../module/fetcher';
+import { fetcherGeneric } from '@utils/fetcher';
 import Heading from './Heading';
 
 export default function Admin() {

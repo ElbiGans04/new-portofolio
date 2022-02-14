@@ -3,8 +3,8 @@ import Tools from '@database/schemas/tools';
 import TypeProject from '@database/schemas/typeProject';
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from '@middleware/runMiddleware';
-import { moveImages } from '@module/files';
-import formatResource from '@module/formatResource';
+import { moveImages } from '@utils/files';
+import formatResource from '@utils/formatResource';
 import {
   RequestControllerRouter,
   RespondControllerRouter,
@@ -17,9 +17,9 @@ import ProjectInterface from '@typess/mongoose/schemas/project';
 import {
   TransformToDocClient,
   TransformToDocServer,
-} from '@src/module/typescript/transformSchemeToDoc';
+} from '@utils/typescript/transformSchemeToDoc';
 import { Types } from 'mongoose';
-import { isObject } from '@module/typescript/narrowing';
+import { isObject } from '@utils/typescript/narrowing';
 
 const pathImage = path.resolve(process.cwd(), 'public/images');
 

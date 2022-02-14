@@ -3,7 +3,7 @@ import '../styles/globals.css';
 import styled, { createGlobalStyle } from 'styled-components';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import upperFirstWord from '@module/upperFirstWord';
+import upperFirstWord from '@utils/upperFirstWord';
 import Heading from '@components/Heading';
 import ErrorComponent from '@components/Error';
 import React, { useState, ErrorInfo, ReactNode } from 'react';

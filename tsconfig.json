@@ -22,9 +22,10 @@
         "@database/*": ["./src/database/*"],
         "@hooks/*": ["./src/hooks/*"],
         "@middleware/*": ["./src/middleware/*"],
-        "@module/*": ["./src/module/*"],
+        "@modules/*": ["./src/modules/*"],
         "@style/*": ["./src/style/*"],
         "@typess/*": ["./src/types/*"],
+        "@utils/*": ["./src/utils/*"],
         "@validation/*": ["./src/validation/*"]
     },
     "typeRoots": ["./node_modules/@types", "./src/types/definition-file"]

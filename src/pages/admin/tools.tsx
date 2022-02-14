@@ -16,7 +16,7 @@ import ModalComponent, {
 } from '@components/Modal';
 import Context from '@hooks/context';
 import { reducer } from '@hooks/reducer';
-import { fetcherGeneric } from '@module/fetcher';
+import { fetcherGeneric } from '@utils/fetcher';
 import type { action, admin } from '@typess/admin';
 import type {
   DocMeta,

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import Router from 'next/router';
-import { fetcherGeneric } from '@module/fetcher';
+import { fetcherGeneric } from '@utils/fetcher';
 import useSWR from 'swr';
 import { DocErrors, DocMeta } from '@typess/jsonApi';
 

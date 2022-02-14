@@ -1,7 +1,7 @@
 import ToolsSchema from '@database/schemas/tools';
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from '@middleware/runMiddleware';
-import formatResource from '@module/formatResource';
+import formatResource from '@utils/formatResource';
 import {
   RequestControllerRouter,
   RespondControllerRouter,
@@ -11,7 +11,7 @@ import joi from 'joi';
 import type {
   TransformToDocClient,
   TransformToDocServer,
-} from '@module/typescript/transformSchemeToDoc';
+} from '@utils/typescript/transformSchemeToDoc';
 import ToolInterface from '@src/types/mongoose/schemas/tool';
 
 class Tools {

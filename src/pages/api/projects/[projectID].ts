@@ -1,8 +1,8 @@
 import Controller from '@controllers/projects';
 import dbConnect from '@database/connection';
 import withIronSession from '@middleware/withSession';
-import { deleteTempFiles } from '@module/files';
-import routerErrorHandling from '@module/routerErrorHandling';
+import { deleteTempFiles } from '@utils/files';
+import routerErrorHandling from '@utils/routerErrorHandling';
 import type {
   RequestControllerRouter,
   RespondControllerRouter,

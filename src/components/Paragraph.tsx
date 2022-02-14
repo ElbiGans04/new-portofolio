@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import resize from '@module/resize';
+import resize from '@utils/resize';
 
 const Paragraph = styled.p<{
   size: number;
