@@ -6,6 +6,7 @@ import type {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
+import HttpError from '@src/modules/httpError';
 
 export const config = {
   api: {
@@ -24,32 +25,22 @@ export default withIronSession(
         // Jika belum login
         if (req.session) {
           if (!req.session.get('user')) {
-            return res.status(403).json({
-              errors: [
-                {
-                  title: 'please login ahead',
-                  detail:
-                    "can't fulfill the request because access is not allowed",
-                  status: '403',
-                },
-              ],
-            });
+            throw new HttpError(
+              'please login ahead',
+              403,
+              "can't fulfill the request because access is not allowed",
+            );
           }
         }
 
         switch (method) {
           case 'PATCH': {
             if (req.headers['content-type'] !== 'application/vnd.api+json') {
-              return res.status(406).json({
-                errors: [
-                  {
-                    title: 'content-type headers not supported',
-                    detail:
-                      'if you try to send JSON:API document please you try to change the content-type headers to application/vnd.api+json',
-                    status: '406',
-                  },
-                ],
-              });
+              throw new HttpError(
+                'content-type headers not supported',
+                406,
+                'if you try to send JSON:API document please you try to change the content-type headers to application/vnd.api+json',
+              );
             }
             await Controller.patchTool(req, res);
             break;
@@ -60,8 +51,11 @@ export default withIronSession(
           }
 
           default:
-            throw { code: 404, title: 'method not found' };
-            break;
+            throw new HttpError(
+              'request not support',
+              406,
+              'The requested HTTP method could not be fulfilled by the server',
+            );
         }
       }
     } catch (err) {

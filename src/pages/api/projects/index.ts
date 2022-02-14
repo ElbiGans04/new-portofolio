@@ -7,6 +7,7 @@ import type {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
+import HttpError from '@src/modules/httpError';
 
 export const config = {
   api: {
@@ -26,16 +27,11 @@ export default withIronSession(
         if (req.session) {
           // Jika belum login
           if (!req.session.get('user')) {
-            return res.status(403).json({
-              errors: [
-                {
-                  title: 'please login ahead',
-                  detail:
-                    "can't fulfill the request because access is not allowed",
-                  status: '403',
-                },
-              ],
-            });
+            throw new HttpError(
+              'please login ahead',
+              403,
+              "can't fulfill the request because access is not allowed",
+            );
           }
         }
 
@@ -43,27 +39,25 @@ export default withIronSession(
         switch (method) {
           case 'POST': {
             if (req.headers['content-type'] !== 'application/vnd.api+json') {
-              return res.status(406).json({
-                errors: [
-                  {
-                    title: 'content-type headers not supported',
-                    detail:
-                      'if you try to send JSON:API document please you try to change the content-type headers to application/vnd.api+json',
-                    status: '406',
-                  },
-                ],
-              });
+              throw new HttpError(
+                'content-type headers not supported',
+                406,
+                'if you try to send JSON:API document please you try to change the content-type headers to application/vnd.api+json',
+              );
             }
             await Controller.postProjects(req, res);
             break;
           }
           default:
-            throw { title: 'method not found', code: 404 };
+            throw new HttpError(
+              'request not support',
+              406,
+              'The requested HTTP method could not be fulfilled by the server',
+            );
             break;
         }
       }
     } catch (err) {
-      console.log(err);
       // Setiap Ada error semua file dalam tmp file
       await deleteTempFiles();
       routerErrorHandling(res, err);
