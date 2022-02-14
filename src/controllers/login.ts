@@ -5,6 +5,7 @@ import {
 import runMiddleware from '@middleware/runMiddleware';
 import { formidableHandler } from '@middleware/formidable';
 import { isObject } from '@utils/typescript/narrowing';
+import HttpError from '@src/modules/httpError';
 
 class Login {
   async postLogin(req: RequestControllerRouter, res: RespondControllerRouter) {
@@ -13,47 +14,33 @@ class Login {
     const { attributes } = req.body;
 
     if (!isObject(attributes)) {
-      return res.status(406).json({
-        errors: [
-          {
-            title: 'Entity not valid',
-            detail:
-              'This happens because the email and password not sent to server',
-            status: '406',
-          },
-        ],
-      });
+      throw new HttpError(
+        'Entity not valid',
+        406,
+        'This happens because the email and password not sent to server',
+      );
     }
 
     if (
       typeof attributes.email !== 'string' ||
       typeof attributes.password !== 'string'
     ) {
-      return res.status(406).json({
-        errors: [
-          {
-            title: 'Type of password field and username field not supported',
-            detail: 'Please send password field and username field as string',
-            status: '406',
-          },
-        ],
-      });
+      throw new HttpError(
+        'Type of password field and username field not supported',
+        406,
+        'Please send password field and username field as string',
+      );
     }
 
     if (
       process.env.EMAIL !== attributes.email ||
       process.env.PW !== attributes.password
     ) {
-      return res.status(404).json({
-        errors: [
-          {
-            title: 'password or email does not match',
-            detail:
-              'This happens because the email and password sent is not the same as the one stored',
-            status: '404',
-          },
-        ],
-      });
+      throw new HttpError(
+        'password or email does not match',
+        406,
+        'This happens because the email and password sent is not the same as the one stored',
+      );
     }
 
     if (req.session) {

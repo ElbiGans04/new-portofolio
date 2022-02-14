@@ -20,6 +20,7 @@ import {
 } from '@utils/typescript/transformSchemeToDoc';
 import { Types } from 'mongoose';
 import { isObject } from '@utils/typescript/narrowing';
+import HttpError from '@src/modules/httpError';
 
 const pathImage = path.resolve(process.cwd(), 'public/images');
 
@@ -31,7 +32,8 @@ class Projects {
       .populate('typeProject');
 
     // jika ga ada
-    if (!result) throw { title: 'project not found', code: 404 };
+    if (!result)
+      throw new HttpError('Project not found', 404, 'Project not found in db');
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
@@ -85,14 +87,18 @@ class Projects {
     if (
       (await TypeProject.findById(validReqBody.attributes.typeProject)) === null
     ) {
-      throw { title: 'invalid type project id', code: 404 };
+      throw new HttpError(
+        'Invalid type project id',
+        404,
+        'Invalid type project id',
+      );
     }
 
     // Cek apakah tools yang dimasukan terdaftar
     for (const tool of validReqBody.attributes.tools) {
       // cek jika tool
       if ((await Tools.findById(tool)) === null) {
-        throw { title: 'invalid tool id', code: 404 };
+        throw new HttpError('Invalid tool id', 404, 'Invalid tool id');
       }
     }
 
@@ -102,16 +108,11 @@ class Projects {
     await project.save();
 
     if (!isObject(req.body.attributes)) {
-      return res.status(406).json({
-        errors: [
-          {
-            title: 'Entity not valid',
-            detail:
-              'This happens because Entity not sent to server or not valid',
-            status: '406',
-          },
-        ],
-      });
+      throw new HttpError(
+        'Entity not valid',
+        406,
+        'This happens because Entity not sent to server or not valid',
+      );
     }
 
     // Pindahkan Gambar
@@ -159,7 +160,11 @@ class Projects {
 
     // Jika tidak memasukan field id
     if (!validReqBody.id)
-      throw { title: 'missing id property in request document', code: 404 };
+      throw new HttpError(
+        'missing id in req.body',
+        404,
+        'missing id in req.body',
+      );
 
     // Jika hanya mengirim satu data tools
     if (!Array.isArray(validReqBody.attributes.tools)) {
@@ -171,14 +176,18 @@ class Projects {
     if (
       (await TypeProject.findById(validReqBody.attributes.typeProject)) === null
     ) {
-      throw { title: 'invalid type project id', code: 404 };
+      throw new HttpError(
+        'Invalid type project id',
+        404,
+        'Invalid type project id',
+      );
     }
 
     // Cek apakah tools yang dimasukan terdaftar
     for (const tool of validReqBody.attributes.tools) {
       // cek jika tool
       if ((await Tools.findById(tool)) === null) {
-        throw { title: 'invalid tool id', code: 404 };
+        throw new HttpError('Invalid tool id', 404, 'Invalid tool id');
       }
     }
 
@@ -192,20 +201,19 @@ class Projects {
 
     // Jika ga ada
     if (!result2Old) {
-      throw { title: 'project not found', code: 404 };
+      throw new HttpError(
+        'project with that id not found',
+        404,
+        'project with that id not found',
+      );
     }
 
     if (!isObject(req.body.attributes)) {
-      return res.status(406).json({
-        errors: [
-          {
-            title: 'Entity not valid',
-            detail:
-              'This happens because Entity not sent to server or not valid',
-            status: '406',
-          },
-        ],
-      });
+      throw new HttpError(
+        'Entity not valid',
+        406,
+        'This happens because Entity not sent to server or not valid',
+      );
     }
 
     // Hapus gambar lama
@@ -244,7 +252,8 @@ class Projects {
     const { projectID } = req.query;
     const result = await Project.findByIdAndDelete(projectID);
 
-    if (!result) throw { title: 'project not found', code: 404 };
+    if (!result)
+      throw new HttpError('Project not found', 404, 'Project not found in db');
 
     // Hapus imagenya juga
     for (const image of result.images) {

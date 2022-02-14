@@ -13,14 +13,15 @@ import type {
   TransformToDocServer,
 } from '@utils/typescript/transformSchemeToDoc';
 import ToolInterface from '@src/types/mongoose/schemas/tool';
-
+import HttpError from '@src/modules/httpError';
 class Tools {
   async getTool(req: RequestControllerRouter, res: RespondControllerRouter) {
     const { toolID } = req.query;
     const result = await ToolsSchema.findById(toolID);
 
     // Jika tidak ada
-    if (!result) throw { code: 404, title: 'tool not found' };
+    if (!result)
+      throw new HttpError('Tool not found', 404, 'Tool not found in db');
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
@@ -63,6 +64,7 @@ class Tools {
 
   async patchTool(req: RequestControllerRouter, res: RespondControllerRouter) {
     await runMiddleware(req, res, formidableHandler);
+
     const { toolID } = req.query;
     const valid = joi.attempt(
       req.body,
@@ -71,7 +73,11 @@ class Tools {
 
     // Check karena di joi validation attribute id merupakan optional
     if (!valid.id)
-      throw { title: 'missing id property in request document', code: 404 };
+      throw new HttpError(
+        'missing id in req.body',
+        404,
+        'missing id in req.body',
+      );
 
     const result = await ToolsSchema.findByIdAndUpdate(
       toolID,
@@ -80,7 +86,7 @@ class Tools {
       new: true,
     });
 
-    if (!result) throw { title: 'tool not found', code: 404 };
+    if (!result) throw new HttpError('tool not found', 404, 'tool not found');
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
@@ -93,7 +99,7 @@ class Tools {
     const { toolID } = req.query;
     const result = await ToolsSchema.findByIdAndDelete(toolID);
 
-    if (!result) throw { title: 'tool not found', code: 404 };
+    if (!result) throw new HttpError('tool not found', 404, 'tool not found');
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
