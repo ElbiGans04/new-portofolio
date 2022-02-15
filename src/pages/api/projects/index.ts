@@ -1,13 +1,13 @@
 import Controller from '@controllers/projects';
 import dbConnect from '@database/connection';
 import withIronSession from '@src/utils/withSession';
-import { deleteTempFiles } from '@utils/files';
 import routerErrorHandling from '@utils/routerErrorHandling';
 import type {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
 import HttpError from '@src/modules/httpError';
+import ProjectService from '@src/controllers/projects.service';
 
 export const config = {
   api: {
@@ -59,7 +59,7 @@ export default withIronSession(
       }
     } catch (err) {
       // Setiap Ada error semua file dalam tmp file
-      await deleteTempFiles();
+      await ProjectService.deleteTempFiles();
       routerErrorHandling(res, err);
     }
     // res.json({vv:'s'})

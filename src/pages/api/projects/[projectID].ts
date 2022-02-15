@@ -1,7 +1,7 @@
 import Controller from '@controllers/projects';
 import dbConnect from '@database/connection';
 import withIronSession from '@src/utils/withSession';
-import { deleteTempFiles } from '@utils/files';
+import ProjectService from '@controllers/projects.service';
 import routerErrorHandling from '@utils/routerErrorHandling';
 import type {
   RequestControllerRouter,
@@ -61,7 +61,7 @@ export default withIronSession(
         }
       }
     } catch (err) {
-      await deleteTempFiles();
+      await ProjectService.deleteTempFiles();
       routerErrorHandling(res, err);
     }
   },

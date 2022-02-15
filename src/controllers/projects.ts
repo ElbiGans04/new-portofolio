@@ -3,7 +3,7 @@ import Tools from '@database/schemas/tools';
 import TypeProject from '@database/schemas/typeProject';
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from '@middleware/runMiddleware';
-import { moveImages } from '@utils/files';
+import ProjectService from './projects.service';
 import formatResource from '@utils/formatResource';
 import {
   RequestControllerRouter,
@@ -128,7 +128,8 @@ class Projects {
           } else validFormat = false;
         });
 
-        if (validFormat) await moveImages(images as { src: string }[]);
+        if (validFormat)
+          await ProjectService.moveImages(images as { src: string }[]);
       }
     }
 
@@ -239,7 +240,8 @@ class Projects {
           } else validFormat = false;
         });
 
-        if (validFormat) await moveImages(images as { src: string }[]);
+        if (validFormat)
+          await ProjectService.moveImages(images as { src: string }[]);
       }
     }
 
@@ -255,7 +257,7 @@ class Projects {
     res: RespondControllerRouter,
   ) {
     const { projectID } = req.query;
-    const result = await Project.findByIdAndDelete(projectID);
+    const result = await Project.findById(projectID);
 
     if (!result)
       throw new HttpError('Project not found', 404, 'Project not found in db');
