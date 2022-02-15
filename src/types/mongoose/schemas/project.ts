@@ -1,5 +1,5 @@
 import images from '@typess/mongoose/schemas/image';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 export default interface project {
   _id: Types.ObjectId;
@@ -8,7 +8,7 @@ export default interface project {
   endDate: Date;
   tools: Types.Array<Types.ObjectId>;
   typeProject: Types.ObjectId;
-  images: Types.DocumentArray<Document<images>>;
+  images: images[];
   description: string;
   url: string;
 }
