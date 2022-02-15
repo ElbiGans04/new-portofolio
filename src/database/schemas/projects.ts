@@ -1,8 +1,14 @@
 import mongoose from 'mongoose';
 import projectType from '@typess/mongoose/schemas/project';
 import imageSchema from './image';
+import imageInterface from '@typess/mongoose/schemas/image';
 
-const projectSchema = new mongoose.Schema<projectType>({
+type modelProject = mongoose.Model<
+  projectType,
+  Record<string, never>,
+  { images: mongoose.Types.DocumentArray<mongoose.Document<imageInterface>> }
+>;
+const projectSchema = new mongoose.Schema<projectType, modelProject>({
   title: {
     type: String,
     required: true,
@@ -29,5 +35,5 @@ const projectSchema = new mongoose.Schema<projectType>({
   },
 });
 
-export default (mongoose.models.Projects as mongoose.Model<projectType>) ||
-  mongoose.model<projectType>('Projects', projectSchema);
+export default (mongoose.models.Projects as modelProject) ||
+  mongoose.model<projectType, modelProject>('Projects', projectSchema);
