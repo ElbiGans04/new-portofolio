@@ -1,4 +1,5 @@
 import fsPromise from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 
 const pathTmp = path.resolve(process.cwd(), 'public/images/tmp');
@@ -16,10 +17,14 @@ export async function deleteTempFiles() {
 export async function moveImages(images: { src: string }[]) {
   // Pindahkan gambar dari tmp ke luar
   const pathImage = path.resolve(process.cwd(), 'public/images/');
+
   for (const image of images) {
-    await fsPromise.rename(
-      `${pathTmp}/${image.src}`,
-      `${pathImage}/${image.src}`,
-    );
+    if (fs.existsSync(`${pathTmp}/${image.src}`)) {
+      // Check If found
+      await fsPromise.rename(
+        `${pathTmp}/${image.src}`,
+        `${pathImage}/${image.src}`,
+      );
+    }
   }
 }
