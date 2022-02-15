@@ -11,6 +11,7 @@ import {
 } from '@typess/controllersRoutersApi';
 import ProjectValidationSchema from '@validation/projects';
 import fsPromise from 'fs/promises';
+import fs from 'fs';
 import Joi from 'joi';
 import path from 'path';
 import ProjectInterface from '@typess/mongoose/schemas/project';
@@ -221,7 +222,11 @@ class Projects {
     if (Array.isArray(images)) {
       if (images.length > 0) {
         for (const image of result2Old.images) {
-          await fsPromise.unlink(`${pathImage}/${image.get('src') as string}`);
+          const imageUrl = `${pathImage}/${image.get('src') as string}`;
+
+          if (fs.existsSync(imageUrl)) {
+            await fsPromise.unlink(imageUrl);
+          }
         }
 
         // pindahkan gambar
@@ -257,7 +262,11 @@ class Projects {
 
     // Hapus imagenya juga
     for (const image of result.images) {
-      await fsPromise.unlink(`${pathImage}/${image.get('src') as string}`);
+      const imageUrl = `${pathImage}/${image.get('src') as string}`;
+
+      if (fs.existsSync(imageUrl)) {
+        await fsPromise.unlink(imageUrl);
+      }
     }
 
     res.setHeader('content-type', 'application/vnd.api+json');
