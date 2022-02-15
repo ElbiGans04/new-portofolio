@@ -1,5 +1,5 @@
 import Controller from '@controllers/login';
-import withSession from '@middleware/withSession';
+import withSession from '@src/utils/withSession';
 import type {
   RequestControllerRouter,
   RespondControllerRouter,

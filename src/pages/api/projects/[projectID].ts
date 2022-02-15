@@ -1,6 +1,6 @@
 import Controller from '@controllers/projects';
 import dbConnect from '@database/connection';
-import withIronSession from '@middleware/withSession';
+import withIronSession from '@src/utils/withSession';
 import { deleteTempFiles } from '@utils/files';
 import routerErrorHandling from '@utils/routerErrorHandling';
 import type {

@@ -1,6 +1,6 @@
 import Controller from '@controllers/tools';
 import dbConnect from '@database/connection';
-import withIronSession from '@middleware/withSession';
+import withIronSession from '@src/utils/withSession';
 import routerErrorHandling from '@utils/routerErrorHandling';
 import type {
   RequestControllerRouter,
