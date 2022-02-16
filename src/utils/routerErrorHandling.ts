@@ -2,6 +2,7 @@ import { NextApiResponse } from 'next';
 import { DocErrors } from '@typess/jsonApi';
 import HttpError from '@src/modules/httpError';
 import { Error as MongooseError } from 'mongoose';
+import { isError } from 'joi';
 
 export default function routerErrorHandling(
   res: NextApiResponse<DocErrors>,
@@ -21,6 +22,12 @@ export default function routerErrorHandling(
       title: `Error cause by mongoose`,
       detail: error.message,
       status: `500`,
+    });
+  } else if (isError(error)) {
+    errors.push({
+      title: `Error cause by joi validation`,
+      detail: error.message,
+      status: `400`,
     });
   } else {
     errors.push({
