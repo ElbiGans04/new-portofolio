@@ -1,27 +1,15 @@
 import Project from '@database/schemas/projects';
-import Tools from '@database/schemas/tools';
-import TypeProject from '@database/schemas/typeProject';
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from '@middleware/runMiddleware';
-import ProjectService from './projects.service';
-import formatResource from '@utils/formatResource';
+import HttpError from '@src/modules/httpError';
 import {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
-import ProjectValidationSchema from '@validation/projects';
-import fsPromise from 'fs/promises';
-import fs from 'fs';
-import Joi from 'joi';
-import path from 'path';
 import ProjectInterface from '@typess/mongoose/schemas/project';
-import {
-  TransformToDocClient,
-  TransformToDocServer,
-} from '@utils/typescript/transformSchemeToDoc';
-import { Types } from 'mongoose';
-import { isObject } from '@utils/typescript/narrowing';
-import HttpError from '@src/modules/httpError';
+import formatResource from '@utils/formatResource';
+import { TransformToDocServer } from '@utils/typescript/transformSchemeToDoc';
+import ProjectService from './projects.service';
 
 class Projects {
   async getProject(req: RequestControllerRouter, res: RespondControllerRouter) {
@@ -138,10 +126,11 @@ class Projects {
 
     // Hapus gambar lama
     const { images } = validReqBody.attributes;
-    console.log(validReqBody);
-    if (images.length > 0) {
-      await ProjectService.deleteImages(result2Old.images);
-      await ProjectService.moveImages(images);
+    if (Array.isArray(images)) {
+      if (images.length > 0) {
+        await ProjectService.deleteImages(result2Old.images);
+        await ProjectService.moveImages(images);
+      }
     }
 
     res.setHeader('content-type', 'application/vnd.api+json');
