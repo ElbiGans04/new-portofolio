@@ -24,16 +24,16 @@ export default withIronSession(
 
       if (method === 'GET') await Controller.getProjects(req, res);
       else {
-        if (req.session) {
-          // Jika belum login
-          if (!req.session.get('user')) {
-            throw new HttpError(
-              'please login ahead',
-              403,
-              "can't fulfill the request because access is not allowed",
-            );
-          }
-        }
+        // if (req.session) {
+        //   // Jika belum login
+        //   if (!req.session.get('user')) {
+        //     throw new HttpError(
+        //       'please login ahead',
+        //       403,
+        //       "can't fulfill the request because access is not allowed",
+        //     );
+        //   }
+        // }
 
         // Lakukan operasi bedasarkan dari jenis http method
         switch (method) {

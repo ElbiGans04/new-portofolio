@@ -18,11 +18,14 @@ const schema = joi
         typeProject: joi.string().alphanum().max(50).required(),
         description: joi.string().max(200).required(),
         url: joi.string().max(50).required(),
-        images: joi.array().items(
-          joi.object({
-            src: joi.string().max(100).required(),
-          }),
-        ),
+        images: joi
+          .array()
+          .items(
+            joi.object({
+              src: joi.string().max(100).required(),
+            }),
+          )
+          .required(),
       })
       .required(),
   })

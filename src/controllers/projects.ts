@@ -23,8 +23,6 @@ import { Types } from 'mongoose';
 import { isObject } from '@utils/typescript/narrowing';
 import HttpError from '@src/modules/httpError';
 
-const pathImage = path.resolve(process.cwd(), 'public/images');
-
 class Projects {
   async getProject(req: RequestControllerRouter, res: RespondControllerRouter) {
     const { projectID } = req.query as { projectID: string };
@@ -72,66 +70,16 @@ class Projects {
   ) {
     await runMiddleware(req, res, formidableHandler);
 
-    // Validasi
-    const validReqBody = Joi.attempt(
-      req.body,
-      ProjectValidationSchema,
-    ) as TransformToDocClient<ProjectInterface>;
-
-    // Jika hanya mengirim satu data tools
-    if (!Array.isArray(validReqBody.attributes.tools)) {
-      const tools = validReqBody.attributes.tools as Types.ObjectId;
-      validReqBody.attributes.tools = [tools] as Types.Array<Types.ObjectId>;
-    }
-
-    // Check Apakah typeProject dengan id tertentu ada
-    if (
-      (await TypeProject.findById(validReqBody.attributes.typeProject)) === null
-    ) {
-      throw new HttpError(
-        'Invalid type project id',
-        404,
-        'Invalid type project id',
-      );
-    }
-
-    // Cek apakah tools yang dimasukan terdaftar
-    for (const tool of validReqBody.attributes.tools) {
-      // cek jika tool
-      if ((await Tools.findById(tool)) === null) {
-        throw new HttpError('Invalid tool id', 404, 'Invalid tool id');
-      }
-    }
+    const validReqBody = await ProjectService.validation(req.body);
 
     // Simpan Ke database
     const project = new Project(validReqBody.attributes);
 
     await project.save();
 
-    if (!isObject(req.body.attributes)) {
-      throw new HttpError(
-        'Entity not valid',
-        406,
-        'This happens because Entity not sent to server or not valid',
-      );
-    }
-
     // Pindahkan Gambar
-    const { images } = req.body.attributes;
-    if (images) {
-      if (Array.isArray(images)) {
-        let validFormat = true;
-        // Check jika ada yang formatnya bukan string
-        images.forEach((image) => {
-          if (isObject(image)) {
-            if (typeof image.src !== 'string') validFormat = false;
-          } else validFormat = false;
-        });
-
-        if (validFormat)
-          await ProjectService.moveImages(images as { src: string }[]);
-      }
-    }
+    const { images } = validReqBody.attributes;
+    await ProjectService.moveImages(images);
 
     // atur headers
     res.setHeader('Location', `/api/projects/${project._id as string}`);
@@ -155,10 +103,9 @@ class Projects {
     const { projectID } = req.query;
 
     // Validasi
-    const validReqBody = Joi.attempt(
+    const validReqBody = (await ProjectService.validation(
       req.body,
-      ProjectValidationSchema,
-    ) as TransformToDocServer<ProjectInterface>;
+    )) as any as TransformToDocServer<ProjectInterface>;
 
     // Jika tidak memasukan field id
     if (!validReqBody.id)
@@ -168,41 +115,20 @@ class Projects {
         'missing id in req.body',
       );
 
-    // Jika hanya mengirim satu data tools
-    if (!Array.isArray(validReqBody.attributes.tools)) {
-      const tools = validReqBody.attributes.tools as Types.ObjectId;
-      validReqBody.attributes.tools = [tools] as Types.Array<Types.ObjectId>;
-    }
-
-    // Check Apakah typeProject dengan id tertentu ada
-    if (
-      (await TypeProject.findById(validReqBody.attributes.typeProject)) === null
-    ) {
-      throw new HttpError(
-        'Invalid type project id',
-        404,
-        'Invalid type project id',
-      );
-    }
-
-    // Cek apakah tools yang dimasukan terdaftar
-    for (const tool of validReqBody.attributes.tools) {
-      // cek jika tool
-      if ((await Tools.findById(tool)) === null) {
-        throw new HttpError('Invalid tool id', 404, 'Invalid tool id');
-      }
-    }
-
     // Ambil Daftar gambar lama
     const result2Old = await Project.findById(projectID, { images: 1 });
 
     // Lakukan Perubahan
-    await Project.findByIdAndUpdate(projectID, validReqBody.attributes, {
-      new: true,
-    });
+    const result = await Project.findByIdAndUpdate(
+      projectID,
+      validReqBody.attributes,
+      {
+        new: true,
+      },
+    );
 
     // Jika ga ada
-    if (!result2Old) {
+    if (!result2Old || !result) {
       throw new HttpError(
         'project with that id not found',
         404,
@@ -210,39 +136,12 @@ class Projects {
       );
     }
 
-    if (!isObject(req.body.attributes)) {
-      throw new HttpError(
-        'Entity not valid',
-        406,
-        'This happens because Entity not sent to server or not valid',
-      );
-    }
-
     // Hapus gambar lama
-    const { images } = req.body.attributes;
-    if (Array.isArray(images)) {
-      if (images.length > 0) {
-        for (const image of result2Old.images) {
-          const imageUrl = `${pathImage}/${image.get('src') as string}`;
-
-          if (fs.existsSync(imageUrl)) {
-            await fsPromise.unlink(imageUrl);
-          }
-        }
-
-        // pindahkan gambar
-        let validFormat = true;
-
-        // Check jika ada yang formatnya bukan string
-        images.forEach((image) => {
-          if (isObject(image)) {
-            if (typeof image.src !== 'string') validFormat = false;
-          } else validFormat = false;
-        });
-
-        if (validFormat)
-          await ProjectService.moveImages(images as { src: string }[]);
-      }
+    const { images } = validReqBody.attributes;
+    console.log(validReqBody);
+    if (images.length > 0) {
+      await ProjectService.deleteImages(result2Old.images);
+      await ProjectService.moveImages(images);
     }
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -257,19 +156,13 @@ class Projects {
     res: RespondControllerRouter,
   ) {
     const { projectID } = req.query;
-    const result = await Project.findById(projectID);
+    const result = await Project.findByIdAndDelete(projectID);
 
     if (!result)
       throw new HttpError('Project not found', 404, 'Project not found in db');
 
     // Hapus imagenya juga
-    for (const image of result.images) {
-      const imageUrl = `${pathImage}/${image.get('src') as string}`;
-
-      if (fs.existsSync(imageUrl)) {
-        await fsPromise.unlink(imageUrl);
-      }
-    }
+    await ProjectService.deleteImages(result.images);
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
