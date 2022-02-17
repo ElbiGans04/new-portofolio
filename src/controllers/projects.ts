@@ -6,9 +6,7 @@ import {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
-import ProjectInterface from '@typess/mongoose/schemas/project';
 import formatResource from '@utils/formatResource';
-import { TransformToDoc } from '@utils/typescript/transformSchemeToDoc';
 import ProjectService from './projects.service';
 
 class Projects {
