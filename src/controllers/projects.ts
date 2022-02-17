@@ -8,12 +8,13 @@ import {
 } from '@typess/controllersRoutersApi';
 import ProjectInterface from '@typess/mongoose/schemas/project';
 import formatResource from '@utils/formatResource';
-import { TransformToDocServer } from '@utils/typescript/transformSchemeToDoc';
+import { TransformToDoc } from '@utils/typescript/transformSchemeToDoc';
 import ProjectService from './projects.service';
 
 class Projects {
   async getProject(req: RequestControllerRouter, res: RespondControllerRouter) {
     const { projectID } = req.query as { projectID: string };
+
     const result = await Project.findById(projectID)
       .populate('tools')
       .populate('typeProject');
@@ -37,6 +38,7 @@ class Projects {
     res: RespondControllerRouter,
   ) {
     const { order = 'ASC' } = req.query;
+
     const results = await Project.find()
       .sort({ title: order === 'ASC' ? 1 : -1 })
       .populate('typeProject')
@@ -91,12 +93,10 @@ class Projects {
     const { projectID } = req.query;
 
     // Validasi
-    const validReqBody = (await ProjectService.validation(
-      req.body,
-    )) as any as TransformToDocServer<ProjectInterface>;
+    const validReqBody = await ProjectService.validation(req.body);
 
     // Jika tidak memasukan field id
-    if (!validReqBody.id)
+    if (validReqBody.id === undefined)
       throw new HttpError(
         'missing id in req.body',
         404,
@@ -126,12 +126,8 @@ class Projects {
 
     // Hapus gambar lama
     const { images } = validReqBody.attributes;
-    if (Array.isArray(images)) {
-      if (images.length > 0) {
-        await ProjectService.deleteImages(result2Old.images);
-        await ProjectService.moveImages(images);
-      }
-    }
+    await ProjectService.deleteImages(result2Old.images);
+    await ProjectService.moveImages(images);
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;

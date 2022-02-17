@@ -3,8 +3,8 @@ import typeProjectSchema from '@src/database/schemas/typeProject';
 import HttpError from '@src/modules/httpError';
 import { OObject } from '@src/types/jsonApi/object';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
-import { TransformToDocClient } from '@src/utils/typescript/transformSchemeToDoc';
-import ProjectValidationSchema from '@validation/projects';
+import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
+import ProjectSchemaValidation from '@validation/projects';
 import fs from 'fs';
 import fsPromise from 'fs/promises';
 import Joi from 'joi';
@@ -49,12 +49,12 @@ class ProjectService {
     // Validasi
     const validReqBody = Joi.attempt(
       body,
-      ProjectValidationSchema,
-    ) as TransformToDocClient<ProjectSchemaInterface>;
+      ProjectSchemaValidation,
+    ) as TransformToDoc<ProjectSchemaInterface>;
 
     // Jika hanya mengirim satu data tools
     if (!Array.isArray(validReqBody.attributes.tools)) {
-      const tools = validReqBody.attributes.tools as Types.ObjectId;
+      const tools = validReqBody.attributes.tools;
       validReqBody.attributes.tools = [tools] as Types.Array<Types.ObjectId>;
     }
 

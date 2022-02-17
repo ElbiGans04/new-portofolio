@@ -1,6 +1,6 @@
 import joi from 'joi';
 
-const schema = joi
+const ProjectSchemaValidation = joi
   .object({
     type: joi.string().max(50).required(),
     id: joi.string().max(100),
@@ -12,7 +12,7 @@ const schema = joi
         tools: joi
           .alternatives()
           .try(
-            joi.array().items(joi.string().required()).unique(),
+            joi.array().items(joi.string().required()).unique().min(2),
             joi.string().required(),
           ),
         typeProject: joi.string().alphanum().max(50).required(),
@@ -25,10 +25,12 @@ const schema = joi
               src: joi.string().max(100).required(),
             }),
           )
+          .min(1)
           .required(),
       })
+      .required()
       .required(),
   })
   .required();
 
-export default schema;
+export default ProjectSchemaValidation;

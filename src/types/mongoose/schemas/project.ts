@@ -6,7 +6,7 @@ export default interface project {
   title: string;
   startDate: Date;
   endDate: Date;
-  tools: Types.Array<Types.ObjectId>;
+  tools: Types.Array<Types.ObjectId> | Types.ObjectId;
   typeProject: Types.ObjectId;
   images: images[];
   description: string;
