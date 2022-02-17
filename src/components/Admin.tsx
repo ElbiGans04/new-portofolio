@@ -416,6 +416,7 @@ const Table = styled.table`
     padding: 1rem;
     color: white;
     text-align: center;
+    vertical-align: middle;
   }
 
   & th {
