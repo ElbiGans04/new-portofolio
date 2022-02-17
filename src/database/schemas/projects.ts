@@ -35,5 +35,5 @@ const projectSchema = new mongoose.Schema<projectType, modelProject>({
   },
 });
 
-export default (mongoose.models.Projects as modelProject) ||
+export default (mongoose.models.Projects as unknown as modelProject) ||
   mongoose.model<projectType, modelProject>('Projects', projectSchema);
