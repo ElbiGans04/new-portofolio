@@ -124,8 +124,20 @@ class Projects {
 
     // Hapus gambar lama
     const { images } = validReqBody.attributes;
-    await ProjectService.deleteImages(result2Old.images);
-    await ProjectService.moveImages(images);
+
+    // Check apakah gambar yang dikirim sama dengan gambar lama
+    images.map(async (image) => {
+      // Check jika gambar dalam req.body sudah lebih dulu tersimpan didatabase
+      const exist = result2Old.images.find((imageOld) => {
+        return imageOld.src === image.src;
+      });
+
+      // Jika Belum tersimpan maka hapus gambar lama dan pindahkan gambar baru
+      if (exist === undefined) {
+        await ProjectService.deleteImages(result2Old.images);
+        await ProjectService.moveImages([image]);
+      }
+    });
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;

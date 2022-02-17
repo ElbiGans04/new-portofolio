@@ -30,7 +30,7 @@ import type {
 import { OObject } from '@typess/jsonApi/object';
 import { Dispatch } from 'hoist-non-react-statics/node_modules/@types/react';
 import Head from 'next/head';
-import React, { useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState, useMemo } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
@@ -154,6 +154,195 @@ function SwitchModal({
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
   const { data, error } = useSWR<Doc, DocErrors>('/api/tools', fetcherGeneric);
   const row = state.row;
+  let images =
+    row !== undefined ? row?.columnsValue[row.columns.indexOf('images')] : null;
+
+  if (Array.isArray(images)) {
+    images = images.map((image) => {
+      if (isObject(image)) {
+        return { src: image.src as string };
+      }
+
+      return {};
+    });
+  }
+
+  /* 
+    Event Handler function
+  */
+  async function onSubmitModalDelete(id: string) {
+    try {
+      dispatch({ type: 'modal/request/start' });
+
+      const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
+        method: 'delete',
+      });
+
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: request.meta.title as string },
+      });
+      await mutate('/api/projects');
+    } catch (err) {
+      console.log(err);
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: 'error happend' },
+      });
+      await mutate('/api/projects');
+    }
+  }
+  async function onSubmitModalAdd(event: React.FormEvent<HTMLFormElement>) {
+    try {
+      event.preventDefault();
+      const form = new FormData();
+      const form2 = new FormData(event.currentTarget);
+      const inputFiles = event.currentTarget[3] as HTMLInputElement;
+      const fileImage = inputFiles.files;
+
+      const document: ResourceObjectForSendWithFiles = {
+        type: 'project',
+        attributes: {},
+      };
+
+      for (const [fieldName, fieldValue] of form2.entries()) {
+        if (document.attributes) {
+          // Check Jika tools properti sudah diisi
+          if (document.attributes.tools) {
+            // Jika sudah diganti sebelumnya
+            if (Array.isArray(document.attributes.tools)) {
+              document.attributes.tools.push(fieldValue as OObject);
+            } else {
+              document.attributes.tools = [
+                document.attributes.tools as OObject,
+                fieldValue as OObject,
+              ];
+            }
+
+            continue;
+          }
+
+          document.attributes[fieldName] = fieldValue;
+        }
+      }
+
+      // Logic
+      dispatch({ type: 'modal/request/start' });
+      for (let i = 0; i < fileImage.length; i++) {
+        const file = fileImage.item(i);
+        if (file) form.append('images', file);
+      }
+
+      const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
+        method: 'post',
+        body: form,
+      });
+
+      if (document.attributes) document.attributes.images = meta.images;
+
+      const request = await fetcherGeneric<DocMeta>('/api/projects', {
+        method: 'post',
+        body: JSON.stringify(document),
+        headers: {
+          'content-type': 'application/vnd.api+json',
+        },
+      });
+
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: request.meta.title },
+      });
+      await mutate('/api/projects');
+    } catch (err) {
+      console.log(err);
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: 'error happend' },
+      });
+      await mutate('/api/projects');
+    }
+  }
+
+  async function onSubmitModalUpdate(
+    event: React.FormEvent<HTMLFormElement>,
+    id: string,
+  ) {
+    try {
+      event.preventDefault();
+      const form = new FormData();
+      const form2 = new FormData(event.currentTarget);
+      const inputFiles = event.currentTarget[3] as HTMLInputElement;
+      const fileImage = inputFiles.files;
+
+      const document: ResourceObjectForSendWithFiles = {
+        id,
+        type: 'project',
+        attributes: {},
+      };
+
+      for (const [fieldName, fieldValue] of form2.entries()) {
+        if (document.attributes) {
+          // Check Jika tools properti sudah diisi
+          if (document.attributes.tools) {
+            // Jika sudah diganti sebelumnya
+            if (Array.isArray(document.attributes.tools)) {
+              document.attributes.tools.push(fieldValue as OObject);
+            } else {
+              document.attributes.tools = [
+                document.attributes.tools as OObject,
+                fieldValue as OObject,
+              ];
+            }
+
+            continue;
+          }
+
+          if (fieldName !== 'images')
+            document.attributes[fieldName] = fieldValue;
+        }
+      }
+
+      // Logic
+      dispatch({ type: 'modal/request/start' });
+      if (fileImage.length > 0) {
+        for (let i = 0; i < fileImage.length; i++) {
+          const file = fileImage.item(i);
+          if (file) form.append('images', file);
+        }
+
+        const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
+          method: 'post',
+          body: form,
+        });
+
+        if (document.attributes) document.attributes.images = meta.images;
+      } else document.attributes.images = images;
+      // else document.attributes.images = ;
+
+      const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(document),
+        headers: {
+          'content-type': 'application/vnd.api+json',
+        },
+      });
+
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: request.meta.title },
+      });
+
+      await mutate('/api/projects');
+    } catch (err) {
+      console.log(err);
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: 'error happend' },
+      });
+
+      await mutate('/api/projects');
+    }
+  }
 
   if (error) {
     return (
@@ -182,7 +371,7 @@ function SwitchModal({
   switch (state.modal) {
     case 'add':
       return (
-        <ModalForm onSubmit={(event) => onSubmit(event, dispatch, mutate)}>
+        <ModalForm onSubmit={(event) => onSubmitModalAdd(event)}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label size={1} minSize={1} htmlFor="title">
@@ -312,9 +501,7 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmit2(row.id, dispatch, mutate)}>
-              DELETE
-            </Button>
+            <Button onClick={() => onSubmitModalDelete(row.id)}>DELETE</Button>
           </ModalFooter>
         </ModalMain2>
       );
@@ -339,9 +526,7 @@ function SwitchModal({
 
         if (isObject(typeProject) && toolsValue) {
           return (
-            <ModalForm
-              onSubmit={(event) => onSubmit3(event, row.id, dispatch, mutate)}
-            >
+            <ModalForm onSubmit={(event) => onSubmitModalUpdate(event, row.id)}>
               <ModalFormContent>
                 <ModalFormContentRow>
                   <Label size={1} minSize={1} htmlFor="title">
@@ -481,188 +666,6 @@ function SwitchModal({
       break;
     default:
       return <> </>;
-  }
-}
-
-async function onSubmit(
-  event: React.FormEvent<HTMLFormElement>,
-  dispatch: Dispatch<any>,
-  mutate: mutateSWRCustom,
-) {
-  try {
-    event.preventDefault();
-    const form = new FormData();
-    const form2 = new FormData(event.currentTarget);
-    const inputFiles = event.currentTarget[3] as HTMLInputElement;
-    const fileImage = inputFiles.files;
-
-    const document: ResourceObjectForSendWithFiles = {
-      type: 'project',
-      attributes: {},
-    };
-
-    for (const [fieldName, fieldValue] of form2.entries()) {
-      if (document.attributes) {
-        // Check Jika tools properti sudah diisi
-        if (document.attributes.tools) {
-          // Jika sudah diganti sebelumnya
-          if (Array.isArray(document.attributes.tools)) {
-            document.attributes.tools.push(fieldValue as OObject);
-          } else {
-            document.attributes.tools = [
-              document.attributes.tools as OObject,
-              fieldValue as OObject,
-            ];
-          }
-
-          continue;
-        }
-
-        document.attributes[fieldName] = fieldValue;
-      }
-    }
-
-    // Logic
-    dispatch({ type: 'modal/request/start' });
-    for (let i = 0; i < fileImage.length; i++) {
-      const file = fileImage.item(i);
-      if (file) form.append('images', file);
-    }
-
-    const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
-      method: 'post',
-      body: form,
-    });
-
-    if (document.attributes) document.attributes.images = meta.images;
-
-    const request = await fetcherGeneric<DocMeta>('/api/projects', {
-      method: 'post',
-      body: JSON.stringify(document),
-      headers: {
-        'content-type': 'application/vnd.api+json',
-      },
-    });
-
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: request.meta.title },
-    });
-    await mutate('/api/projects');
-  } catch (err) {
-    console.log(err);
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: 'error happend' },
-    });
-    await mutate('/api/projects');
-  }
-}
-
-async function onSubmit2(
-  id: string,
-  dispatch: Dispatch<any>,
-  mutate: mutateSWRCustom,
-) {
-  try {
-    dispatch({ type: 'modal/request/start' });
-
-    const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
-      method: 'delete',
-    });
-
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: request.meta.title as string },
-    });
-    await mutate('/api/projects');
-  } catch (err) {
-    console.log(err);
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: 'error happend' },
-    });
-    await mutate('/api/projects');
-  }
-}
-
-async function onSubmit3(
-  event: React.FormEvent<HTMLFormElement>,
-  id: string,
-  dispatch: Dispatch<any>,
-  mutate: mutateSWRCustom,
-) {
-  try {
-    event.preventDefault();
-    const form = new FormData();
-    const form2 = new FormData(event.currentTarget);
-    const inputFiles = event.currentTarget[3] as HTMLInputElement;
-    const fileImage = inputFiles.files;
-    const document: ResourceObjectForSendWithFiles = {
-      id,
-      type: 'project',
-      attributes: {},
-    };
-
-    for (const [fieldName, fieldValue] of form2.entries()) {
-      if (document.attributes) {
-        // Check Jika tools properti sudah diisi
-        if (document.attributes.tools) {
-          // Jika sudah diganti sebelumnya
-          if (Array.isArray(document.attributes.tools)) {
-            document.attributes.tools.push(fieldValue as OObject);
-          } else {
-            document.attributes.tools = [
-              document.attributes.tools as OObject,
-              fieldValue as OObject,
-            ];
-          }
-
-          continue;
-        }
-
-        if (fieldName !== 'images') document.attributes[fieldName] = fieldValue;
-      }
-    }
-
-    // Logic
-    dispatch({ type: 'modal/request/start' });
-    if (fileImage.length > 0) {
-      for (let i = 0; i < fileImage.length; i++) {
-        const file = fileImage.item(i);
-        if (file) form.append('images', file);
-      }
-
-      const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
-        method: 'post',
-        body: form,
-      });
-
-      if (document.attributes) document.attributes.images = meta.images;
-    }
-
-    const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(document),
-      headers: {
-        'content-type': 'application/vnd.api+json',
-      },
-    });
-
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: request.meta.title },
-    });
-
-    await mutate('/api/projects');
-  } catch (err) {
-    console.log(err);
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: 'error happend' },
-    });
-
-    await mutate('/api/projects');
   }
 }
 
