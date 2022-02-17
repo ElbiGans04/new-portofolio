@@ -1,22 +1,18 @@
 import ToolsSchema from '@database/schemas/tools';
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from '@middleware/runMiddleware';
-import formatResource from '@utils/formatResource';
+import HttpError from '@src/modules/httpError';
 import {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
-import ToolValidationSchema from '@validation/tools';
-import joi from 'joi';
-import type {
-  TransformToDocClient,
-  TransformToDocServer,
-} from '@utils/typescript/transformSchemeToDoc';
-import ToolInterface from '@src/types/mongoose/schemas/tool';
-import HttpError from '@src/modules/httpError';
+import formatResource from '@utils/formatResource';
+import toolsService from './tools.service';
+
 class Tools {
   async getTool(req: RequestControllerRouter, res: RespondControllerRouter) {
     const { toolID } = req.query;
+
     const result = await ToolsSchema.findById(toolID);
 
     // Jika tidak ada
@@ -35,6 +31,7 @@ class Tools {
 
   async getTools(req: RequestControllerRouter, res: RespondControllerRouter) {
     const results = await ToolsSchema.find();
+
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
     return res.end(
@@ -44,10 +41,8 @@ class Tools {
 
   async postTools(req: RequestControllerRouter, res: RespondControllerRouter) {
     await runMiddleware(req, res, formidableHandler);
-    const valid = joi.attempt(
-      req.body,
-      ToolValidationSchema,
-    ) as TransformToDocClient<ToolInterface>;
+
+    const valid = toolsService.validation(req.body);
 
     const tool = new ToolsSchema(valid.attributes);
     await tool.save();
@@ -66,10 +61,8 @@ class Tools {
     await runMiddleware(req, res, formidableHandler);
 
     const { toolID } = req.query;
-    const valid = joi.attempt(
-      req.body,
-      ToolValidationSchema,
-    ) as TransformToDocServer<ToolInterface>;
+
+    const valid = toolsService.validation(req.body);
 
     // Check karena di joi validation attribute id merupakan optional
     if (!valid.id)

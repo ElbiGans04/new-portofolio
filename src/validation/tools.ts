@@ -1,6 +1,6 @@
 import joi from 'joi';
 
-const schema = joi
+const ToolSchemaValidation = joi
   .object({
     type: joi.string().max(50).required(),
     id: joi.string().max(100),
@@ -13,4 +13,4 @@ const schema = joi
   })
   .required();
 
-export default schema;
+export default ToolSchemaValidation;
