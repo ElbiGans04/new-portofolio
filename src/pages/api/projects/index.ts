@@ -6,7 +6,7 @@ import type {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
-import HttpError from '@src/modules/httpError';
+import HttpError from '@src/utils/httpError';
 import ProjectService from '@src/controllers/projects.service';
 
 export const config = {
@@ -24,16 +24,16 @@ export default withIronSession(
 
       if (method === 'GET') await Controller.getProjects(req, res);
       else {
-        // if (req.session) {
-        //   // Jika belum login
-        //   if (!req.session.get('user')) {
-        //     throw new HttpError(
-        //       'please login ahead',
-        //       403,
-        //       "can't fulfill the request because access is not allowed",
-        //     );
-        //   }
-        // }
+        if (req.session) {
+          // Jika belum login
+          if (!req.session.get('user')) {
+            throw new HttpError(
+              'please login ahead',
+              403,
+              "can't fulfill the request because access is not allowed",
+            );
+          }
+        }
 
         // Lakukan operasi bedasarkan dari jenis http method
         switch (method) {

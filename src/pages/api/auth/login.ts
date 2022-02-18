@@ -5,7 +5,7 @@ import type {
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
 import routerErrorHandling from '@src/utils/routerErrorHandling';
-import HttpError from '@src/modules/httpError';
+import HttpError from '@src/utils/httpError';
 
 export const config = {
   api: {

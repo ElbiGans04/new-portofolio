@@ -1,6 +1,6 @@
 import toolsSchema from '@src/database/schemas/tools';
 import typeProjectSchema from '@src/database/schemas/typeProject';
-import HttpError from '@src/modules/httpError';
+import HttpError from '@src/utils/httpError';
 import { OObject } from '@src/types/jsonApi/object';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';

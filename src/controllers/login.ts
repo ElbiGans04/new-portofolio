@@ -5,7 +5,7 @@ import {
 import runMiddleware from '@middleware/runMiddleware';
 import { formidableHandler } from '@middleware/formidable';
 import { isObject } from '@utils/typescript/narrowing';
-import HttpError from '@src/modules/httpError';
+import HttpError from '@src/utils/httpError';
 
 class Login {
   async postLogin(req: RequestControllerRouter, res: RespondControllerRouter) {

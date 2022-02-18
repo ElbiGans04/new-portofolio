@@ -6,7 +6,7 @@ import type {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
-import HttpError from '@src/modules/httpError';
+import HttpError from '@src/utils/httpError';
 
 export const config = {
   api: {

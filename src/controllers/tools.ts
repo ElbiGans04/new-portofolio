@@ -1,7 +1,7 @@
 import ToolsSchema from '@database/schemas/tools';
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from '@middleware/runMiddleware';
-import HttpError from '@src/modules/httpError';
+import HttpError from '@src/utils/httpError';
 import {
   RequestControllerRouter,
   RespondControllerRouter,
