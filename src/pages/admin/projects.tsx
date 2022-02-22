@@ -16,26 +16,25 @@ import ModalComponent, {
 } from '@components/Modal';
 import Context from '@hooks/context';
 import { reducer } from '@hooks/reducer';
-import { fetcherGeneric } from '@utils/fetcher';
-import getRandom from '@utils/randomNumber';
-import changeFirstWord from '@utils/upperFirstWord';
 import type { admin } from '@typess/admin';
 import type {
-  Doc,
+  DocData,
   DocErrors,
   DocMeta,
   ResourceObject,
-  ResourceObjectForSendWithFiles,
 } from '@typess/jsonApi';
-import { OObject } from '@typess/jsonApi/object';
+import { OObject, OObjectWithFiles } from '@typess/jsonApi/object';
+import { fetcherGeneric } from '@utils/fetcher';
+import getRandom from '@utils/randomNumber';
+import { isObject } from '@utils/typescript/narrowing';
+import changeFirstWord from '@utils/upperFirstWord';
 import { Dispatch } from 'hoist-non-react-statics/node_modules/@types/react';
 import Head from 'next/head';
-import React, { useReducer, useRef, useState, useMemo } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
-import { isObject } from '@utils/typescript/narrowing';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
@@ -152,7 +151,10 @@ function SwitchModal({
   dispatch: Dispatch<any>;
 }) {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
-  const { data, error } = useSWR<Doc, DocErrors>('/api/tools', fetcherGeneric);
+  const { data, error } = useSWR<DocData, DocErrors>(
+    '/api/tools',
+    fetcherGeneric,
+  );
   const row = state.row;
   let images =
     row !== undefined ? row?.columnsValue[row.columns.indexOf('images')] : null;
@@ -200,7 +202,7 @@ function SwitchModal({
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
 
-      const document: ResourceObjectForSendWithFiles = {
+      const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
         type: 'project',
         attributes: {},
       };
@@ -274,7 +276,7 @@ function SwitchModal({
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
 
-      const document: ResourceObjectForSendWithFiles = {
+      const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
         id,
         type: 'project',
         attributes: {},
@@ -668,60 +670,6 @@ function SwitchModal({
       return <> </>;
   }
 }
-
-// function InputCollections({
-//   data: { data: result = [] } = {},
-//   defaultValues = [],
-//   ...props
-// } = {}) {
-//   const [inputState, setInputState] = useState(() =>
-//     defaultValues.map((defaultValue) => defaultValue._id)
-//   );
-//   const [inputCount, setInputCount] = useState(defaultValues.length || 1);
-//   const collectionInput = [];
-
-//   // callback
-//   function onChange(event, index) {
-//     const arrayBaru = [...inputState];
-//     arrayBaru[index] = event.target.value;
-//     setInputState(arrayBaru);
-//   }
-
-//   // Looping untuk select element yang diperlukan
-//   for (let i = 0; i < inputCount; i++) {
-//     const element = (
-//       <ContainerInput>
-//         <select
-//           onChange={(event) => onChange(event, i)}
-//           value={inputState[i]}
-//           key={getRandom()}
-//           {...props}
-//         >
-//           {result.map((value) => {
-//             return (
-//               <option key={getRandom()} value={value._id}>
-//                 {value.name}
-//               </option>
-//             );
-//           })}
-//         </select>
-//         <Button type="button" onClick={() => console.log(i)}>X</Button>
-//       </ContainerInput>
-//     );
-//     collectionInput.push(element);
-//   }
-//   return (
-//     <ContainerInputs>
-//       <Button className="add" type="button" onClick={() => setInputCount((state) => state + 1)}>
-//         <IoAddOutline />
-//       </Button>
-//       {collectionInput}
-//     </ContainerInputs>
-//   );
-// }
-
-// data: { data: result = [] } = {},
-// defaultValues = [],
 
 function InputCollections({
   data,

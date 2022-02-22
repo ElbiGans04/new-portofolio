@@ -1,125 +1,107 @@
-import type { error } from '@typess/jsonApi/error';
-import type { meta } from '@typess/jsonApi/meta';
-import type { link } from '@typess/jsonApi/link';
-import type { OObject, OObjectWithFiles } from '@typess/jsonApi/object';
+import { OObject } from './object';
 
-type jsonApi = {
-  version: string;
-  meta?: meta;
+/*
+    Additional
+*/
+
+type MetaObject = {
+  [index: string]: OObject;
 };
 
-type ResourceIdentifierObjects = {
+type link =
+  | string
+  | {
+      href: string;
+      meta: MetaObject;
+    };
+
+interface ResourceIdentifierObject {
   type: string;
   id: string;
-  meta?: meta;
-};
+  meta?: MetaObject;
+}
 
-export type ResourceObject = ResourceIdentifierObjects & {
-  attributes: {
-    [index: string]: OObject;
-  };
-  relationships?: {
-    [index: string]: {
-      links?: {
-        self?: string;
-        related?: {
-          href: string;
-          meta?: meta;
-        };
-      };
-      meta?: meta;
-      data?:
-        | ResourceIdentifierObjects
-        | null
-        | ResourceIdentifierObjects[]
-        | [];
-    };
-  };
-  links?: {
-    self: string;
-  };
-};
-
-export type ResourceObjectForSend = {
-  id?: string;
+export interface ResourceObject<T = { [index: string]: OObject }> {
   type: string;
-  meta?: meta;
-  attributes: {
-    [index: string]: OObject;
-  };
-  relationships?: {
-    [index: string]: {
-      links?: {
-        self?: string;
-        related?: {
-          href: string;
-          meta?: meta;
-        };
-      };
-      meta?: meta;
-      data?:
-        | ResourceIdentifierObjects
-        | null
-        | ResourceIdentifierObjects[]
-        | [];
-    };
-  };
-  links?: {
-    self: string;
-  };
-};
-
-export type ResourceObjectForSendWithFiles = {
   id?: string;
-  type: string;
-  meta?: meta;
-  attributes: {
-    [index: string]: OObjectWithFiles;
-  };
+  attributes?: T;
   relationships?: {
     [index: string]: {
-      links?: {
-        self?: string;
-        related?: {
-          href: string;
-          meta?: meta;
-        };
+      links: {
+        self: link;
+        related?: link;
       };
-      meta?: meta;
-      data?:
-        | ResourceIdentifierObjects
+      data:
+        | ResourceIdentifierObject
         | null
-        | ResourceIdentifierObjects[]
-        | [];
+        | ResourceIdentifierObject[]
+        | never[];
+      meta?: MetaObject;
     };
   };
   links?: {
-    self: string;
+    self?: link;
   };
-};
+  meta?: MetaObject;
+}
 
-//  Dokumen
-type baseDoc =
-  | {
-      jsonapi?: jsonApi;
-    }
-  | {
-      links?:
-        | link
-        | {
-            first: string | null;
-            last: string | null;
-            next: string | null;
-            prev: string | null;
-          };
+/* 
+    TOP LEVEL MEMBER
+*/
+
+interface DocBase {
+  jsonapi?: {
+    version?: string;
+    meta?: MetaObject;
+  };
+  links?: {
+    self?: link;
+    related?: link;
+    pagination?: {
+      first: string | null;
+      last: string | null;
+      prev: string | null;
+      next: string | null;
     };
+  };
+}
 
-export type Doc = {
-  data: ResourceObject | null | ResourceObject[] | never[];
-  included?: ResourceObject[];
-  meta?: meta;
-};
+export interface DocData<T = { [index: string]: OObject }> extends DocBase {
+  data:
+    | ResourceObject<T>
+    | ResourceObject<T>[]
+    | null
+    | never[]
+    | ResourceIdentifierObject
+    | ResourceIdentifierObject[];
+  meta?: MetaObject;
+  included?: Array<{
+    type: string;
+    id?: string;
+    attributes: {
+      [index: string]: OObject;
+    };
+  }>;
+}
 
-export type DocMeta = { meta: meta } & baseDoc;
+export interface DocMeta extends DocBase {
+  meta: MetaObject;
+}
 
-export type DocErrors = { errors: Array<error>; meta?: meta } & baseDoc;
+export interface DocErrors extends DocBase {
+  errors: Array<{
+    id?: string;
+    links?: {
+      about: string;
+    };
+    status: string;
+    code?: string;
+    title: string;
+    detail: string;
+    source?: {
+      pointer: string;
+    };
+    meta?: MetaObject;
+  }>;
+  meta?: MetaObject;
+}

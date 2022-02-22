@@ -1,4 +1,4 @@
-import { Doc, DocErrors, DocMeta } from '@typess/jsonApi';
+import { DocData, DocErrors, DocMeta } from '@typess/jsonApi';
 import formidable from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-iron-session';
@@ -14,6 +14,5 @@ export interface RequestControllerRouter extends NextApiRequest {
   session?: Session;
 }
 
-export type RespondControllerRouter = NextApiResponse<
-  Doc | DocMeta | DocErrors
->;
+export type RespondControllerRouter<T = { [index: string]: OObject }> =
+  NextApiResponse<DocData<T> | DocMeta | DocErrors>;

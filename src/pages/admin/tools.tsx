@@ -18,10 +18,7 @@ import Context from '@hooks/context';
 import { reducer } from '@hooks/reducer';
 import { fetcherGeneric } from '@utils/fetcher';
 import type { action, admin } from '@typess/admin';
-import type {
-  DocMeta,
-  ResourceObjectForSendWithFiles,
-} from '@typess/jsonApi/index';
+import type { DocMeta, ResourceObject } from '@typess/jsonApi/index';
 import Head from 'next/head';
 import React, {
   Dispatch,
@@ -32,6 +29,7 @@ import React, {
 } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import { useSWRConfig } from 'swr';
+import { OObjectWithFiles } from '@typess/jsonApi/object';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
@@ -193,7 +191,7 @@ const onSubmit = async (
 ) => {
   try {
     event.preventDefault();
-    const document: ResourceObjectForSendWithFiles = {
+    const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
       type: 'tool',
       attributes: {},
     };
@@ -267,7 +265,7 @@ const onSubmit3 = async (
 ) => {
   try {
     event.preventDefault();
-    const document: ResourceObjectForSendWithFiles = {
+    const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
       type: 'tool',
       id,
       attributes: {},

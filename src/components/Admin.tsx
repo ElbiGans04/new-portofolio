@@ -3,7 +3,7 @@ import Context from '@hooks/context';
 import useUser from '@hooks/useUser';
 import getRandom from '@utils/randomNumber';
 import upperFirstWord from '@utils/upperFirstWord';
-import { Doc, DocErrors, ResourceObject } from '@typess/jsonApi/index';
+import { DocData, DocErrors, ResourceObject } from '@typess/jsonApi/index';
 import { OObject } from '@typess/jsonApi/object';
 import React, { useContext, useMemo, useRef, useState } from 'react';
 import {
@@ -25,7 +25,7 @@ export default function Admin() {
     renameColumns = {},
     dispatch,
   } = useContext(Context);
-  const { data, error } = useSWR<Doc, DocErrors>(url, fetcherGeneric);
+  const { data, error } = useSWR<DocData, DocErrors>(url, fetcherGeneric);
   const user = useUser({ redirectTo: '/login', redirectIfFound: false });
 
   // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah
@@ -262,7 +262,7 @@ type filterResults = {
   rowsId: string[];
 };
 function filter(
-  data: Doc | undefined,
+  data: DocData | undefined,
   columns: string[],
   visibleColumns: string[],
   visibleValue = 0,
@@ -275,7 +275,12 @@ function filter(
     rowsId: [],
   };
 
-  if (typeof data === 'undefined' || data.data === null) return results;
+  if (
+    typeof data === 'undefined' ||
+    data.data === null ||
+    (Array.isArray(data.data) && data.data.length <= 0)
+  )
+    return results;
 
   // Dapatkan columns
   // Filter mana column yang boleh ditampilkan mana yang tidak
@@ -310,7 +315,6 @@ function getAndFilterColumns(
   visibleColumns: string[],
   visibleValue: number,
 ): string[] {
-  if (data === undefined) return [];
   if (data.attributes === undefined) return [];
 
   return Object.keys(data.attributes).filter((column) => {
