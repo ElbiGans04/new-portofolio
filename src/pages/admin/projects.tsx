@@ -3,9 +3,7 @@ import Button from '@components/Button';
 import Heading from '@components/Heading';
 import Input from '@components/Input';
 import Label from '@components/Label';
-import ModalComponent, {
-  GlobalStyle,
-  ModalAdmin,
+import {
   ModalContent2,
   ModalFooter,
   ModalForm,
@@ -30,16 +28,14 @@ import { isObject } from '@utils/typescript/narrowing';
 import changeFirstWord from '@utils/upperFirstWord';
 import { Dispatch } from 'hoist-non-react-statics/node_modules/@types/react';
 import Head from 'next/head';
-import React, { useReducer, useRef, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
-import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
 export default function Projects() {
-  const ref = useRef(null);
   const [state, dispatch] = useReducer(reducer, {
     // iddle, loading, finish
     status: 'iddle',
@@ -109,32 +105,12 @@ export default function Projects() {
       </Head>
 
       {/* Halaman Admin */}
-      <Admin />
-
-      {/* Modal */}
-      {/* Saat modal diopen overflow pada body harus dihidden */}
-      {state.modal && <GlobalStyle />}
-      <CSSTransition
-        nodeRef={ref}
-        classNames="modal"
-        in={state.modal !== null}
-        timeout={500}
-      >
-        <ModalComponent
-          width="700px"
-          height=""
-          updateState={dispatch}
-          defaultState={{ type: 'modal/close' }}
-          ref={ref}
-        >
-          <ModalAdmin
-            status={state.status}
-            message={state.message}
-            dispatch={dispatch}
-            Children={() => <SwitchModal dispatch={dispatch} state={state} />}
-          />
-        </ModalComponent>
-      </CSSTransition>
+      <Admin
+        status={state.status}
+        message={state.message}
+        modal={state.modal}
+        Children={() => <SwitchModal state={state} dispatch={dispatch} />}
+      />
     </Context.Provider>
   );
 }

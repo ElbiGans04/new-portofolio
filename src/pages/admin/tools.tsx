@@ -3,9 +3,7 @@ import Button from '@components/Button';
 import Heading from '@components/Heading';
 import Input from '@components/Input';
 import Label from '@components/Label';
-import ModalComponent, {
-  GlobalStyle,
-  ModalAdmin,
+import {
   ModalContent2,
   ModalFooter,
   ModalForm,
@@ -16,20 +14,13 @@ import ModalComponent, {
 } from '@components/Modal';
 import Context from '@hooks/context';
 import { reducer } from '@hooks/reducer';
-import { fetcherGeneric } from '@utils/fetcher';
 import type { action, admin } from '@typess/admin';
 import type { DocMeta, ResourceObject } from '@typess/jsonApi/index';
-import Head from 'next/head';
-import React, {
-  Dispatch,
-  FormEvent,
-  useReducer,
-  useRef,
-  useState,
-} from 'react';
-import { CSSTransition } from 'react-transition-group';
-import { useSWRConfig } from 'swr';
 import { OObjectWithFiles } from '@typess/jsonApi/object';
+import { fetcherGeneric } from '@utils/fetcher';
+import Head from 'next/head';
+import React, { Dispatch, FormEvent, useReducer, useState } from 'react';
+import { useSWRConfig } from 'swr';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
@@ -48,7 +39,6 @@ export default function Tools() {
       visibleColumns: ['_id', '__v'],
     },
   });
-  const ref = useRef<HTMLDivElement>(null);
 
   return (
     <Context.Provider value={state2}>
@@ -57,31 +47,12 @@ export default function Tools() {
       </Head>
 
       {/* Halaman Admin */}
-      <Admin />
-
-      {/* Modal */}
-      {state.modal !== null && <GlobalStyle />}
-      <CSSTransition
-        nodeRef={ref}
-        classNames="modal"
-        in={state.modal !== null}
-        timeout={500}
-      >
-        <ModalComponent
-          width="500px"
-          height=""
-          updateState={dispatch}
-          defaultState={{ type: 'modal/close' }}
-          ref={ref}
-        >
-          <ModalAdmin
-            status={state.status}
-            message={state.message}
-            dispatch={dispatch}
-            Children={() => <SwitchModal dispatch={dispatch} state={state} />}
-          />
-        </ModalComponent>
-      </CSSTransition>
+      <Admin
+        status={state.status}
+        message={state.message}
+        modal={state.modal}
+        Children={() => <SwitchModal state={state} dispatch={dispatch} />}
+      />
     </Context.Provider>
   );
 }
@@ -95,10 +66,125 @@ function SwitchModal({
 }) {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
   const row = state.row;
+
+  /* 
+
+      Event Handling
+
+  */
+
+  async function onSubmitModalAdd(event: FormEvent<HTMLFormElement>) {
+    try {
+      event.preventDefault();
+      const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
+        type: 'tool',
+        attributes: {},
+      };
+      const form = new FormData(event.currentTarget);
+
+      if (document.attributes !== undefined) {
+        for (const [index, value] of form.entries()) {
+          document.attributes[index] = value;
+        }
+
+        dispatch({ type: 'modal/request/start' });
+
+        const request = await fetcherGeneric<DocMeta>('/api/tools', {
+          method: 'post',
+          body: JSON.stringify(document),
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+          },
+        });
+
+        dispatch({
+          type: 'modal/request/finish',
+          payload: { message: request.meta.title as string },
+        });
+
+        await mutate('/api/tools');
+      }
+    } catch (err) {
+      alert('Error');
+      console.log(err);
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: 'Error happend when request' },
+      });
+    }
+  }
+
+  async function onSubmitModalDelete(id: string) {
+    try {
+      dispatch({ type: 'modal/request/start' });
+
+      const request = await fetcherGeneric<DocMeta>(`/api/tools/${id}`, {
+        method: 'delete',
+      });
+
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: request.meta.title as string },
+      });
+
+      await mutate('/api/tools');
+    } catch (err) {
+      alert('Error');
+      console.log(err);
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: 'Error happend when request' },
+      });
+    }
+  }
+
+  async function onSubmitModalUpdate(
+    event: FormEvent<HTMLFormElement>,
+    id: string,
+  ) {
+    try {
+      event.preventDefault();
+      const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
+        type: 'tool',
+        id,
+        attributes: {},
+      };
+      const form = new FormData(event.currentTarget);
+      if (document.attributes !== undefined) {
+        for (const [index, value] of form.entries()) {
+          document.attributes[index] = value;
+        }
+
+        dispatch({ type: 'modal/request/start' });
+        const request = await fetcherGeneric<DocMeta>(`/api/tools/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify(document),
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+          },
+        });
+
+        dispatch({
+          type: 'modal/request/finish',
+          payload: { message: request.meta.title as string },
+        });
+
+        await mutate('/api/tools');
+      }
+    } catch (err) {
+      alert('Error');
+      console.log(err);
+      dispatch({
+        type: 'modal/request/finish',
+        payload: { message: 'Error happend when request' },
+      });
+    }
+  }
+
   switch (state.modal) {
     case 'add': {
       return (
-        <ModalForm onSubmit={(event) => onSubmit(event, dispatch, mutate)}>
+        <ModalForm onSubmit={(event) => onSubmitModalAdd(event)}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label minSize={1} size={1} htmlFor="name">
@@ -128,9 +214,7 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmit2(row.id, dispatch, mutate)}>
-              DELETE
-            </Button>
+            <Button onClick={() => onSubmitModalDelete(row.id)}>DELETE</Button>
           </ModalFooter>
         </ModalMain2>
       );
@@ -142,9 +226,7 @@ function SwitchModal({
         ] as string;
         const asValue = row.columnsValue[row.columns.indexOf('as')] as string;
         return (
-          <ModalForm
-            onSubmit={(event) => onSubmit3(event, row.id, dispatch, mutate)}
-          >
+          <ModalForm onSubmit={(event) => onSubmitModalUpdate(event, row.id)}>
             <ModalFormContent>
               <ModalFormContentRow>
                 <Label minSize={1} size={1} htmlFor="name">
@@ -182,122 +264,3 @@ function SwitchModal({
       return <> </>;
   }
 }
-
-// Submit
-const onSubmit = async (
-  event: FormEvent<HTMLFormElement>,
-  dispatch: Dispatch<any>,
-  mutate: mutateSWRCustom,
-) => {
-  try {
-    event.preventDefault();
-    const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
-      type: 'tool',
-      attributes: {},
-    };
-    const form = new FormData(event.currentTarget);
-
-    if (document.attributes !== undefined) {
-      for (const [index, value] of form.entries()) {
-        document.attributes[index] = value;
-      }
-
-      dispatch({ type: 'modal/request/start' });
-
-      const request = await fetcherGeneric<DocMeta>('/api/tools', {
-        method: 'post',
-        body: JSON.stringify(document),
-        headers: {
-          'Content-Type': 'application/vnd.api+json',
-        },
-      });
-
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: request.meta.title },
-      });
-
-      await mutate('/api/tools');
-    }
-  } catch (err) {
-    alert('Error');
-    console.log(err);
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: 'Error happend when request' },
-    });
-  }
-};
-
-const onSubmit2 = async (
-  id: string,
-  dispatch: Dispatch<any>,
-  mutate: mutateSWRCustom,
-) => {
-  try {
-    dispatch({ type: 'modal/request/start' });
-
-    const request = await fetcherGeneric<DocMeta>(`/api/tools/${id}`, {
-      method: 'delete',
-    });
-
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: request.meta.title },
-    });
-
-    await mutate('/api/tools');
-  } catch (err) {
-    alert('Error');
-    console.log(err);
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: 'Error happend when request' },
-    });
-  }
-};
-
-const onSubmit3 = async (
-  event: FormEvent<HTMLFormElement>,
-  id: string,
-  dispatch: Dispatch<any>,
-  mutate: mutateSWRCustom,
-) => {
-  try {
-    event.preventDefault();
-    const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
-      type: 'tool',
-      id,
-      attributes: {},
-    };
-    const form = new FormData(event.currentTarget);
-    if (document.attributes !== undefined) {
-      for (const [index, value] of form.entries()) {
-        document.attributes[index] = value;
-      }
-
-      dispatch({ type: 'modal/request/start' });
-      const request = await fetcherGeneric<DocMeta>(`/api/tools/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(document),
-        headers: {
-          'Content-Type': 'application/vnd.api+json',
-        },
-      });
-
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: request.meta.title },
-      });
-
-      await mutate('/api/tools');
-    }
-  } catch (err) {
-    alert('Error');
-    console.log(err);
-    dispatch({
-      type: 'modal/request/finish',
-      payload: { message: 'Error happend when request' },
-    });
-  }
-};

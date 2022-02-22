@@ -16,8 +16,19 @@ import styled from 'styled-components';
 import useSWR from 'swr';
 import { fetcherGeneric } from '@utils/fetcher';
 import Heading from './Heading';
+import ModalComponent, { GlobalStyle, ModalAdmin } from '@components/Modal';
 
-export default function Admin() {
+export default function Admin({
+  modal,
+  status,
+  message,
+  Children,
+}: {
+  modal: 'add' | 'update' | 'delete';
+  status: string;
+  message: string;
+  Children: () => JSX.Element;
+}) {
   const {
     url = '',
     columns = [],
@@ -27,6 +38,7 @@ export default function Admin() {
   } = useContext(Context);
   const { data, error } = useSWR<DocData, DocErrors>(url, fetcherGeneric);
   const user = useUser({ redirectTo: '/login', redirectIfFound: false });
+  const ref = useRef<HTMLDivElement>(null);
 
   // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah
   const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(
@@ -64,6 +76,30 @@ export default function Admin() {
 
   return (
     <Container>
+      {/* Modal */}
+      {modal && <GlobalStyle />}
+      <CSSTransition
+        nodeRef={ref}
+        classNames="modal"
+        in={modal !== null}
+        timeout={500}
+      >
+        <ModalComponent
+          width="700px"
+          height=""
+          updateState={dispatch}
+          defaultState={{ type: 'modal/close' }}
+          ref={ref}
+        >
+          <ModalAdmin
+            status={status}
+            message={message}
+            dispatch={dispatch}
+            Children={Children}
+          />
+        </ModalComponent>
+      </CSSTransition>
+
       <ContainerButtons>
         <Button onClick={() => dispatch({ type: 'modal/open/add' })}>
           <IoAddOutline />
