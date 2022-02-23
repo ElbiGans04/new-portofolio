@@ -3,12 +3,7 @@ import projectType from '@typess/mongoose/schemas/project';
 import imageSchema from './image';
 import imageInterface from '@typess/mongoose/schemas/image';
 
-type modelProject = mongoose.Model<
-  projectType,
-  Record<string, never>,
-  { images: mongoose.Types.DocumentArray<mongoose.Document<imageInterface>> }
->;
-const projectSchema = new mongoose.Schema<projectType, modelProject>({
+const projectSchema = new mongoose.Schema<projectType>({
   title: {
     type: String,
     required: true,
@@ -35,5 +30,6 @@ const projectSchema = new mongoose.Schema<projectType, modelProject>({
   },
 });
 
-export default (mongoose.models.Projects as unknown as modelProject) ||
-  mongoose.model<projectType, modelProject>('Projects', projectSchema);
+export default (mongoose.models
+  .Projects as unknown as mongoose.Model<projectType>) ||
+  mongoose.model<projectType>('Projects', projectSchema);
