@@ -32,12 +32,15 @@ export default function Tools() {
     row: null,
   });
   const [state2] = useState({
-    dispatch,
     url: '/api/tools',
+    dispatch,
+    columns: [],
     visible: {
       visibleValue: 0,
       visibleColumns: ['_id', '__v'],
     },
+    renameColumns: {},
+    specialTreatment: {},
   });
 
   return (

@@ -29,25 +29,21 @@ export default function Admin({
   message: string;
   Children: () => JSX.Element;
 }) {
-  const {
-    url = '',
-    columns = [],
-    visible: { visibleColumns = [], visibleValue = 0 } = {},
-    renameColumns = {},
-    dispatch,
-  } = useContext(Context);
-  const { data, error } = useSWR<DocData, DocErrors>(url, fetcherGeneric);
+  const adminContext = useContext(Context);
+  if (!adminContext) throw new Error('Invalid Context Admin');
+
+  const { data, error } = useSWR<DocData, DocErrors>(
+    adminContext.url,
+    fetcherGeneric,
+  );
   const user = useUser({ redirectTo: '/login', redirectIfFound: false });
   const ref = useRef<HTMLDivElement>(null);
 
   // Membuat fungsi hanya akan dipanggil jika ada depedency yang berubah
   const { mainColumns, detailColumns, mainRows, detailRows, rowsId } = useMemo(
-    () => filter(data, columns, visibleColumns, visibleValue),
-    [data, columns, visibleColumns, visibleValue],
+    () => filter(data, adminContext.columns, adminContext.visible),
+    [data, adminContext],
   );
-
-  // Jika dispatch tidak ada
-  if (dispatch === undefined) throw new Error('dispatch not found');
 
   // Jika ada error
   if (error) {
@@ -87,21 +83,23 @@ export default function Admin({
         <ModalComponent
           width="700px"
           height=""
-          updateState={dispatch}
+          updateState={adminContext.dispatch}
           defaultState={{ type: 'modal/close' }}
           ref={ref}
         >
           <ModalAdmin
             status={status}
             message={message}
-            dispatch={dispatch}
+            dispatch={adminContext.dispatch}
             Children={Children}
           />
         </ModalComponent>
       </CSSTransition>
 
       <ContainerButtons>
-        <Button onClick={() => dispatch({ type: 'modal/open/add' })}>
+        <Button
+          onClick={() => adminContext.dispatch({ type: 'modal/open/add' })}
+        >
           <IoAddOutline />
           Add Entity
         </Button>
@@ -115,7 +113,9 @@ export default function Admin({
               {/* Looping element yang diijinkan */}
               {mainColumns.map((value, index) => {
                 // Check apakah field tertentu harus direname
-                const keyRenameColumns = Object.entries(renameColumns);
+                const keyRenameColumns = Object.entries(
+                  adminContext.renameColumns,
+                );
                 const shouldRename = keyRenameColumns.find(
                   (column) => column[0] === value,
                 );
@@ -159,16 +159,12 @@ function Row({
   mainRow: OObject;
   id: string;
 }) {
-  const {
-    dispatch,
-    specialTreatment = {},
-    renameColumns = {},
-  } = useContext(Context);
+  const adminContext = useContext(Context);
+  if (!adminContext) throw new Error('Invalid Context Admin');
+
   const [details, setDetails] = useState(false);
   const ref = useRef(null);
-  const keySpecialTreatment = Object.entries(specialTreatment);
-
-  if (dispatch === undefined) throw new Error('dispatch function not found');
+  const keySpecialTreatment = Object.entries(adminContext.specialTreatment);
 
   if (mainRow instanceof Array && detailRow instanceof Array) {
     return (
@@ -206,7 +202,10 @@ function Row({
             <TdActions>
               <Button
                 onClick={() =>
-                  dispatch({ type: 'modal/open/delete', payload: { id } })
+                  adminContext.dispatch({
+                    type: 'modal/open/delete',
+                    payload: { id },
+                  })
                 }
                 title="delete the row"
               >
@@ -214,7 +213,7 @@ function Row({
               </Button>
               <Button
                 onClick={() =>
-                  dispatch({
+                  adminContext.dispatch({
                     type: 'modal/open/update',
                     payload: {
                       id,
@@ -243,7 +242,9 @@ function Row({
               <RowDetailsContent colSpan={mainRow.length + 1}>
                 <RowDetailsContentContent>
                   {detailColumns.map((detailColumn, index) => {
-                    const keyRenameColumns = Object.entries(renameColumns);
+                    const keyRenameColumns = Object.entries(
+                      adminContext.renameColumns,
+                    );
                     // check jika ada column yang harus direname
                     const specialField = keyRenameColumns.find(
                       (keySpecial) => keySpecial[0] === detailColumn,
@@ -300,8 +301,10 @@ type filterResults = {
 function filter(
   data: DocData | undefined,
   columns: string[],
-  visibleColumns: string[],
-  visibleValue = 0,
+  visible: {
+    visibleColumns: string[];
+    visibleValue: number;
+  },
 ) {
   const results: filterResults = {
     mainColumns: [],
@@ -321,8 +324,16 @@ function filter(
   // Dapatkan columns
   // Filter mana column yang boleh ditampilkan mana yang tidak
   const result = Array.isArray(data.data)
-    ? getAndFilterColumns(data.data[0], visibleColumns, visibleValue)
-    : getAndFilterColumns(data.data, visibleColumns, visibleValue);
+    ? getAndFilterColumns(
+        data.data[0],
+        visible.visibleColumns,
+        visible.visibleValue,
+      )
+    : getAndFilterColumns(
+        data.data,
+        visible.visibleColumns,
+        visible.visibleValue,
+      );
 
   // Check Terlebih dahulu apakah sesuai dengan kriteria yang diinginkan
   // // Dari hasil operasi diatas kita pilih mana yang akan ditampilkan sebagai

@@ -44,8 +44,8 @@ export default function Projects() {
     row: null,
   });
   const [state2] = useState({
-    dispatch,
     url: '/api/projects',
+    dispatch,
     columns: ['title', 'description'],
     visible: {
       visibleValue: 0,
