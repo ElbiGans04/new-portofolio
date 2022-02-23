@@ -143,6 +143,7 @@ const Main = styled.main`
     & {
       margin-top: 1rem;
       padding: 1rem;
+      gap: 1rem;
     }
   }
 `;
