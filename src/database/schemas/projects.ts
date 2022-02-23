@@ -1,7 +1,6 @@
-import mongoose from 'mongoose';
 import projectType from '@typess/mongoose/schemas/project';
+import mongoose from 'mongoose';
 import imageSchema from './image';
-import imageInterface from '@typess/mongoose/schemas/image';
 
 const projectSchema = new mongoose.Schema<projectType>({
   title: {

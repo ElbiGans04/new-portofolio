@@ -1,144 +1,41 @@
-import Head from 'next/head';
 import Heading from '@components/Heading';
-import styled, { createGlobalStyle } from 'styled-components';
-import React, {
-  useEffect,
-  useReducer,
-  useState,
-  useRef,
-  MouseEvent,
-} from 'react';
-import Image from 'next/image';
-import { CSSTransition } from 'react-transition-group';
-import upperFirstWord from '@utils/upperFirstWord';
-import Paragraph from '@components/Paragraph';
 import Modal from '@components/Modal';
+import Paragraph from '@components/Paragraph';
+import dbConnection from '@database/connection';
+import ProjectSchema from '@database/schemas/projects';
+import tool from '@src/types/mongoose/schemas/tool';
+import ProjectInterface from '@typess/mongoose/schemas/project';
 import getRandom from '@utils/randomNumber';
+import upperFirstWord from '@utils/upperFirstWord';
+// import mongodb from 'mongodb';
+import mongoose from 'mongoose';
+import { GetServerSideProps } from 'next';
+import Head from 'next/head';
+import Image from 'next/image';
+import React, { MouseEvent, useEffect, useRef, useState } from 'react';
+import { CSSTransition } from 'react-transition-group';
+import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
-import { fetcherGeneric } from '@utils/fetcher';
 
-type requestProject = {
-  data: StateProjects;
-  code: string;
-};
-
-type StateProjects = Array<{
-  id: string;
-  type: string;
-  attributes: {
-    tools: Array<{
-      _id: string;
-      name: string;
-      as: string;
-      _v: number;
-    }>;
-    title: string;
-    startDate: string;
-    endDate: string;
-    images: Array<{
-      _id: string;
-      src: string;
-    }>;
-    url: string;
-    description: string;
-    typeProject: {
-      _id: string;
-      projects?: any[];
-      name: string;
-      _v: number;
-    };
-    _v: number;
+export const getServerSideProps: GetServerSideProps = async function () {
+  await dbConnection();
+  // const result = await ProjectSchema.find().populate('typeProject').populate('tools');
+  const result = await ProjectSchema.find();
+  return {
+    props: {
+      projects: JSON.stringify(result),
+    }, // will be passed to the page component as props
   };
-}>;
-
-type State = {
-  status: 'iddle' | 'loading' | 'error';
-  projects: StateProjects;
-  refetch: boolean;
 };
 
-type Action =
-  | { type: 'request/start' }
-  | {
-      type: 'request/finish';
-      payload: {
-        projects: StateProjects;
-      };
-    }
-  | { type: 'request/error' }
-  | { type: 'request/refetch' };
-
-function Projects() {
+function Projects({ projects }: { projects: string }) {
+  const projectsResult = JSON.parse(projects) as ProjectInterface[];
   // React hooks
-  const [state, dispatch] = useReducer(reducer, {
-    status: 'iddle',
-    projects: [],
-    refetch: false,
-  });
   const [modal, setModal] = useState({ open: false, index: 0 });
   const nodeRef = useRef<HTMLDivElement>(null);
 
   // Variabel Biasa
-  const project = state.projects[modal.index];
-  const disabled = state.status !== 'iddle';
-  const className = state.status !== 'iddle' ? 'cursor-notAllowed' : '';
-
-  useEffect(() => {
-    // Mencegah react menyetel state ketika sudah pindah halaman
-    let didCancel = false;
-    async function getData() {
-      try {
-        if (!didCancel) {
-          // ubah state
-          dispatch({ type: 'request/start' });
-        }
-
-        const fetchProjects = await fetcherGeneric<requestProject>(
-          `/api/projects`,
-        );
-
-        // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
-        if (!didCancel) {
-          dispatch({
-            type: 'request/finish',
-            payload: { projects: fetchProjects.data },
-          });
-        }
-      } catch (err) {
-        console.log(err);
-        if (!didCancel) dispatch({ type: 'request/error' });
-      }
-    }
-
-    getData().catch((err) => {
-      console.log(`\n\n\n ERROR WHEN REQUEST DATA`);
-      console.log(err);
-    });
-
-    // Setel true variabel did cancel
-    return () => {
-      didCancel = true;
-    };
-  }, [state.refetch]);
-
-  if (state.status === 'error') {
-    return (
-      <>
-        <Heading minSize={1} size={1.5}>
-          <span>Failed to retrieve data:(</span>
-        </Heading>
-        <Action onClick={() => dispatch({ type: 'request/refetch' })}>
-          <Heading minSize={1} size={1.2}>
-            <span>Click here to try to retrieve data again</span>
-          </Heading>
-        </Action>
-      </>
-    );
-  }
-
-  if (state.status === 'loading') {
-    return <div className="loader" />;
-  }
+  const project = projectsResult[modal.index];
 
   return (
     <>
@@ -157,21 +54,19 @@ function Projects() {
         {/* Inti Content */}
         <ContainerProjects>
           {project &&
-            state.projects.map((value, index) => (
+            projectsResult.map((value, index) => (
               <Project
                 onClick={() => {
                   setModal({ open: true, index });
                 }}
                 key={index}
-                className={className}
-                disabled={disabled}
               >
                 <ProjectImageContainer>
-                  {value.attributes.images[0] && (
+                  {value.images[0] && (
                     <Image
                       alt="project"
                       className={projectsStyled.project}
-                      src={`/images/${value.attributes.images[0].src}`}
+                      src={`/images/${value.images[0].src}`}
                       layout="fill"
                     />
                   )}
@@ -179,10 +74,14 @@ function Projects() {
 
                 <ProjectTextContainer>
                   <Heading minSize={1} size={1.3}>
-                    <span>{upperFirstWord(value.attributes.title)}</span>
+                    <span>{upperFirstWord(value.title)}</span>
                   </Heading>
                   <Heading minSize={1} size={1}>
-                    {upperFirstWord(value.attributes.typeProject.name)}
+                    {upperFirstWord(
+                      typeof value.typeProject !== 'string'
+                        ? value.typeProject.name
+                        : 'Unkown',
+                    )}
                   </Heading>
                 </ProjectTextContainer>
               </Project>
@@ -208,7 +107,7 @@ function Projects() {
               <ImageSlider showModal={modal.open} project={project} />
               <ModalContentContent>
                 <Heading minSize={1.5} size={2}>
-                  <span>{upperFirstWord(project.attributes.title)}</span>
+                  <span>{upperFirstWord(project.title)}</span>
                 </Heading>
                 <ModalContentContentList>
                   <ModalContentContentListTitle>
@@ -225,16 +124,20 @@ function Projects() {
                   <ModalContentContentListValue>
                     <Heading minSize={1} size={1}>
                       :&nbsp;
-                      {getFullDate(project.attributes.startDate)}
+                      {getFullDate(project.startDate)}
                       {' - '}
-                      {getFullDate(project.attributes.endDate)}
+                      {getFullDate(project.endDate)}
                     </Heading>
                     <Heading minSize={1} size={1}>
-                      :&nbsp; {getStringOfTools(project.attributes.tools)}
+                      :&nbsp; {getStringOfTools(project.tools)}
                     </Heading>
                     <Heading minSize={1} size={1}>
                       :&nbsp;
-                      {upperFirstWord(project.attributes.typeProject.name)}
+                      {upperFirstWord(
+                        typeof project.typeProject !== 'string'
+                          ? project.typeProject.name
+                          : 'Unkown',
+                      )}
                     </Heading>
                   </ModalContentContentListValue>
                 </ModalContentContentList>
@@ -246,12 +149,8 @@ function Projects() {
                   fontWeight="normal"
                   lineHeight="1.5rem"
                 >
-                  {project.attributes.description}.{' '}
-                  {project.attributes.url && (
-                    <GoTo href={project.attributes.url}>
-                      {project.attributes.url}
-                    </GoTo>
-                  )}
+                  {project.description}.{' '}
+                  {project.url && <GoTo href={project.url}>{project.url}</GoTo>}
                 </Paragraph>
               </ModalContentContent>
             </Modal>
@@ -270,7 +169,7 @@ function ImageSlider({
   project,
 }: {
   showModal: boolean;
-  project: StateProjects[number];
+  project: ProjectInterface;
 }) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -282,7 +181,7 @@ function ImageSlider({
 
   function changeImageAction(event: MouseEvent, action: number): void {
     if (
-      project.attributes.images.length > 1 &&
+      project.images.length > 1 &&
       event.currentTarget.parentElement !== null &&
       event.currentTarget.parentElement.parentElement !== null
     ) {
@@ -294,11 +193,11 @@ function ImageSlider({
       let result = 0;
       if (action === 0) {
         // // Jika hasil Operasi berikutnya kurang dari 0 maka setel ke jumlah gambar dikurangi 1
-        if (slide.slide - 1 < 0) result = project.attributes.images.length - 1;
+        if (slide.slide - 1 < 0) result = project.images.length - 1;
         else result = slide.slide - 1;
       } else {
         // Jika hasil Operasi berikutnya melebihi panjang gambar
-        if (slide.slide + 1 > project.attributes.images.length - 1) result = 0;
+        if (slide.slide + 1 > project.images.length - 1) result = 0;
         else result = slide.slide + 1;
       }
 
@@ -307,7 +206,7 @@ function ImageSlider({
   }
   return (
     <ModalImage ref={nodeRef}>
-      {project.attributes.images.length > 1 && (
+      {project.images.length > 1 && (
         <ModalImageActions>
           <ModalImageAction
             onClick={(event) => changeImageAction(event, 0)}
@@ -328,7 +227,7 @@ function ImageSlider({
 
       {/* Content Images */}
       <ModalImageContent translateX={slide.translateX}>
-        {project.attributes.images.map((value, index) => (
+        {project.images.map((value, index) => (
           <ModalImageContentContent key={getRandom(index)}>
             <Image
               alt="project"
@@ -342,7 +241,7 @@ function ImageSlider({
 
       {/* Content Count */}
       <ModalImageCount>
-        {project.attributes.images.map((value, index) => (
+        {project.images.map((value, index) => (
           <ModalImageCountCount
             key={getRandom(index)}
             opacity={slide.slide === index ? '1' : '0.5'}
@@ -353,47 +252,43 @@ function ImageSlider({
   );
 }
 
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case 'request/start':
-      return { ...state, status: 'loading' };
-    case 'request/finish':
-      return {
-        ...state,
-        projects: action.payload.projects,
-        status: 'iddle',
-        refetch: false,
-      };
-    case 'request/error':
-      return { ...state, status: 'error', refetch: false };
-    case 'request/refetch':
-      return { ...state, refetch: true };
-    default:
-      return state;
-  }
-}
-
 function getFullDate(data: string) {
   const date = new Date(data);
   return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 }
 
-function getStringOfTools(
-  data: Array<{
-    _id: string;
-    name: string;
-    as: string;
-    _v: number;
-  }>,
-) {
+function getStringOfTools(data: ProjectInterface['tools']) {
   let result = '';
-  data.forEach((value, index) => {
-    result += `${upperFirstWord(value.name)}`;
-    if (value.as) result += ` as ${value.as}`;
-    if (index !== data.length - 1) result += ', ';
-  });
+  if (Array.isArray(data)) {
+    data.forEach(function (
+      value: mongoose.Types.ObjectId | tool,
+      index: number,
+    ) {
+      if (isTool(value)) {
+        result += `${upperFirstWord(value.name)}`;
+        if (value.as) result += ` as ${value.as}`;
+        return;
+      }
 
-  return result;
+      result += `${value.toString()}`;
+
+      // tambahkan koma
+      if (index !== data.length - 1) result += ', ';
+    });
+    return result;
+  }
+
+  if (isTool(data)) return (result = `${data.name} as ${data.as}`);
+  return (result = `${data.toString()}`);
+}
+function isTool(
+  data:
+    | tool
+    | mongoose.Types.ObjectId
+    | mongoose.Types.Array<mongoose.Types.ObjectId>
+    | mongoose.Types.Array<tool>,
+): data is tool {
+  return (data as tool).name !== undefined;
 }
 
 const GlobalStyle = createGlobalStyle`
@@ -420,30 +315,6 @@ const Container = styled.div`
   }
 `;
 
-const Action = styled.button`
-  background-color: var(--dark);
-  border-radius: 0.8rem;
-  // font-weight: bold;
-  color: white;
-  border: 0.1rem solid var(--pink);
-  padding: 0.8rem;
-  margin: 0.8rem;
-  cursor: pointer;
-
-  @media (max-width: 768px) {
-    & {
-      background-color: var(--dark);
-      border-radius: 2rem;
-      font-weight: bold;
-      color: white;
-      border: 0.2rem solid var(--pink);
-      padding: 0.8rem;
-      margin: 0 0.8rem;
-      cursor: pointer;
-    }
-  }
-`;
-
 const ContainerProjects = styled.div`
   display: grid;
   width: 100%;
@@ -459,7 +330,7 @@ const ContainerProjects = styled.div`
   }
 `;
 
-const Project = styled.div<{ disabled: boolean }>`
+const Project = styled.div`
   width: 100%;
   display: grid;
   position: relative;

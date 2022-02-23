@@ -5,8 +5,8 @@ import { Types } from 'mongoose';
 
 export default interface project {
   title: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   tools:
     | Types.Array<Types.ObjectId>
     | Types.ObjectId
