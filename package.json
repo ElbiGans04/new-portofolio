@@ -9,7 +9,8 @@
     "lint": "next lint",
     "prettier": "prettier --write ./src",
     "test:lint:all": "eslint \"src/**\" --fix",
-    "prepare": "husky install"
+    "test:ts": "tsc --noEmit",
+    "test:ts:watch": "tsc --noEmit --watch"
   },
   "dependencies": {
     "formidable": "^2.0.1",
