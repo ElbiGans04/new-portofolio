@@ -35,10 +35,8 @@ class Projects {
     req: RequestControllerRouter,
     res: RespondControllerRouter,
   ) {
-    const { order = 'ASC' } = req.query;
-
     const results = await Project.find()
-      .sort({ title: order === 'ASC' ? 1 : -1 })
+      .sort({ title: 1 })
       .populate('typeProject')
       .populate('tools');
 

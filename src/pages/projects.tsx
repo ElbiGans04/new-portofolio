@@ -51,13 +51,9 @@ type StateProjects = Array<{
   };
 }>;
 
-type ListActionsValue = 'ALL' | 'A1' | 'A2' | 'ASC' | 'DESC';
-type ListActionsType = 'project-type' | 'sort';
-
 type State = {
   status: 'iddle' | 'loading' | 'error';
   projects: StateProjects;
-  activeActions: string[];
   refetch: boolean;
 };
 
@@ -70,52 +66,13 @@ type Action =
       };
     }
   | { type: 'request/error' }
-  | { type: 'request/refetch' }
-  | {
-      type: 'action/change';
-      payload: {
-        actions: string[];
-      };
-    };
-
-const listActions: {
-  text: string;
-  value: ListActionsValue;
-  type: ListActionsType;
-}[] = [
-  // {
-  //   text: "All",
-  //   value: "ALL",
-  //   type: "project-type",
-  // },
-  // {
-  //   text: "Personal Projects",
-  //   value: "A1",
-  //   type: "project-type",
-  // },
-  // {
-  //   text: "Work Projects",
-  //   value: "A2",
-  //   type: "project-type",
-  // },
-  {
-    text: 'A-Z',
-    value: 'ASC',
-    type: 'sort',
-  },
-  {
-    text: 'Z-A',
-    value: 'DESC',
-    type: 'sort',
-  },
-];
+  | { type: 'request/refetch' };
 
 function Projects() {
   // React hooks
   const [state, dispatch] = useReducer(reducer, {
     status: 'iddle',
     projects: [],
-    activeActions: ['ALL', 'ASC'],
     refetch: false,
   });
   const [modal, setModal] = useState({ open: false, index: 0 });
@@ -137,7 +94,7 @@ function Projects() {
         }
 
         const fetchProjects = await fetcherGeneric<requestProject>(
-          `/api/projects?type=${state.activeActions[0]}&order=${state.activeActions[1]}`,
+          `/api/projects`,
         );
 
         // ubah state setelah finish tetapi cek dulu apakah halamannya berganti
@@ -162,21 +119,7 @@ function Projects() {
     return () => {
       didCancel = true;
     };
-  }, [state.activeActions, state.refetch]);
-
-  // Event Handler untuk tombol aksi
-  const handleAction = (
-    typeButton: ListActionsType,
-    buttonValue: ListActionsValue,
-  ) => {
-    // Setel state terbaru
-    const newActiveActions = [...state.activeActions];
-    typeButton === 'sort'
-      ? (newActiveActions[1] = buttonValue)
-      : (newActiveActions[0] = buttonValue);
-
-    dispatch({ type: 'action/change', payload: { actions: newActiveActions } });
-  };
+  }, [state.refetch]);
 
   if (state.status === 'error') {
     return (
@@ -207,40 +150,9 @@ function Projects() {
           <title>Projects I&apos;ve made</title>
         </Head>
 
-        {/* Action Components */}
-        {/* Check Kondisi Jika merupakan button yang aktif maka kita bedakan */}
-        <ContainerActions>
-          {listActions.map((value, index) => {
-            if (value.value === state.activeActions[1]) {
-              return (
-                <ActionActive
-                  className={className}
-                  disabled={disabled}
-                  key={index}
-                  onClick={() => handleAction(value.type, value.value)}
-                >
-                  <Heading minSize={1} size={1.2}>
-                    {value.text}
-                  </Heading>
-                </ActionActive>
-              );
-            }
-
-            return (
-              <Action
-                className={className}
-                disabled={disabled}
-                key={index}
-                onClick={() => handleAction(value.type, value.value)}
-              >
-                <Heading minSize={1} size={1.2}>
-                  {value.text}
-                </Heading>
-              </Action>
-            );
-          })}
-        </ContainerActions>
-        {/* End of Action Components */}
+        <Paragraph size={1.5} minSize={1}>
+          Projects that I&apos;ve <span>made myself</span>
+        </Paragraph>
 
         {/* Inti Content */}
         <ContainerProjects>
@@ -456,12 +368,6 @@ function reducer(state: State, action: Action): State {
       return { ...state, status: 'error', refetch: false };
     case 'request/refetch':
       return { ...state, refetch: true };
-    case 'action/change':
-      return {
-        ...state,
-        activeActions: action.payload.actions,
-        refetch: false,
-      };
     default:
       return state;
   }
@@ -505,25 +411,13 @@ const Container = styled.div`
   display: grid;
   width: 100%;
   justify-items: center;
-  gap: 3rem;
-`;
-const ContainerActions = styled.div`
-  width: 80%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
+  gap: 4rem;
 
   @media (max-width: 768px) {
     & {
-      display: grid;
-      align-items: center;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 0.5rem;
+      gap: 3rem;
     }
   }
-  // // grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  // // gap: .8rem;
 `;
 
 const Action = styled.button`
@@ -548,12 +442,6 @@ const Action = styled.button`
       cursor: pointer;
     }
   }
-`;
-
-const ActionActive = styled(Action)`
-  // border: 0;
-  color: var(--dark);
-  background-color: var(--pink);
 `;
 
 const ContainerProjects = styled.div`
