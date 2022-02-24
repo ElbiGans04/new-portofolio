@@ -1,5 +1,4 @@
-import toolsSchema from '@src/database/schemas/tools';
-import typeProjectSchema from '@src/database/schemas/typeProject';
+import { toolSchema, typeProjectSchema } from '@database/index';
 import HttpError from '@src/utils/httpError';
 import { OObject } from '@src/types/jsonApi/object';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
@@ -74,7 +73,7 @@ class ProjectService {
     // Cek apakah tools yang dimasukan terdaftar
     for (const tool of validReqBody.attributes.tools) {
       // cek jika tool
-      if ((await toolsSchema.findById(tool)) === null) {
+      if ((await toolSchema.findById(tool)) === null) {
         throw new HttpError('Invalid tool id', 404, 'Invalid tool id');
       }
     }

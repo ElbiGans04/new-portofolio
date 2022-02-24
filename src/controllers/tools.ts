@@ -1,4 +1,4 @@
-import ToolsSchema from '@database/schemas/tools';
+import { toolSchema } from '@src/database';
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from '@middleware/runMiddleware';
 import HttpError from '@src/utils/httpError';
@@ -13,7 +13,7 @@ class Tools {
   async getTool(req: RequestControllerRouter, res: RespondControllerRouter) {
     const { toolID } = req.query;
 
-    const result = await ToolsSchema.findById(toolID);
+    const result = await toolSchema.findById(toolID);
 
     // Jika tidak ada
     if (!result)
@@ -23,19 +23,19 @@ class Tools {
     res.statusCode = 200;
     return res.end(
       JSON.stringify({
-        data: formatResource(result, ToolsSchema.modelName),
+        data: formatResource(result, toolSchema.modelName),
         code: 200,
       }),
     );
   }
 
   async getTools(req: RequestControllerRouter, res: RespondControllerRouter) {
-    const results = await ToolsSchema.find();
+    const results = await toolSchema.find();
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
     return res.end(
-      JSON.stringify({ data: formatResource(results, ToolsSchema.modelName) }),
+      JSON.stringify({ data: formatResource(results, toolSchema.modelName) }),
     );
   }
 
@@ -44,7 +44,7 @@ class Tools {
 
     const valid = toolsService.validation(req.body);
 
-    const tool = new ToolsSchema(valid.attributes);
+    const tool = new toolSchema(valid.attributes);
     await tool.save();
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -52,7 +52,7 @@ class Tools {
     return res.end(
       JSON.stringify({
         meta: { title: 'tool has created' },
-        data: formatResource(tool, ToolsSchema.modelName),
+        data: formatResource(tool, toolSchema.modelName),
       }),
     );
   }
@@ -72,12 +72,11 @@ class Tools {
         'missing id in req.body',
       );
 
-    const result = await ToolsSchema.findByIdAndUpdate(
-      toolID,
-      valid.attributes,
-    ).setOptions({
-      new: true,
-    });
+    const result = await toolSchema
+      .findByIdAndUpdate(toolID, valid.attributes)
+      .setOptions({
+        new: true,
+      });
 
     if (!result) throw new HttpError('tool not found', 404, 'tool not found');
 
@@ -90,7 +89,7 @@ class Tools {
 
   async deleteTool(req: RequestControllerRouter, res: RespondControllerRouter) {
     const { toolID } = req.query;
-    const result = await ToolsSchema.findByIdAndDelete(toolID);
+    const result = await toolSchema.findByIdAndDelete(toolID);
 
     if (!result) throw new HttpError('tool not found', 404, 'tool not found');
 

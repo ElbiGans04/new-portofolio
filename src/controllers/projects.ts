@@ -1,4 +1,4 @@
-import Project from '@database/schemas/projects';
+import { projectsSchema } from '@database/index';
 import { formidableHandler } from '@middleware/formidable';
 import runMiddleware from '@middleware/runMiddleware';
 import HttpError from '@src/utils/httpError';
@@ -13,7 +13,8 @@ class Projects {
   async getProject(req: RequestControllerRouter, res: RespondControllerRouter) {
     const { projectID } = req.query as { projectID: string };
 
-    const result = await Project.findById(projectID)
+    const result = await projectsSchema
+      .findById(projectID)
       .populate('tools')
       .populate('typeProject');
 
@@ -25,7 +26,7 @@ class Projects {
     res.statusCode = 200;
     return res.end(
       JSON.stringify({
-        data: formatResource(result, Project.modelName),
+        data: formatResource(result, projectsSchema.modelName),
         code: 200,
       }),
     );
@@ -35,7 +36,8 @@ class Projects {
     req: RequestControllerRouter,
     res: RespondControllerRouter,
   ) {
-    const results = await Project.find()
+    const results = await projectsSchema
+      .find()
       .sort({ title: 1 })
       .populate('typeProject')
       .populate('tools');
@@ -44,7 +46,7 @@ class Projects {
     res.statusCode = 200;
     return res.end(
       JSON.stringify({
-        data: formatResource(results, Project.modelName),
+        data: formatResource(results, projectsSchema.modelName),
         code: 200,
       }),
     );
@@ -59,7 +61,7 @@ class Projects {
     const validReqBody = await ProjectService.validation(req.body);
 
     // Simpan Ke database
-    const project = new Project(validReqBody.attributes);
+    const project = new projectsSchema(validReqBody.attributes);
 
     await project.save();
 
@@ -100,10 +102,10 @@ class Projects {
       );
 
     // Ambil Daftar gambar lama
-    const result2Old = await Project.findById(projectID, { images: 1 });
+    const result2Old = await projectsSchema.findById(projectID, { images: 1 });
 
     // Lakukan Perubahan
-    const result = await Project.findByIdAndUpdate(
+    const result = await projectsSchema.findByIdAndUpdate(
       projectID,
       validReqBody.attributes,
       {
@@ -149,7 +151,7 @@ class Projects {
     res: RespondControllerRouter,
   ) {
     const { projectID } = req.query;
-    const result = await Project.findByIdAndDelete(projectID);
+    const result = await projectsSchema.findByIdAndDelete(projectID);
 
     if (!result)
       throw new HttpError('Project not found', 404, 'Project not found in db');

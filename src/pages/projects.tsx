@@ -2,12 +2,10 @@ import Heading from '@components/Heading';
 import Modal from '@components/Modal';
 import Paragraph from '@components/Paragraph';
 import dbConnection from '@database/connection';
-import ProjectSchema from '@database/schemas/projects';
 import tool from '@src/types/mongoose/schemas/tool';
 import ProjectInterface from '@typess/mongoose/schemas/project';
 import getRandom from '@utils/randomNumber';
 import upperFirstWord from '@utils/upperFirstWord';
-// import mongodb from 'mongodb';
 import mongoose from 'mongoose';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
@@ -16,15 +14,18 @@ import React, { MouseEvent, useEffect, useRef, useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
+import { projectsSchema } from '@src/database';
 
 export const getServerSideProps: GetServerSideProps = async function () {
   await dbConnection();
-  // const result = await ProjectSchema.find().populate('typeProject').populate('tools');
-  const result = await ProjectSchema.find();
+  const result = await projectsSchema
+    .find()
+    .populate('typeProject')
+    .populate('tools');
   return {
     props: {
       projects: JSON.stringify(result),
-    }, // will be passed to the page component as props
+    },
   };
 };
 
