@@ -24,9 +24,9 @@ export default function Admin({
   message,
   Children,
 }: {
-  modal: 'add' | 'update' | 'delete';
+  modal: 'add' | 'update' | 'delete' | null;
   status: string;
-  message: string;
+  message: string | null;
   Children: () => JSX.Element;
 }) {
   const adminContext = useContext(Context);
@@ -376,7 +376,7 @@ function getAndFilterColumns(
 
 function decideRow(results: filterResults, row: ResourceObject) {
   // Push setiap id
-  results.rowsId.push(row.id);
+  results.rowsId.push(row.id ? row.id : '');
 
   if (row.attributes === undefined) return;
 

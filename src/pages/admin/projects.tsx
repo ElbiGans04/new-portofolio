@@ -125,25 +125,13 @@ function SwitchModal({
 }: {
   state: admin;
   dispatch: Dispatch<any>;
-}) {
+}): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
   const { data, error } = useSWR<DocData, DocErrors>(
     '/api/tools',
     fetcherGeneric,
   );
   const row = state.row;
-  let images =
-    row !== undefined ? row?.columnsValue[row.columns.indexOf('images')] : null;
-
-  if (Array.isArray(images)) {
-    images = images.map((image) => {
-      if (isObject(image)) {
-        return { src: image.src as string };
-      }
-
-      return {};
-    });
-  }
 
   /* 
     Event Handler function
@@ -206,9 +194,11 @@ function SwitchModal({
 
       // Logic
       dispatch({ type: 'modal/request/start' });
-      for (let i = 0; i < fileImage.length; i++) {
-        const file = fileImage.item(i);
-        if (file) form.append('images', file);
+      if (fileImage) {
+        for (let i = 0; i < fileImage.length; i++) {
+          const file = fileImage.item(i);
+          if (file) form.append('images', file);
+        }
       }
 
       const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
@@ -251,12 +241,33 @@ function SwitchModal({
       const form2 = new FormData(event.currentTarget);
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
+      let images: OObject | OObject[] =
+        row !== null
+          ? row.columnsValue
+            ? row.columnsValue[row.columns ? row.columns.indexOf('images') : 0]
+            : null
+          : null;
 
-      const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
+      if (Array.isArray(images)) {
+        images = images.map((image) => {
+          if (isObject(image)) {
+            return { src: image.src as string };
+          }
+
+          return { src: '' };
+        });
+      }
+
+      const document: ResourceObject<{
+        [index: string]: OObjectWithFiles | OObject;
+      }> = {
         id,
         type: 'project',
         attributes: {},
       };
+
+      if (document.attributes == undefined)
+        throw new Error('document.attributes is missing');
 
       for (const [fieldName, fieldValue] of form2.entries()) {
         if (document.attributes) {
@@ -282,20 +293,22 @@ function SwitchModal({
 
       // Logic
       dispatch({ type: 'modal/request/start' });
-      if (fileImage.length > 0) {
-        for (let i = 0; i < fileImage.length; i++) {
-          const file = fileImage.item(i);
-          if (file) form.append('images', file);
-        }
+      if (fileImage) {
+        if (fileImage.length > 0) {
+          for (let i = 0; i < fileImage.length; i++) {
+            const file = fileImage.item(i);
+            if (file) form.append('images', file);
+          }
 
-        const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
-          method: 'post',
-          body: form,
-        });
+          const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
+            method: 'post',
+            body: form,
+          });
 
-        if (document.attributes) document.attributes.images = meta.images;
-      } else document.attributes.images = images;
-      // else document.attributes.images = ;
+          if (document.attributes) document.attributes.images = meta.images;
+        } else document.attributes.images = images;
+        // else document.attributes.images = ;
+      }
 
       const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
         method: 'PATCH',
@@ -479,7 +492,9 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmitModalDelete(row.id)}>DELETE</Button>
+            <Button onClick={() => onSubmitModalDelete(row ? row.id : '')}>
+              DELETE
+            </Button>
           </ModalFooter>
         </ModalMain2>
       );
@@ -641,6 +656,8 @@ function SwitchModal({
           );
         }
       }
+
+      return <></>;
       break;
     default:
       return <> </>;

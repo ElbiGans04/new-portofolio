@@ -115,7 +115,7 @@ function MessageComponent({
   setMessage,
 }: {
   message: DocErrors | null;
-  setMessage: Dispatch<SetStateAction<DocErrors>>;
+  setMessage: Dispatch<SetStateAction<DocErrors | null>>;
 }) {
   let messageText = '';
   if (message !== null) {

@@ -66,7 +66,7 @@ function SwitchModal({
 }: {
   state: admin;
   dispatch: Dispatch<action>;
-}) {
+}): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
   const row = state.row;
 
@@ -217,13 +217,15 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmitModalDelete(row.id)}>DELETE</Button>
+            <Button onClick={() => onSubmitModalDelete(row ? row.id : '')}>
+              DELETE
+            </Button>
           </ModalFooter>
         </ModalMain2>
       );
     }
     case 'update': {
-      if (row.columns !== null && row.columnsValue !== null) {
+      if (row && row.columns !== null && row.columnsValue !== null) {
         const nameValue = row.columnsValue[
           row.columns.indexOf('name')
         ] as string;
@@ -260,6 +262,8 @@ function SwitchModal({
           </ModalForm>
         );
       }
+
+      return <></>;
 
       break;
     }
