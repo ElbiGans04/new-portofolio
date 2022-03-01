@@ -6,6 +6,10 @@ const imageSchema = new mongoose.Schema<images>({
     type: String,
     required: true,
   },
+  ref: {
+    type: String,
+    required: true,
+  },
 });
 
 export default imageSchema;

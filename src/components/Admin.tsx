@@ -204,7 +204,11 @@ function Row({
                 onClick={() =>
                   adminContext.dispatch({
                     type: 'modal/open/delete',
-                    payload: { id },
+                    payload: {
+                      id,
+                      columns: [...mainColumns, ...detailColumns],
+                      columnsValue: [...mainRow, ...detailRow],
+                    },
                   })
                 }
                 title="delete the row"

@@ -22,7 +22,8 @@ const ProjectSchemaValidation = joi
           .array()
           .items(
             joi.object({
-              src: joi.string().max(100).required(),
+              src: joi.string().max(500).required(),
+              ref: joi.string().max(100).required(),
             }),
           )
           .min(1)

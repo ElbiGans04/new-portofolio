@@ -32,6 +32,15 @@ import React, { useReducer, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
+import firebaseConfig from '@src/config/firebase';
+import { initializeApp } from 'firebase/app';
+import {
+  ref,
+  uploadBytes,
+  getStorage,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
@@ -132,13 +141,47 @@ function SwitchModal({
     fetcherGeneric,
   );
   const row = state.row;
+  const firebaseApp = initializeApp(firebaseConfig);
+  const firebaseRootStroage = getStorage(firebaseApp);
 
   /* 
     Event Handler function
   */
   async function onSubmitModalDelete(id: string) {
     try {
+      let images: OObject | OObject[] =
+        row !== null
+          ? row.columnsValue
+            ? row.columnsValue[row.columns ? row.columns.indexOf('images') : 0]
+            : null
+          : null;
+
+      if (Array.isArray(images)) {
+        images = images.map((image) => {
+          if (isObject(image)) {
+            return { src: image.src as string, ref: image.ref as string };
+          }
+
+          return { src: '', ref: '' };
+        });
+      }
+
       dispatch({ type: 'modal/request/start' });
+
+      if (Array.isArray(images)) {
+        for (let i = 0; i < images.length; i++) {
+          if (isObject(images[i])) {
+            if (images[i]) {
+              const image = images[i] as { [index: string]: OObject };
+              if (image) {
+                const R = (image.ref as string) || '';
+                const imgRef = ref(firebaseRootStroage, R);
+                if (R.length > 0) await deleteObject(imgRef);
+              }
+            }
+          }
+        }
+      }
 
       const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
         method: 'delete',
@@ -161,7 +204,6 @@ function SwitchModal({
   async function onSubmitModalAdd(event: React.FormEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
-      const form = new FormData();
       const form2 = new FormData(event.currentTarget);
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
@@ -195,18 +237,24 @@ function SwitchModal({
       // Logic
       dispatch({ type: 'modal/request/start' });
       if (fileImage) {
-        for (let i = 0; i < fileImage.length; i++) {
-          const file = fileImage.item(i);
-          if (file) form.append('images', file);
+        if (document.attributes) {
+          document.attributes.images = [];
+
+          for (let i = 0; i < fileImage.length; i++) {
+            const file = fileImage.item(i);
+
+            if (file) {
+              const name = `elbi-images-${Date.now()}-${file.name}`;
+              const imageRef = ref(firebaseRootStroage, `/images/${name}`);
+              await uploadBytes(imageRef, file);
+              document.attributes.images.push({
+                src: await getDownloadURL(imageRef),
+                ref: imageRef.fullPath,
+              });
+            }
+          }
         }
       }
-
-      const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
-        method: 'post',
-        body: form,
-      });
-
-      if (document.attributes) document.attributes.images = meta.images;
 
       const request = await fetcherGeneric<DocMeta>('/api/projects', {
         method: 'post',
@@ -237,7 +285,6 @@ function SwitchModal({
   ) {
     try {
       event.preventDefault();
-      const form = new FormData();
       const form2 = new FormData(event.currentTarget);
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
@@ -251,10 +298,10 @@ function SwitchModal({
       if (Array.isArray(images)) {
         images = images.map((image) => {
           if (isObject(image)) {
-            return { src: image.src as string };
+            return { src: image.src as string, ref: image.ref as string };
           }
 
-          return { src: '' };
+          return { src: '', ref: '' };
         });
       }
 
@@ -290,24 +337,43 @@ function SwitchModal({
             document.attributes[fieldName] = fieldValue;
         }
       }
-
       // Logic
       dispatch({ type: 'modal/request/start' });
       if (fileImage) {
         if (fileImage.length > 0) {
-          for (let i = 0; i < fileImage.length; i++) {
-            const file = fileImage.item(i);
-            if (file) form.append('images', file);
+          if (document.attributes) {
+            document.attributes.images = [];
+
+            if (Array.isArray(images)) {
+              for (let i = 0; i < images.length; i++) {
+                if (isObject(images[i])) {
+                  if (images[i]) {
+                    const image = images[i] as { [index: string]: OObject };
+                    if (image) {
+                      const R = (image.ref as string) || '';
+                      const imgRef = ref(firebaseRootStroage, R);
+                      if (R.length > 0) await deleteObject(imgRef);
+                    }
+                  }
+                }
+              }
+            }
+
+            for (let i = 0; i < fileImage.length; i++) {
+              const file = fileImage.item(i);
+
+              if (file) {
+                const name = `elbi-images-${Date.now()}-${file.name}`;
+                const imageRef = ref(firebaseRootStroage, `/images/${name}`);
+                await uploadBytes(imageRef, file);
+                document.attributes.images.push({
+                  src: await getDownloadURL(imageRef),
+                  ref: imageRef.fullPath,
+                });
+              }
+            }
           }
-
-          const { meta } = await fetcherGeneric<DocMeta>('/api/images', {
-            method: 'post',
-            body: form,
-          });
-
-          if (document.attributes) document.attributes.images = meta.images;
         } else document.attributes.images = images;
-        // else document.attributes.images = ;
       }
 
       const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
@@ -499,7 +565,7 @@ function SwitchModal({
         </ModalMain2>
       );
     case 'update':
-      if (row && row.columns && row.columnsValue) {
+      if (row) {
         const titleValue = row.columnsValue[
           row.columns.indexOf('title')
         ] as string;

@@ -65,10 +65,12 @@ function Projects({ projects }: { projects: string }) {
                 <ProjectImageContainer>
                   {value.images[0] && (
                     <Image
+                      loader={myLoader}
                       alt="project"
                       className={projectsStyled.project}
-                      src={`/images/${value.images[0].src}`}
+                      src={`${value.images[0].src}`}
                       layout="fill"
+                      unoptimized
                     />
                   )}
                 </ProjectImageContainer>
@@ -231,10 +233,12 @@ function ImageSlider({
         {project.images.map((value, index) => (
           <ModalImageContentContent key={getRandom(index)}>
             <Image
+              loader={myLoader}
               alt="project"
               className={projectsStyled.project}
-              src={`/images/${value.src}`}
+              src={`${value.src}`}
               layout="fill"
+              unoptimized
             />
           </ModalImageContentContent>
         ))}
@@ -290,6 +294,10 @@ function isTool(
     | mongoose.Types.Array<tool>,
 ): data is tool {
   return (data as tool).name !== undefined;
+}
+
+function myLoader({ src }: { src: string }) {
+  return src;
 }
 
 const GlobalStyle = createGlobalStyle`

@@ -20,7 +20,11 @@ export function reducer(state: admin, action: action): admin {
       return {
         ...state,
         modal: 'delete',
-        row: { columns: null, columnsValue: null, id: action.payload.id },
+        row: {
+          columns: [...action.payload.columns],
+          columnsValue: [...action.payload.columnsValue],
+          id: action.payload.id,
+        },
       };
     }
     case 'modal/request/start': {

@@ -7,7 +7,6 @@ import type {
   RespondControllerRouter,
 } from '@typess/controllersRoutersApi';
 import HttpError from '@src/utils/httpError';
-import ProjectService from '@src/controllers/projects.service';
 
 export const config = {
   api: {
@@ -58,8 +57,6 @@ export default withIronSession(
         }
       }
     } catch (err) {
-      // Setiap Ada error semua file dalam tmp file
-      await ProjectService.deleteTempFiles();
       routerErrorHandling(res, err);
     }
     // res.json({vv:'s'})

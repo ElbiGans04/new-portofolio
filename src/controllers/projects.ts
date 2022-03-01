@@ -65,10 +65,6 @@ class Projects {
 
     await project.save();
 
-    // Pindahkan Gambar
-    const { images } = validReqBody.attributes;
-    await ProjectService.moveImages(images);
-
     // atur headers
     res.setHeader('Location', `/api/projects/${project._id as string}`);
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -101,9 +97,6 @@ class Projects {
         'missing id in req.body',
       );
 
-    // Ambil Daftar gambar lama
-    const result2Old = await projectsSchema.findById(projectID, { images: 1 });
-
     // Lakukan Perubahan
     const result = await projectsSchema.findByIdAndUpdate(
       projectID,
@@ -114,30 +107,13 @@ class Projects {
     );
 
     // Jika ga ada
-    if (!result2Old || !result) {
+    if (!result) {
       throw new HttpError(
         'project with that id not found',
         404,
         'project with that id not found',
       );
     }
-
-    // Hapus gambar lama
-    const { images } = validReqBody.attributes;
-
-    // Check apakah gambar yang dikirim sama dengan gambar lama
-    images.map(async (image) => {
-      // Check jika gambar dalam req.body sudah lebih dulu tersimpan didatabase
-      const exist = result2Old.images.find((imageOld) => {
-        return imageOld.src === image.src;
-      });
-
-      // Jika Belum tersimpan maka hapus gambar lama dan pindahkan gambar baru
-      if (exist === undefined) {
-        await ProjectService.deleteImages(result2Old.images);
-        await ProjectService.moveImages([image]);
-      }
-    });
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
@@ -155,9 +131,6 @@ class Projects {
 
     if (!result)
       throw new HttpError('Project not found', 404, 'Project not found in db');
-
-    // Hapus imagenya juga
-    await ProjectService.deleteImages(result.images);
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;

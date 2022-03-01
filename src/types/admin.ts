@@ -2,8 +2,8 @@ import type { OObject } from '@typess/jsonApi/object';
 
 interface Data {
   id: string;
-  columns: string[] | null;
-  columnsValue: OObject[] | null;
+  columns: string[];
+  columnsValue: OObject[];
 }
 export interface admin {
   status: 'iddle' | 'loading' | 'error';
@@ -18,7 +18,10 @@ export type action =
       type: 'modal/open/update';
       payload: { id: string; columns: string[]; columnsValue: OObject[] };
     }
-  | { type: 'modal/open/delete'; payload: { id: string } }
+  | {
+      type: 'modal/open/delete';
+      payload: { id: string; columns: string[]; columnsValue: OObject[] };
+    }
   | { type: 'modal/request/start' }
   | {
       type: 'modal/request/finish';
