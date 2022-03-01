@@ -3928,6 +3928,14 @@ next@11.1.0:
     vm-browserify "1.1.2"
     watchpack "2.1.1"
 
+nextjs-progressbar@^0.0.14:
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/nextjs-progressbar/-/nextjs-progressbar-0.0.14.tgz#cc2630ee4e9dec598314394bd0fffb0cbfc40444"
+  integrity sha512-AXYXHDN6M52AwFnGqH/vlwyo0gbC9zM7QS/4ryOTI0RUqfze5FJl8uSrxKJMzK6hGFdDeQXcZoWsLGXeCVtTwg==
+  dependencies:
+    nprogress "^0.2.0"
+    prop-types "^15.7.2"
+
 node-fetch@2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
@@ -4012,6 +4020,11 @@ npm-run-path@^4.0.1:
   integrity sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==
   dependencies:
     path-key "^3.0.0"
+
+nprogress@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/nprogress/-/nprogress-0.2.0.tgz#cb8f34c53213d895723fcbab907e9422adbcafb1"
+  integrity sha1-y480xTIT2JVyP8urkH6UIq28r7E=
 
 object-assign@^4.1.1:
   version "4.1.1"
