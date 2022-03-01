@@ -1,11 +1,11 @@
-import Controller from '@controllers/tools';
-import dbConnect from '@database/connection';
+import Controller from '@src/controllers/tools';
+import dbConnect from '@src/database/connection';
 import withIronSession from '@src/utils/withSession';
-import routerErrorHandling from '@utils/routerErrorHandling';
+import routerErrorHandling from '@src/utils/routerErrorHandling';
 import type {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
+} from '@src/types/controllersRoutersApi';
 import HttpError from '@src/utils/httpError';
 
 export const config = {

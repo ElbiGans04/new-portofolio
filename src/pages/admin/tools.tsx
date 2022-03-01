@@ -1,8 +1,8 @@
-import Admin from '@components/Admin';
-import Button from '@components/Button';
-import Heading from '@components/Heading';
-import Input from '@components/Input';
-import Label from '@components/Label';
+import Admin from '@src/components/Admin';
+import Button from '@src/components/Button';
+import Heading from '@src/components/Heading';
+import Input from '@src/components/Input';
+import Label from '@src/components/Label';
 import {
   ModalContent2,
   ModalFooter,
@@ -11,13 +11,13 @@ import {
   ModalFormContentRow,
   ModalFormFooter,
   ModalMain2,
-} from '@components/Modal';
-import Context from '@hooks/context';
-import { reducer } from '@hooks/reducer';
-import type { action, admin } from '@typess/admin';
-import type { DocMeta, ResourceObject } from '@typess/jsonApi/index';
-import { OObjectWithFiles } from '@typess/jsonApi/object';
-import { fetcherGeneric } from '@utils/fetcher';
+} from '@src/components/Modal';
+import Context from '@src/hooks/context';
+import { reducer } from '@src/hooks/reducer';
+import type { action, admin } from '@src/types/admin';
+import type { DocMeta, ResourceObject } from '@src/types/jsonApi/index';
+import { OObjectWithFiles } from '@src/types/jsonApi/object';
+import { fetcherGeneric } from '@src/utils/fetcher';
 import Head from 'next/head';
 import React, { Dispatch, FormEvent, useReducer, useState } from 'react';
 import { useSWRConfig } from 'swr';

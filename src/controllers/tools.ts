@@ -1,12 +1,12 @@
 import { toolSchema } from '@src/database';
-import { formidableHandler } from '@middleware/formidable';
-import runMiddleware from '@middleware/runMiddleware';
+import { formidableHandler } from '@src/middleware/formidable';
+import runMiddleware from '@src/middleware/runMiddleware';
 import HttpError from '@src/utils/httpError';
 import {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
-import formatResource from '@utils/formatResource';
+} from '@src/types/controllersRoutersApi';
+import formatResource from '@src/utils/formatResource';
 import toolsService from './tools.service';
 
 class Tools {

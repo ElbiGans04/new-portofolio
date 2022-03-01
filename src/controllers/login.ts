@@ -1,10 +1,10 @@
 import {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
-import runMiddleware from '@middleware/runMiddleware';
-import { formidableHandler } from '@middleware/formidable';
-import { isObject } from '@utils/typescript/narrowing';
+} from '@src/types/controllersRoutersApi';
+import runMiddleware from '@src/middleware/runMiddleware';
+import { formidableHandler } from '@src/middleware/formidable';
+import { isObject } from '@src/utils/typescript/narrowing';
 import HttpError from '@src/utils/httpError';
 
 class Login {
@@ -13,7 +13,7 @@ class Login {
 
     const { attributes } = req.body;
 
-    if (!isObject(attributes)) {
+    if (!isObject(attributes) || Array.isArray(attributes)) {
       throw new HttpError(
         'Entity not valid',
         406,

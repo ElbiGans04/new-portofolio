@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import resize from '@utils/resize';
+import resize from '@src/utils/resize';
 
 const Label = styled.label<{ size: number; minSize: number }>`
   color: var(--pink);

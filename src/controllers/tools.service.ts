@@ -1,7 +1,7 @@
 import { OObject } from '@src/types/jsonApi/object';
 import Joi from 'joi';
-import ToolsSchemaValidation from '@validation/tools';
-import { TransformToDoc } from '@utils/typescript/transformSchemeToDoc';
+import ToolsSchemaValidation from '@src/validation/tools';
+import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
 
 class ToolsService {

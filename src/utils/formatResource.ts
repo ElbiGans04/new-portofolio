@@ -1,5 +1,5 @@
 import { Document } from 'mongoose';
-import { OObject } from '@typess/jsonApi/object';
+import { OObject } from '@src/types/jsonApi/object';
 
 interface ResultType {
   type: string;

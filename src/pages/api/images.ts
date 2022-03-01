@@ -1,9 +1,9 @@
-import Controller from '@controllers/images';
+import Controller from '@src/controllers/images';
 import type {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
-import RouterErrorHandling from '@utils/routerErrorHandling';
+} from '@src/types/controllersRoutersApi';
+import RouterErrorHandling from '@src/utils/routerErrorHandling';
 import HttpError from '@src/utils/httpError';
 
 export const config = {

@@ -6,8 +6,8 @@ import {
   IoMail,
 } from 'react-icons/io5';
 import styled from 'styled-components';
-import Container from '@components/Container';
-import Paragraph from '@components/Paragraph';
+import Container from '@src/components/Container';
+import Paragraph from '@src/components/Paragraph';
 
 function Contacts() {
   return (

@@ -1,9 +1,9 @@
-import Controller from '@controllers/login';
+import Controller from '@src/controllers/login';
 import withSession from '@src/utils/withSession';
 import type {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
+} from '@src/types/controllersRoutersApi';
 import routerErrorHandling from '@src/utils/routerErrorHandling';
 import HttpError from '@src/utils/httpError';
 

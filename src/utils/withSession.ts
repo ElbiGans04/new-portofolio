@@ -1,7 +1,7 @@
 import {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
+} from '@src/types/controllersRoutersApi';
 import { withIronSession } from 'next-iron-session';
 
 export default function withSession(

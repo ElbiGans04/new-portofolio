@@ -1,7 +1,7 @@
 import React, { Dispatch } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import Heading from '@components/Heading';
-import Button from '@components/Button';
+import Heading from '@src/components/Heading';
+import Button from '@src/components/Button';
 
 const ModalComponent = React.forwardRef<
   HTMLDivElement,

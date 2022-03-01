@@ -1,10 +1,10 @@
-import Button from '@components/Button';
-import Context from '@hooks/context';
-import useUser from '@hooks/useUser';
-import getRandom from '@utils/randomNumber';
-import upperFirstWord from '@utils/upperFirstWord';
-import { DocData, DocErrors, ResourceObject } from '@typess/jsonApi/index';
-import { OObject } from '@typess/jsonApi/object';
+import Button from '@src/components/Button';
+import Context from '@src/hooks/context';
+import useUser from '@src/hooks/useUser';
+import getRandom from '@src/utils/randomNumber';
+import upperFirstWord from '@src/utils/upperFirstWord';
+import { DocData, DocErrors, ResourceObject } from '@src/types/jsonApi/index';
+import { OObject } from '@src/types/jsonApi/object';
 import React, { useContext, useMemo, useRef, useState } from 'react';
 import {
   IoAddOutline,
@@ -14,9 +14,9 @@ import {
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useSWR from 'swr';
-import { fetcherGeneric } from '@utils/fetcher';
+import { fetcherGeneric } from '@src/utils/fetcher';
 import Heading from './Heading';
-import ModalComponent, { GlobalStyle, ModalAdmin } from '@components/Modal';
+import ModalComponent, { GlobalStyle, ModalAdmin } from '@src/components/Modal';
 
 export default function Admin({
   modal,

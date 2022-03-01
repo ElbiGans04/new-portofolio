@@ -1,7 +1,7 @@
 import {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
+} from '@src/types/controllersRoutersApi';
 import path from 'path';
 import formidable from 'formidable';
 

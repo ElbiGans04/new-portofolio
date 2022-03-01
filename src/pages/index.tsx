@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import React from 'react';
 import styled from 'styled-components';
-import Heading from '@components/Heading';
+import Heading from '@src/components/Heading';
 import ProfileImage from '@public/images/profile.jpg';
 import styleIndex from '../styles/index.module.css';
 

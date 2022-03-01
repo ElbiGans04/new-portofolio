@@ -1,4 +1,4 @@
-import projectType from '@typess/mongoose/schemas/project';
+import projectType from '@src/types/mongoose/schemas/project';
 import mongoose from 'mongoose';
 import imageSchema from './image';
 

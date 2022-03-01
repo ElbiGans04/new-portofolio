@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import Head from 'next/head';
 import Image from 'next/image';
-import Text from '@components/Heading';
+import Text from '@src/components/Heading';
 
 function ErrorComponent({
   message,

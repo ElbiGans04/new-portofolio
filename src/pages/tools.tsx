@@ -1,5 +1,5 @@
-import Paragraph from '@components/Paragraph';
-import Container from '@components/Container';
+import Paragraph from '@src/components/Paragraph';
+import Container from '@src/components/Container';
 import Head from 'next/head';
 
 function About() {

@@ -1,17 +1,11 @@
-import { toolSchema, typeProjectSchema } from '@database/index';
-import HttpError from '@src/utils/httpError';
+import { toolSchema, typeProjectSchema } from '@src/database/index';
 import { OObject } from '@src/types/jsonApi/object';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
+import HttpError from '@src/utils/httpError';
 import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
-import ProjectSchemaValidation from '@validation/projects';
-import fs from 'fs';
-import fsPromise from 'fs/promises';
+import ProjectSchemaValidation from '@src/validation/projects';
 import Joi from 'joi';
 import { Types } from 'mongoose';
-import path from 'path';
-
-const pathTmp = path.resolve(process.cwd(), 'public/images/tmp');
-const pathImage = path.resolve(process.cwd(), 'public/images/');
 
 class ProjectService {
   async validation(body: { [index: string]: OObject }) {

@@ -1,4 +1,4 @@
-import type { admin, action } from '@typess/admin';
+import type { admin, action } from '@src/types/admin';
 // Reducer
 export function reducer(state: admin, action: action): admin {
   switch (action.type) {

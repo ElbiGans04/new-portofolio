@@ -1,4 +1,4 @@
-import ErrorComponent from '@components/Error';
+import ErrorComponent from '@src/components/Error';
 
 function notFound() {
   return (

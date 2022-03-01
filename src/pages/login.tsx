@@ -1,11 +1,11 @@
 import Head from 'next/head';
 import styled from 'styled-components';
-import Input from '@components/Input';
-import Label from '@components/Label';
-import Button from '@components/Button';
+import Input from '@src/components/Input';
+import Label from '@src/components/Label';
+import Button from '@src/components/Button';
 import { FormEvent, useState } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
-import { DocErrors, DocMeta } from '@typess/jsonApi';
+import { DocErrors, DocMeta } from '@src/types/jsonApi';
 import { Dispatch, SetStateAction } from 'react';
 import useUser from '../hooks/useUser';
 import { CSSTransition } from 'react-transition-group';

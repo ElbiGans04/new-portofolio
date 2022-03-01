@@ -1,11 +1,11 @@
-import '../styles/reset.css';
-import '../styles/globals.css';
+import '@src/styles/reset.css';
+import '@src/styles/globals.css';
 import NextNProgress from 'nextjs-progressbar';
 import styled, { createGlobalStyle } from 'styled-components';
 import Link from 'next/link';
-import upperFirstWord from '@utils/upperFirstWord';
-import Heading from '@components/Heading';
-import ErrorComponent from '@components/Error';
+import upperFirstWord from '@src/utils/upperFirstWord';
+import Heading from '@src/components/Heading';
+import ErrorComponent from '@src/components/Error';
 import React, { useState, ErrorInfo, ReactNode } from 'react';
 import { AppProps } from 'next/app';
 import { useRouter } from 'next/router';

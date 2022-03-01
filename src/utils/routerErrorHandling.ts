@@ -1,5 +1,5 @@
 import { NextApiResponse } from 'next';
-import { DocErrors } from '@typess/jsonApi';
+import { DocErrors } from '@src/types/jsonApi';
 import HttpError from '@src/utils/httpError';
 import { Error as MongooseError } from 'mongoose';
 import { isError } from 'joi';

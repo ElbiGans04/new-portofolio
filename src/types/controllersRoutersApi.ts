@@ -1,4 +1,4 @@
-import { DocData, DocErrors, DocMeta } from '@typess/jsonApi';
+import { DocData, DocErrors, DocMeta } from '@src/types/jsonApi';
 import formidable from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-iron-session';

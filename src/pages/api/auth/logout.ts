@@ -2,7 +2,7 @@ import withSession from '@src/utils/withSession';
 import type {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
+} from '@src/types/controllersRoutersApi';
 
 export default withSession(
   (req: RequestControllerRouter, res: RespondControllerRouter) => {

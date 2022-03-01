@@ -1,5 +1,5 @@
 import { Dispatch, createContext } from 'react';
-import { OObject } from '@typess/jsonApi/object';
+import { OObject } from '@src/types/jsonApi/object';
 
 type ContextType =
   | {

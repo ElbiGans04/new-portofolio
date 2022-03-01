@@ -1,6 +1,6 @@
-import images from '@typess/mongoose/schemas/image';
-import tool from '@typess/mongoose/schemas/tool';
-import typeProject from '@typess/mongoose/schemas/typeProject';
+import images from '@src/types/mongoose/schemas/image';
+import tool from '@src/types/mongoose/schemas/tool';
+import typeProject from '@src/types/mongoose/schemas/typeProject';
 import { Types } from 'mongoose';
 
 export default interface project {

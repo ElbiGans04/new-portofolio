@@ -1,8 +1,8 @@
-import Admin from '@components/Admin';
-import Button from '@components/Button';
-import Heading from '@components/Heading';
-import Input from '@components/Input';
-import Label from '@components/Label';
+import Admin from '@src/components/Admin';
+import Button from '@src/components/Button';
+import Heading from '@src/components/Heading';
+import Input from '@src/components/Input';
+import Label from '@src/components/Label';
 import {
   ModalContent2,
   ModalFooter,
@@ -11,24 +11,23 @@ import {
   ModalFormContentRow,
   ModalFormFooter,
   ModalMain2,
-} from '@components/Modal';
-import Context from '@hooks/context';
-import { reducer } from '@hooks/reducer';
-import type { admin } from '@typess/admin';
+} from '@src/components/Modal';
+import Context from '@src/hooks/context';
+import { reducer } from '@src/hooks/reducer';
+import type { admin } from '@src/types/admin';
 import type {
   DocData,
   DocErrors,
   DocMeta,
   ResourceObject,
-} from '@typess/jsonApi';
-import { OObject, OObjectWithFiles } from '@typess/jsonApi/object';
-import { fetcherGeneric } from '@utils/fetcher';
-import getRandom from '@utils/randomNumber';
-import { isObject } from '@utils/typescript/narrowing';
-import changeFirstWord from '@utils/upperFirstWord';
-import { Dispatch } from 'hoist-non-react-statics/node_modules/@types/react';
+} from '@src/types/jsonApi';
+import { OObject, OObjectWithFiles } from '@src/types/jsonApi/object';
+import { fetcherGeneric } from '@src/utils/fetcher';
+import getRandom from '@src/utils/randomNumber';
+import { isObject } from '@src/utils/typescript/narrowing';
+import changeFirstWord from '@src/utils/upperFirstWord';
 import Head from 'next/head';
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, Dispatch } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';

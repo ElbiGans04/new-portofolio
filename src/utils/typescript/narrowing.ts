@@ -1,4 +1,4 @@
-import { OObject } from '@typess/jsonApi/object';
+import { OObject } from '@src/types/jsonApi/object';
 
 export function isObject(
   target: OObject,

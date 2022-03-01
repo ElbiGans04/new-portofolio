@@ -1,9 +1,9 @@
-import { formidableHandler } from '@middleware/formidable';
-import runMiddleware from '@middleware/runMiddleware';
+import { formidableHandler } from '@src/middleware/formidable';
+import runMiddleware from '@src/middleware/runMiddleware';
 import {
   RequestControllerRouter,
   RespondControllerRouter,
-} from '@typess/controllersRoutersApi';
+} from '@src/types/controllersRoutersApi';
 
 class Images {
   async postImages(req: RequestControllerRouter, res: RespondControllerRouter) {
