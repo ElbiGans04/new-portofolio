@@ -1,26 +1,29 @@
-import type { OObject } from '@src/types/jsonApi/object';
+import type { ResourceObject } from '@src/types/jsonApi/index';
+import { DocDataDiscriminated } from '@src/types/jsonApi/index';
+import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
+import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
+import { Dispatch as ReactDispact } from 'react';
+export type DATA =
+  | ResourceObject<ProjectSchemaInterface, 'Projects'>
+  | ResourceObject<ToolSchemaInterface, 'Tools'>;
+export type DocAdminData = DocDataDiscriminated<DATA[]>;
 
-interface Data {
-  id: string;
-  columns: string[];
-  columnsValue: OObject[];
-}
 export interface admin {
   status: 'iddle' | 'loading' | 'error';
   modal: 'add' | 'update' | 'delete' | null;
   message: string | null;
-  row: Data | null;
+  row: DATA | null;
 }
 
 export type action =
   | { type: 'modal/open/add' }
   | {
       type: 'modal/open/update';
-      payload: { id: string; columns: string[]; columnsValue: OObject[] };
+      payload: DATA;
     }
   | {
       type: 'modal/open/delete';
-      payload: { id: string; columns: string[]; columnsValue: OObject[] };
+      payload: DATA;
     }
   | { type: 'modal/request/start' }
   | {
@@ -30,3 +33,5 @@ export type action =
       };
     }
   | { type: 'modal/close' };
+
+export type Dispatch = ReactDispact<action>;

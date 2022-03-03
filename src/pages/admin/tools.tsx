@@ -1,4 +1,9 @@
-import Admin from '@src/components/Admin';
+import Admin, {
+  AdminError,
+  AdminLoading,
+  AdminModal,
+  TdButton,
+} from '@src/components/Admin';
 import Button from '@src/components/Button';
 import Heading from '@src/components/Heading';
 import Input from '@src/components/Input';
@@ -12,51 +17,94 @@ import {
   ModalFormFooter,
   ModalMain2,
 } from '@src/components/Modal';
-import Context from '@src/hooks/context';
 import { reducer } from '@src/hooks/reducer';
-import type { action, admin } from '@src/types/admin';
+import useAdmin from '@src/hooks/useAdmin';
+import type { admin } from '@src/types/admin';
+import { Dispatch, DocAdminData } from '@src/types/admin';
 import type { DocMeta, ResourceObject } from '@src/types/jsonApi/index';
 import { OObjectWithFiles } from '@src/types/jsonApi/object';
 import { fetcherGeneric } from '@src/utils/fetcher';
+import getRandom from '@src/utils/randomNumber';
 import Head from 'next/head';
-import React, { Dispatch, FormEvent, useReducer, useState } from 'react';
+import React, { FormEvent, useReducer } from 'react';
 import { useSWRConfig } from 'swr';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
 export default function Tools() {
+  const { data, user, error, ref } = useAdmin('/api/tools');
   const [state, dispatch] = useReducer(reducer, {
     status: 'iddle',
     modal: null,
     message: null,
     row: null,
   });
-  const [state2] = useState({
-    url: '/api/tools',
-    dispatch,
-    columns: [],
-    visible: {
-      visibleValue: 0,
-      visibleColumns: ['_id', '__v'],
-    },
-    renameColumns: {},
-    specialTreatment: {},
-  });
+
+  if (error) return <AdminError />;
+  if (!data || !user) return <AdminLoading />;
 
   return (
-    <Context.Provider value={state2}>
+    <React.Fragment>
       <Head>
         <title>Tools</title>
       </Head>
 
-      {/* Halaman Admin */}
-      <Admin
+      <AdminModal
+        ref={ref}
         status={state.status}
         message={state.message}
         modal={state.modal}
+        dispatch={dispatch}
         Children={() => <SwitchModal state={state} dispatch={dispatch} />}
       />
-    </Context.Provider>
+      {/* Halaman Admin */}
+      <Admin
+        dispatch={dispatch}
+        Children={() => <TableHeadBody dispatch={dispatch} data={data} />}
+      />
+    </React.Fragment>
+  );
+}
+
+function TableHeadBody({
+  data,
+  dispatch,
+}: {
+  data: DocAdminData;
+  dispatch: Dispatch;
+}) {
+  const projects = data.data;
+
+  return (
+    <React.Fragment>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>As</th>
+          <th />
+        </tr>
+      </thead>
+      <tbody>
+        {projects.map((project, index) => {
+          if (project.type == 'Projects' || project.attributes === undefined)
+            return (
+              <React.Fragment>
+                <tr />
+                <tr />
+              </React.Fragment>
+            );
+          return (
+            <React.Fragment key={getRandom(index)}>
+              <tr>
+                <td>{project.attributes.name}</td>
+                <td>{project.attributes.as}</td>
+                <TdButton dispatch={dispatch} payload={project} />
+              </tr>
+            </React.Fragment>
+          );
+        })}
+      </tbody>
+    </React.Fragment>
   );
 }
 
@@ -65,9 +113,11 @@ function SwitchModal({
   dispatch,
 }: {
   state: admin;
-  dispatch: Dispatch<action>;
+  dispatch: Dispatch;
 }): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
+
+  // Check apakah jenis data sesuai
   const row = state.row;
 
   /* 
@@ -209,6 +259,10 @@ function SwitchModal({
       );
     }
     case 'delete': {
+      if (!row) throw new Error('row not found');
+      if (row.type === 'Projects') throw new Error('Type of row is wrong');
+      if (row.id == undefined) throw new Error('row id not found');
+
       return (
         <ModalMain2>
           <ModalContent2>
@@ -217,55 +271,53 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmitModalDelete(row ? row.id : '')}>
+            <Button onClick={() => onSubmitModalDelete(row.id ? row.id : '')}>
               DELETE
             </Button>
           </ModalFooter>
         </ModalMain2>
       );
     }
+
     case 'update': {
-      if (row && row.columns !== null && row.columnsValue !== null) {
-        const nameValue = row.columnsValue[
-          row.columns.indexOf('name')
-        ] as string;
-        const asValue = row.columnsValue[row.columns.indexOf('as')] as string;
-        return (
-          <ModalForm onSubmit={(event) => onSubmitModalUpdate(event, row.id)}>
-            <ModalFormContent>
-              <ModalFormContentRow>
-                <Label minSize={1} size={1} htmlFor="name">
-                  Name:
-                </Label>
-                <Input
-                  name="name"
-                  defaultValue={nameValue}
-                  id="name"
-                  placeholder="insert name"
-                />
-              </ModalFormContentRow>
-              <ModalFormContentRow>
-                <Label minSize={1} size={1} htmlFor="as">
-                  As:
-                </Label>
-                <Input
-                  name="as"
-                  defaultValue={asValue}
-                  id="as"
-                  placeholder="insert as"
-                />
-              </ModalFormContentRow>
-            </ModalFormContent>
-            <ModalFormFooter>
-              <Button type="submit">SUBMIT</Button>
-            </ModalFormFooter>
-          </ModalForm>
-        );
-      }
-
-      return <></>;
-
-      break;
+      if (!row) throw new Error('row not found');
+      if (row.id === undefined) throw new Error('row id not found');
+      if (row.type === 'Projects') throw new Error('Type of row is wrong');
+      if (row.attributes === undefined)
+        throw new Error('row.attributes is undefined');
+      return (
+        <ModalForm
+          onSubmit={(event) => onSubmitModalUpdate(event, row.id ? row.id : '')}
+        >
+          <ModalFormContent>
+            <ModalFormContentRow>
+              <Label minSize={1} size={1} htmlFor="name">
+                Name:
+              </Label>
+              <Input
+                name="name"
+                defaultValue={row.attributes.name}
+                id="name"
+                placeholder="insert name"
+              />
+            </ModalFormContentRow>
+            <ModalFormContentRow>
+              <Label minSize={1} size={1} htmlFor="as">
+                As:
+              </Label>
+              <Input
+                name="as"
+                defaultValue={row.attributes.as}
+                id="as"
+                placeholder="insert as"
+              />
+            </ModalFormContentRow>
+          </ModalFormContent>
+          <ModalFormFooter>
+            <Button type="submit">SUBMIT</Button>
+          </ModalFormFooter>
+        </ModalForm>
+      );
     }
     default:
       return <> </>;

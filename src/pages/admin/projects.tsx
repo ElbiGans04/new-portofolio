@@ -1,4 +1,11 @@
-import Admin from '@src/components/Admin';
+import Admin, {
+  AdminError,
+  AdminLoading,
+  AdminModal,
+  RowDetail,
+  RowDetailsContentContentContent,
+  TdButton,
+} from '@src/components/Admin';
 import Button from '@src/components/Button';
 import Heading from '@src/components/Heading';
 import Input from '@src/components/Input';
@@ -12,11 +19,12 @@ import {
   ModalFormFooter,
   ModalMain2,
 } from '@src/components/Modal';
-import Context from '@src/hooks/context';
+import firebaseConfig from '@src/config/firebase';
 import { reducer } from '@src/hooks/reducer';
-import type { admin } from '@src/types/admin';
+import useAdmin from '@src/hooks/useAdmin';
+import type { admin, DATA, Dispatch, DocAdminData } from '@src/types/admin';
 import type {
-  DocData,
+  DocDataDiscriminated,
   DocErrors,
   DocMeta,
   ResourceObject,
@@ -24,26 +32,27 @@ import type {
 import { OObject, OObjectWithFiles } from '@src/types/jsonApi/object';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import getRandom from '@src/utils/randomNumber';
-import { isObject } from '@src/utils/typescript/narrowing';
-import changeFirstWord from '@src/utils/upperFirstWord';
+import { initializeApp } from 'firebase/app';
+import {
+  deleteObject,
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytes,
+} from 'firebase/storage';
 import Head from 'next/head';
-import React, { useReducer, useState, Dispatch } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
-import firebaseConfig from '@src/config/firebase';
-import { initializeApp } from 'firebase/app';
-import {
-  ref,
-  uploadBytes,
-  getStorage,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
+import toolSchema from '@src/types/mongoose/schemas/tool';
+import { Types } from 'mongoose';
+import projectSchema from '@src/types/mongoose/schemas/project';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
 export default function Projects() {
+  const { data, user, error, ref } = useAdmin('/api/projects');
   const [state, dispatch] = useReducer(reducer, {
     // iddle, loading, finish
     status: 'iddle',
@@ -51,78 +60,165 @@ export default function Projects() {
     modal: null,
     row: null,
   });
-  const [state2] = useState({
-    url: '/api/projects',
-    dispatch,
-    columns: ['title', 'description'],
-    visible: {
-      visibleValue: 0,
-      visibleColumns: ['_id', '__v'],
-    },
-    renameColumns: {
-      startDate: 'Date',
-    },
-    specialTreatment: {
-      tools: function tools(value: OObject) {
-        let textResult = '';
-        if (Array.isArray(value)) {
-          value.forEach((text, index) => {
-            if (isObject(text)) {
-              textResult += changeFirstWord(text.name as string);
-              if (index !== value.length - 1) textResult += ', ';
-            }
-          });
-        }
 
-        return <div>{textResult}</div>;
-      },
-      typeProject: function typeProject(value: OObject) {
-        if (isObject(value))
-          return <div>{changeFirstWord(value.name as string)}</div>;
-        return <div />;
-      },
-      images: function images(value: OObject) {
-        let textResult = '';
-        if (Array.isArray(value)) {
-          value.forEach((text, index) => {
-            if (typeof text === 'object' && text !== null) {
-              if (Array.isArray(text)) return;
-              textResult += text.src as string;
-              if (index !== value.length - 1) textResult += ', ';
-            }
-          });
-        }
-
-        return <div>{textResult}</div>;
-      },
-      startDate: function startDate(value: OObject) {
-        if (typeof value === 'string') return changeFormatDate(value);
-        return '';
-      },
-      endDate: function endDate(value: OObject) {
-        if (typeof value === 'string') return changeFormatDate(value);
-        return '';
-      },
-    },
-  });
+  if (error) return <AdminError />;
+  if (!data || !user) return <AdminLoading />;
 
   return (
-    <Context.Provider value={state2}>
+    <React.Fragment>
       <Head>
         <title>Projects</title>
       </Head>
 
-      {/* Halaman Admin */}
-      <Admin
+      <AdminModal
+        ref={ref}
         status={state.status}
         message={state.message}
         modal={state.modal}
+        dispatch={dispatch}
         Children={() => <SwitchModal state={state} dispatch={dispatch} />}
       />
-    </Context.Provider>
+
+      {/* Halaman Admin */}
+      <Admin
+        dispatch={dispatch}
+        Children={() => <TableHeadBody data={data} dispatch={dispatch} />}
+      />
+    </React.Fragment>
   );
 }
 
+function TableHeadBody({
+  data,
+  dispatch,
+}: {
+  data: DocAdminData;
+  dispatch: Dispatch;
+}) {
+  const projects = data.data;
+
+  return (
+    <React.Fragment>
+      <thead>
+        <tr>
+          <th />
+          <th>Title</th>
+          <th>Description</th>
+          <th />
+        </tr>
+      </thead>
+      <tbody>
+        {projects.map((project, index) => {
+          return (
+            <React.Fragment key={getRandom(index)}>
+              <TableBodyRow dispatch={dispatch} project={project} />
+            </React.Fragment>
+          );
+        })}
+      </tbody>
+    </React.Fragment>
+  );
+}
+
+function TableBodyRow({
+  project,
+  dispatch,
+}: {
+  project: DATA;
+  dispatch: Dispatch;
+}) {
+  const [detail, setDetail] = useState(false);
+  const ref = useRef<HTMLTableRowElement>(null);
+
+  if (project.type == 'Tools' || project.attributes === undefined)
+    return (
+      <React.Fragment>
+        <tr />
+        <tr />
+      </React.Fragment>
+    );
+
+  return (
+    <React.Fragment>
+      {/* Row Main */}
+      <tr>
+        <td>
+          <Button
+            title="see details of row"
+            onClick={() => setDetail((state) => !state)}
+          >
+            <IoAddOutline />
+          </Button>
+        </td>
+        <td>{project.attributes.title}</td>
+        <td>{project.attributes.description}</td>
+        <TdButton dispatch={dispatch} payload={project} />
+      </tr>
+      {/* Row Details */}
+      <RowDetail
+        ref={ref}
+        open={detail}
+        colSpan={3}
+        Children={() => <TableTrChild project={project} />}
+      />
+    </React.Fragment>
+  );
+}
+
+function TableTrChild({ project }: { project: DATA }) {
+  if (project.type !== 'Projects' || project.attributes === undefined)
+    return (
+      <RowDetailsContentContentContent>
+        <div /> <div />
+      </RowDetailsContentContentContent>
+    );
+
+  const { startDate, endDate, typeProject, tools, images, url } =
+    project.attributes;
+
+  return (
+    <React.Fragment>
+      <RowDetailsContentContentContent>
+        <div>Development start date</div>
+        <div>{parseDate(startDate)}</div>
+      </RowDetailsContentContentContent>
+      <RowDetailsContentContentContent>
+        <div>Development completion date</div>
+        <div>{parseDate(endDate)}</div>
+      </RowDetailsContentContentContent>
+      <RowDetailsContentContentContent>
+        <div>Images</div>
+        <div>{images.map((image) => image.ref).join(', ')}</div>
+      </RowDetailsContentContentContent>
+      <RowDetailsContentContentContent>
+        <div>Tools</div>
+        <div>
+          {Array.isArray(tools)
+            ? tools
+                .map((tool) => (isTool(tool) ? tool.name : tool.toString()))
+                .join(', ')
+            : isTool(tools)
+            ? tools.name
+            : tools.toString()}
+        </div>
+      </RowDetailsContentContentContent>
+      <RowDetailsContentContentContent>
+        <div>Website type</div>
+        <div>
+          {typeof typeProject == 'string' ? typeProject : typeProject.name}
+        </div>
+      </RowDetailsContentContentContent>
+      <RowDetailsContentContentContent>
+        <div>Website url</div>
+        <div>{url}</div>
+      </RowDetailsContentContentContent>
+    </React.Fragment>
+  );
+}
+
+function isTool(tool: Types.ObjectId | toolSchema): tool is toolSchema {
+  return (tool as toolSchema).name !== undefined;
+}
 // {
 //   modal,
 //   row: { id, columns, columnsValue },
@@ -132,13 +228,13 @@ function SwitchModal({
   dispatch,
 }: {
   state: admin;
-  dispatch: Dispatch<any>;
+  dispatch: Dispatch;
 }): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
-  const { data, error } = useSWR<DocData, DocErrors>(
-    '/api/tools',
-    fetcherGeneric,
-  );
+  const { data, error } = useSWR<
+    DocDataDiscriminated<ResourceObject<toolSchema>[]>,
+    DocErrors
+  >('/api/tools', fetcherGeneric);
   const row = state.row;
   const firebaseApp = initializeApp(firebaseConfig);
   const firebaseRootStroage = getStorage(firebaseApp);
@@ -148,40 +244,20 @@ function SwitchModal({
   */
   async function onSubmitModalDelete(id: string) {
     try {
-      let images: OObject | OObject[] =
-        row !== null
-          ? row.columnsValue
-            ? row.columnsValue[row.columns ? row.columns.indexOf('images') : 0]
-            : null
-          : null;
-
-      if (Array.isArray(images)) {
-        images = images.map((image) => {
-          if (isObject(image)) {
-            return { src: image.src as string, ref: image.ref as string };
-          }
-
-          return { src: '', ref: '' };
-        });
-      }
+      if (!row) throw new Error('row is not found');
+      if (!row.attributes) throw new Error('row.attribues is not found');
+      if (row.type === 'Tools') throw new Error('type of row is wrong');
+      const images = row.attributes.images;
 
       dispatch({ type: 'modal/request/start' });
 
       if (Array.isArray(images)) {
         for (let i = 0; i < images.length; i++) {
-          if (isObject(images[i])) {
-            if (images[i]) {
-              const image = images[i] as { [index: string]: OObject };
-              if (image) {
-                const R = (image.ref as string) || '';
-                const imgRef = ref(firebaseRootStroage, R);
-                if (R.length > 0) await deleteObject(imgRef);
-              }
-            }
-          }
+          const image = images[i];
+          const imgRef = ref(firebaseRootStroage, image.ref);
+          await deleteObject(imgRef);
         }
       }
-
       const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
         method: 'delete',
       });
@@ -265,7 +341,7 @@ function SwitchModal({
 
       dispatch({
         type: 'modal/request/finish',
-        payload: { message: request.meta.title },
+        payload: { message: request.meta.title as string },
       });
       await mutate('/api/projects');
     } catch (err) {
@@ -287,22 +363,14 @@ function SwitchModal({
       const form2 = new FormData(event.currentTarget);
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
-      let images: OObject | OObject[] =
-        row !== null
-          ? row.columnsValue
-            ? row.columnsValue[row.columns ? row.columns.indexOf('images') : 0]
-            : null
-          : null;
 
-      if (Array.isArray(images)) {
-        images = images.map((image) => {
-          if (isObject(image)) {
-            return { src: image.src as string, ref: image.ref as string };
-          }
-
-          return { src: '', ref: '' };
-        });
-      }
+      if (!row) throw new Error('row is not found');
+      if (!row.attributes) throw new Error('row.attribues is not found');
+      if (row.type === 'Tools') throw new Error('type of row is wrong');
+      const images = row.attributes.images.map((image) => ({
+        src: image.src,
+        ref: image.ref,
+      }));
 
       const document: ResourceObject<{
         [index: string]: OObjectWithFiles | OObject;
@@ -345,16 +413,9 @@ function SwitchModal({
 
             if (Array.isArray(images)) {
               for (let i = 0; i < images.length; i++) {
-                if (isObject(images[i])) {
-                  if (images[i]) {
-                    const image = images[i] as { [index: string]: OObject };
-                    if (image) {
-                      const R = (image.ref as string) || '';
-                      const imgRef = ref(firebaseRootStroage, R);
-                      if (R.length > 0) await deleteObject(imgRef);
-                    }
-                  }
-                }
+                const image = images[i];
+                const imgRef = ref(firebaseRootStroage, image.ref);
+                await deleteObject(imgRef);
               }
             }
 
@@ -372,7 +433,7 @@ function SwitchModal({
               }
             }
           }
-        } else document.attributes.images = images;
+        } else document.attributes.images = images as any as OObject;
       }
 
       const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
@@ -385,7 +446,7 @@ function SwitchModal({
 
       dispatch({
         type: 'modal/request/finish',
-        payload: { message: request.meta.title },
+        payload: { message: request.meta.title as string },
       });
 
       await mutate('/api/projects');
@@ -537,10 +598,7 @@ function SwitchModal({
               <Label size={1} minSize={1} htmlFor="tools">
                 tool :
               </Label>
-              <InputCollections
-                name="tools"
-                data={data.data as ResourceObject[]}
-              />
+              <InputCollections name="tools" data={data} />
             </ModalFormContentRow>
           </ModalFormContent>
           <ModalFormFooter>
@@ -557,173 +615,170 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmitModalDelete(row ? row.id : '')}>
+            <Button
+              onClick={() =>
+                onSubmitModalDelete(row ? (row.id ? row.id : '') : '')
+              }
+            >
               DELETE
             </Button>
           </ModalFooter>
         </ModalMain2>
       );
-    case 'update':
-      if (row) {
-        const titleValue = row.columnsValue[
-          row.columns.indexOf('title')
-        ] as string;
-        const startDateValue = changeFormatDate(
-          row.columnsValue[row.columns.indexOf('startDate')] as string,
-        );
-        const endDateValue = changeFormatDate(
-          row.columnsValue[row.columns.indexOf('endDate')] as string,
-        );
-        const urlValue = row.columnsValue[row.columns.indexOf('url')] as string;
-        const descriptionValue = row.columnsValue[
-          row.columns.indexOf('description')
-        ] as string;
-        const typeProject =
-          row.columnsValue[row.columns.indexOf('typeProject')];
-        const toolsValue = row.columnsValue[row.columns.indexOf('tools')];
+    case 'update': {
+      if (!row) throw new Error('row is not found');
+      if (!row.attributes) throw new Error('row.attribues is not found');
+      if (row.type === 'Tools') throw new Error('type of row is wrong');
 
-        if (isObject(typeProject) && toolsValue) {
-          return (
-            <ModalForm onSubmit={(event) => onSubmitModalUpdate(event, row.id)}>
-              <ModalFormContent>
-                <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="title">
-                    Title:{' '}
-                  </Label>
+      return (
+        <ModalForm
+          onSubmit={(event) =>
+            onSubmitModalUpdate(event, row ? (row.id ? row.id : '') : '')
+          }
+        >
+          <ModalFormContent>
+            <ModalFormContentRow>
+              <Label size={1} minSize={1} htmlFor="title">
+                Title:{' '}
+              </Label>
+              <Input
+                type="text"
+                id="title"
+                placeholder="enter the project title"
+                name="title"
+                required
+                defaultValue={row.attributes.title}
+              />
+            </ModalFormContentRow>
+
+            <ModalFormContentRow>
+              <Label size={1} minSize={1} htmlFor="startDate">
+                Date start of development:{' '}
+              </Label>
+              <Input
+                type="date"
+                id="startDate"
+                placeholder="enter the start date of development"
+                name="startDate"
+                required
+                defaultValue={parseDate(row.attributes.startDate)}
+              />
+            </ModalFormContentRow>
+
+            <ModalFormContentRow>
+              <Label size={1} minSize={1} htmlFor="endDate">
+                Date end of development:
+              </Label>
+              <Input
+                id="endDate"
+                type="date"
+                placeholder="enter the end date of development"
+                name="endDate"
+                required
+                defaultValue={parseDate(row.attributes.endDate)}
+              />
+            </ModalFormContentRow>
+
+            <ModalFormContentRow>
+              <Label size={1} minSize={1}>
+                Images:
+              </Label>
+              <Input
+                name="images"
+                type="file"
+                id="file"
+                multiple
+                accept=".jpg, .png, .jpeg"
+              />
+            </ModalFormContentRow>
+
+            <ModalFormContentRow>
+              <Label size={1} minSize={1} htmlFor="url">
+                Url of website:
+              </Label>
+              <Input
+                type="text"
+                id="url"
+                placeholder="enter url"
+                name="url"
+                required
+                defaultValue={row.attributes.url}
+              />
+            </ModalFormContentRow>
+
+            <ModalFormContentRow>
+              <Label size={1} minSize={1} htmlFor="description">
+                Description :
+              </Label>
+              <Input
+                type="text"
+                id="description"
+                name="description"
+                placeholder="enter description of project"
+                required
+                defaultValue={row.attributes.description}
+              />
+            </ModalFormContentRow>
+
+            <ModalFormContentRow>
+              <Label size={1} minSize={1}>
+                Type of project :
+              </Label>
+              <ContainerCheckbox>
+                <Checkbox>
                   <Input
-                    type="text"
-                    id="title"
-                    placeholder="enter the project title"
-                    name="title"
+                    name="typeProject"
+                    type="radio"
+                    id="work"
+                    value="A2"
                     required
-                    defaultValue={titleValue}
+                    defaultChecked={
+                      typeof row.attributes.typeProject === 'string'
+                        ? undefined
+                        : row.attributes.typeProject._id.toString() === 'A2'
+                    }
                   />
-                </ModalFormContentRow>
-
-                <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="startDate">
-                    Date start of development:{' '}
+                  <Label size={1} minSize={1} htmlFor="work">
+                    Work project
                   </Label>
+                </Checkbox>
+                <Checkbox>
                   <Input
-                    type="date"
-                    id="startDate"
-                    placeholder="enter the start date of development"
-                    name="startDate"
+                    name="typeProject"
+                    type="radio"
+                    id="personal"
+                    value="A1"
                     required
-                    defaultValue={startDateValue}
+                    defaultChecked={
+                      typeof row.attributes.typeProject === 'string'
+                        ? undefined
+                        : row.attributes.typeProject._id.toString() === 'A1'
+                    }
                   />
-                </ModalFormContentRow>
-
-                <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="endDate">
-                    Date end of development:
+                  <Label size={1} minSize={1} htmlFor="work">
+                    Personal Project
                   </Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    placeholder="enter the end date of development"
-                    name="endDate"
-                    required
-                    defaultValue={endDateValue}
-                  />
-                </ModalFormContentRow>
+                </Checkbox>
+              </ContainerCheckbox>
+            </ModalFormContentRow>
 
-                <ModalFormContentRow>
-                  <Label size={1} minSize={1}>
-                    Images:
-                  </Label>
-                  <Input
-                    name="images"
-                    type="file"
-                    id="file"
-                    multiple
-                    accept=".jpg, .png, .jpeg"
-                  />
-                </ModalFormContentRow>
-
-                <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="url">
-                    Url of website:
-                  </Label>
-                  <Input
-                    type="text"
-                    id="url"
-                    placeholder="enter url"
-                    name="url"
-                    required
-                    defaultValue={urlValue}
-                  />
-                </ModalFormContentRow>
-
-                <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="description">
-                    Description :
-                  </Label>
-                  <Input
-                    type="text"
-                    id="description"
-                    name="description"
-                    placeholder="enter description of project"
-                    required
-                    defaultValue={descriptionValue}
-                  />
-                </ModalFormContentRow>
-
-                <ModalFormContentRow>
-                  <Label size={1} minSize={1}>
-                    Type of project :
-                  </Label>
-                  <ContainerCheckbox>
-                    <Checkbox>
-                      <Input
-                        name="typeProject"
-                        type="radio"
-                        id="work"
-                        value="A2"
-                        required
-                        defaultChecked={typeProject._id === 'A2'}
-                      />
-                      <Label size={1} minSize={1} htmlFor="work">
-                        Work project
-                      </Label>
-                    </Checkbox>
-                    <Checkbox>
-                      <Input
-                        name="typeProject"
-                        type="radio"
-                        id="personal"
-                        value="A1"
-                        required
-                        defaultChecked={typeProject._id === 'A1'}
-                      />
-                      <Label size={1} minSize={1} htmlFor="work">
-                        Personal Project
-                      </Label>
-                    </Checkbox>
-                  </ContainerCheckbox>
-                </ModalFormContentRow>
-
-                <ModalFormContentRow>
-                  <Label size={1} minSize={1} htmlFor="tools">
-                    Tools :
-                  </Label>
-                  <InputCollections
-                    name="tools"
-                    defaultValues={toolsValue}
-                    data={data.data as ResourceObject[]}
-                  />
-                </ModalFormContentRow>
-              </ModalFormContent>
-              <ModalFormFooter>
-                <Button type="submit">Update Project</Button>
-              </ModalFormFooter>
-            </ModalForm>
-          );
-        }
-      }
-
-      return <></>;
-      break;
+            <ModalFormContentRow>
+              <Label size={1} minSize={1} htmlFor="tools">
+                Tools :
+              </Label>
+              <InputCollections
+                name="tools"
+                defaultValues={row.attributes.tools}
+                data={data}
+              />
+            </ModalFormContentRow>
+          </ModalFormContent>
+          <ModalFormFooter>
+            <Button type="submit">Update Project</Button>
+          </ModalFormFooter>
+        </ModalForm>
+      );
+    }
     default:
       return <> </>;
   }
@@ -734,23 +789,21 @@ function InputCollections({
   defaultValues,
   name,
 }: {
-  data: ResourceObject[];
+  data: DocDataDiscriminated<ResourceObject<toolSchema>[]>;
   name: string;
-  defaultValues?: OObject;
+  defaultValues?: projectSchema['tools'];
 }) {
   const [inputState, setInputState] = useState(() => {
     if (defaultValues) {
       if (Array.isArray(defaultValues)) {
-        return defaultValues.map((value) => {
-          if (isObject(value)) {
-            return value._id as string;
-          }
-        });
+        return defaultValues.map((value) =>
+          isTool(value) ? value._id : value.toString(),
+        );
       }
     }
 
     // Jika tidak ada nilai dafault
-    return [data[0]?.id];
+    return data.data[0].id ? [data.data[0].id] : [];
   });
 
   const collectionInput = [];
@@ -775,21 +828,24 @@ function InputCollections({
 
   function onAddItem() {
     const newInputState = [...inputState];
-    newInputState.push(data[0]?.id);
+    newInputState.push(data.data[0].id || '');
     setInputState(newInputState);
   }
 
   // Looping untuk select element yang diperlukan
   for (let i = 0; i < inputState.length; i++) {
+    const stateInput = inputState[i];
     const element = (
       <ContainerInput key={i}>
         <select
           onChange={(event) => onChange(event, i)}
-          value={inputState[i]}
+          value={
+            typeof stateInput == 'string' ? stateInput : stateInput.toString()
+          }
           key={getRandom(i)}
           name={name}
         >
-          {data.map((value) => {
+          {data.data.map((value) => {
             const textOption = value.attributes
               ? value.attributes.name
               : 'undefined';
@@ -817,12 +873,13 @@ function InputCollections({
   );
 }
 
-function changeFormatDate(data: string) {
+function parseDate(data: string) {
   const date = new Date(data);
   const month =
     date.getMonth() + 1 < 10
       ? `0${date.getMonth() + 1}`
       : `${date.getMonth() + 1}`;
+
   return `${date.getFullYear()}-${month}-${
     date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
   }`;

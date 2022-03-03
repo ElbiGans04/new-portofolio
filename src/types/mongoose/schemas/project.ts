@@ -4,6 +4,7 @@ import typeProject from '@src/types/mongoose/schemas/typeProject';
 import { Types } from 'mongoose';
 
 export default interface project {
+  _id: Types.ObjectId;
   title: string;
   startDate: string;
   endDate: string;

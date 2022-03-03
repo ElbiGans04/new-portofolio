@@ -9,22 +9,14 @@ export function reducer(state: admin, action: action): admin {
       return {
         ...state,
         modal: 'update',
-        row: {
-          columns: [...action.payload.columns],
-          columnsValue: [...action.payload.columnsValue],
-          id: action.payload.id,
-        },
+        row: action.payload,
       };
     }
     case 'modal/open/delete': {
       return {
         ...state,
         modal: 'delete',
-        row: {
-          columns: [...action.payload.columns],
-          columnsValue: [...action.payload.columnsValue],
-          id: action.payload.id,
-        },
+        row: action.payload,
       };
     }
     case 'modal/request/start': {

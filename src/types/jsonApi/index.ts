@@ -21,8 +21,8 @@ interface ResourceIdentifierObject {
   meta?: MetaObject;
 }
 
-export interface ResourceObject<T = { [index: string]: OObject }> {
-  type: string;
+export interface ResourceObject<T = { [index: string]: OObject }, T2 = string> {
+  type: T2;
   id?: string;
   attributes?: T;
   relationships?: {
@@ -66,14 +66,48 @@ interface DocBase {
   };
 }
 
-export interface DocData<T = { [index: string]: OObject }> extends DocBase {
+export interface DocData<T = { [index: string]: OObject }, T2 = string>
+  extends DocBase {
   data:
-    | ResourceObject<T>
-    | ResourceObject<T>[]
+    | ResourceObject<T, T2>
+    | ResourceObject<T, T2>[]
     | null
     | never[]
     | ResourceIdentifierObject
     | ResourceIdentifierObject[];
+  meta?: MetaObject;
+  included?: Array<{
+    type: string;
+    id?: string;
+    attributes: {
+      [index: string]: OObject;
+    };
+  }>;
+}
+
+/* 
+  Discriminated Uunions. Memperluas fungsi DocDoc.
+  Tujuan agar halaman admin bisa melakukan discriminated-unions terhadap data yang dikirim
+  
+  # CONTOH PENGGUNAAN JIKA TYPE ARGUMENT BERUPA UNION YANG DAPAT ARRAY atau Object tunggal
+  interface Human {
+    name: number,
+    age: number
+  }
+  
+  interface Animal {
+    color: string
+  }
+  type DATA = ResourceObject<Human, "human"> | ResourceObject<Animal, "animal">;
+  const test: DocDataDiscriminated<DATA[] | DATA> = {
+    data: [{
+      type: "human"
+    }]
+  }
+*/
+export interface DocDataDiscriminated<T = { [index: string]: OObject }>
+  extends DocBase {
+  data: T;
   meta?: MetaObject;
   included?: Array<{
     type: string;
