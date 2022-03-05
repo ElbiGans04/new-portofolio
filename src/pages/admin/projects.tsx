@@ -48,6 +48,7 @@ import useSWR, { useSWRConfig } from 'swr';
 import toolSchema from '@src/types/mongoose/schemas/tool';
 import projectSchema from '@src/types/mongoose/schemas/project';
 import { isTool } from '@src/utils/typescript/narrowing';
+import parseDate from '@src/utils/getStringDate';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
@@ -865,18 +866,6 @@ function InputCollections({
       {collectionInput}
     </ContainerInputs>
   );
-}
-
-function parseDate(data: string) {
-  const date = new Date(data);
-  const month =
-    date.getMonth() + 1 < 10
-      ? `0${date.getMonth() + 1}`
-      : `${date.getMonth() + 1}`;
-
-  return `${date.getFullYear()}-${month}-${
-    date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
-  }`;
 }
 
 // Styled Component

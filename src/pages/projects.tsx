@@ -16,6 +16,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
 import { projectsSchema } from '@src/database';
 import { isTool } from '@src/utils/typescript/narrowing';
+import parseDate from '@src/utils/getStringDate';
 
 export const getServerSideProps: GetServerSideProps = async function () {
   await dbConnection();
@@ -128,9 +129,9 @@ function Projects({ projects }: { projects: string }) {
                   <ModalContentContentListValue>
                     <Heading minSize={1} size={1}>
                       :&nbsp;
-                      {getFullDate(project.startDate)}
+                      {parseDate(project.startDate)}
                       {' - '}
-                      {getFullDate(project.endDate)}
+                      {parseDate(project.endDate)}
                     </Heading>
                     <Heading minSize={1} size={1}>
                       :&nbsp; {getStringOfTools(project.tools)}
@@ -256,11 +257,6 @@ function ImageSlider({
       </ModalImageCount>
     </ModalImage>
   );
-}
-
-function getFullDate(data: string) {
-  const date = new Date(data);
-  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 }
 
 function getStringOfTools(data: ProjectInterface['tools']) {
