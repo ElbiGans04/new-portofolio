@@ -55,13 +55,13 @@ export default function Tools() {
         message={state.message}
         modal={state.modal}
         dispatch={dispatch}
-        Children={() => <SwitchModal state={state} dispatch={dispatch} />}
-      />
+      >
+        <SwitchModal state={state} dispatch={dispatch} />
+      </AdminModal>
       {/* Halaman Admin */}
-      <Admin
-        dispatch={dispatch}
-        Children={() => <TableHeadBody dispatch={dispatch} data={data} />}
-      />
+      <Admin dispatch={dispatch}>
+        <TableHeadBody dispatch={dispatch} data={data} />
+      </Admin>
     </React.Fragment>
   );
 }

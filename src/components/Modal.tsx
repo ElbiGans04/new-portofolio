@@ -34,12 +34,11 @@ export function ModalAdmin({
   status,
   message,
   dispatch,
-  Children,
-  ...props
+  children,
 }: {
   status: string;
   message: string | null;
-  Children: () => JSX.Element;
+  children: JSX.Element;
   dispatch: Dispatch<any>;
 }): JSX.Element {
   switch (status) {
@@ -71,7 +70,7 @@ export function ModalAdmin({
         );
       }
 
-      return <Children {...props} />;
+      return children;
     }
     default:
       return <></>;

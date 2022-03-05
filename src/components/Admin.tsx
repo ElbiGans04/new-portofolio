@@ -41,9 +41,9 @@ export const AdminModal = React.forwardRef<
     dispatch: Dispatch<action>;
     message: string | null;
     status: string;
-    Children: () => JSX.Element;
+    children: JSX.Element;
   }
->(({ modal, dispatch, message, status, Children }, ref) => {
+>(({ modal, dispatch, message, status, children }, ref) => {
   return (
     <>
       {modal && <GlobalStyle />}
@@ -60,12 +60,9 @@ export const AdminModal = React.forwardRef<
           defaultState={{ type: 'modal/close' }}
           ref={ref}
         >
-          <ModalAdmin
-            status={status}
-            message={message}
-            dispatch={dispatch}
-            Children={Children}
-          />
+          <ModalAdmin status={status} message={message} dispatch={dispatch}>
+            {children}
+          </ModalAdmin>
         </ModalComponent>
       </CSSTransition>
     </>
@@ -76,10 +73,12 @@ AdminModal.displayName = 'AdminModal';
 
 export default function Admin({
   dispatch,
-  Children,
+
+  children,
 }: {
   dispatch: Dispatch<action>;
-  Children: () => JSX.Element;
+  // Children: () => JSX.Element;
+  children: JSX.Element;
 }) {
   return (
     <Container>
@@ -91,7 +90,8 @@ export default function Admin({
       </ContainerButtons>
       <ContainerTable>
         <Table>
-          <Children />
+          {children}
+          {/* <Children /> */}
         </Table>
       </ContainerTable>
     </Container>
@@ -137,8 +137,8 @@ export function TdButton({
 
 export const RowDetail = React.forwardRef<
   HTMLTableRowElement,
-  { open: boolean; colSpan: number; Children: () => JSX.Element }
->(({ open, colSpan, Children }, ref) => {
+  { open: boolean; colSpan: number; children: JSX.Element }
+>(({ open, colSpan, children }, ref) => {
   return (
     <>
       <CSSTransition
@@ -149,9 +149,7 @@ export const RowDetail = React.forwardRef<
       >
         <RowDetails ref={ref}>
           <RowDetailsContent colSpan={colSpan}>
-            <RowDetailsContentContent>
-              <Children />
-            </RowDetailsContentContent>
+            <RowDetailsContentContent>{children}</RowDetailsContentContent>
           </RowDetailsContent>
         </RowDetails>
       </CSSTransition>

@@ -76,14 +76,14 @@ export default function Projects() {
         message={state.message}
         modal={state.modal}
         dispatch={dispatch}
-        Children={() => <SwitchModal state={state} dispatch={dispatch} />}
-      />
+      >
+        <SwitchModal state={state} dispatch={dispatch} />
+      </AdminModal>
 
       {/* Halaman Admin */}
-      <Admin
-        dispatch={dispatch}
-        Children={() => <TableHeadBody data={data} dispatch={dispatch} />}
-      />
+      <Admin dispatch={dispatch}>
+        <TableHeadBody data={data} dispatch={dispatch} />
+      </Admin>
     </React.Fragment>
   );
 }
@@ -155,12 +155,9 @@ function TableBodyRow({
         <TdButton dispatch={dispatch} payload={project} />
       </tr>
       {/* Row Details */}
-      <RowDetail
-        ref={ref}
-        open={detail}
-        colSpan={3}
-        Children={() => <TableTrChild project={project} />}
-      />
+      <RowDetail ref={ref} open={detail} colSpan={3}>
+        <TableTrChild project={project} />
+      </RowDetail>
     </React.Fragment>
   );
 }
@@ -216,9 +213,6 @@ function TableTrChild({ project }: { project: DATA }) {
   );
 }
 
-function isTool(tool: Types.ObjectId | toolSchema): tool is toolSchema {
-  return (tool as toolSchema).name !== undefined;
-}
 // {
 //   modal,
 //   row: { id, columns, columnsValue },
@@ -883,6 +877,10 @@ function parseDate(data: string) {
   return `${date.getFullYear()}-${month}-${
     date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
   }`;
+}
+
+function isTool(tool: Types.ObjectId | toolSchema): tool is toolSchema {
+  return (tool as toolSchema).name !== undefined;
 }
 
 // Styled Component
