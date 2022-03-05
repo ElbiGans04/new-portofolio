@@ -3,9 +3,36 @@ import { OObject } from '@src/types/jsonApi/object';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import HttpError from '@src/utils/httpError';
 import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
-import ProjectSchemaValidation from '@src/validation/projects';
 import Joi from 'joi';
 import { Types } from 'mongoose';
+
+const ProjectSchemaValidation = Joi.object({
+  type: Joi.string().max(50).required(),
+  id: Joi.string().max(100),
+  attributes: Joi.object({
+    title: Joi.string().max(50).required(),
+    startDate: Joi.date().required(),
+    endDate: Joi.date().required(),
+    tools: Joi.alternatives().try(
+      Joi.array().items(Joi.string().required()).unique().min(2),
+      Joi.string().required(),
+    ),
+    typeProject: Joi.string().alphanum().max(50).required(),
+    description: Joi.string().max(200).required(),
+    url: Joi.string().max(50).required(),
+    images: Joi.array()
+      .items(
+        Joi.object({
+          src: Joi.string().max(500).required(),
+          ref: Joi.string().max(100).required(),
+        }),
+      )
+      .min(1)
+      .required(),
+  })
+    .required()
+    .required(),
+}).required();
 
 class ProjectService {
   async validation(body: { [index: string]: OObject }) {
