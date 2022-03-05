@@ -199,7 +199,7 @@ const Table = styled.table`
   background-color: var(--dark2);
   padding: 1rem;
   border-radius: 0.8rem;
-
+  line-height: 1.5rem;
   & thead {
     border-bottom: 2px solid var(--pink);
   }
