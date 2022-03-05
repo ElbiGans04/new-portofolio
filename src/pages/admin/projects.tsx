@@ -46,8 +46,8 @@ import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
 import toolSchema from '@src/types/mongoose/schemas/tool';
-import { Types } from 'mongoose';
 import projectSchema from '@src/types/mongoose/schemas/project';
+import { isTool } from '@src/utils/typescript/narrowing';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
@@ -877,10 +877,6 @@ function parseDate(data: string) {
   return `${date.getFullYear()}-${month}-${
     date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
   }`;
-}
-
-function isTool(tool: Types.ObjectId | toolSchema): tool is toolSchema {
-  return (tool as toolSchema).name !== undefined;
 }
 
 // Styled Component

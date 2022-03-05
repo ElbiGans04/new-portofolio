@@ -15,6 +15,7 @@ import { CSSTransition } from 'react-transition-group';
 import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
 import { projectsSchema } from '@src/database';
+import { isTool } from '@src/utils/typescript/narrowing';
 
 export const getServerSideProps: GetServerSideProps = async function () {
   await dbConnection();
@@ -272,6 +273,7 @@ function getStringOfTools(data: ProjectInterface['tools']) {
       if (isTool(value)) {
         result += `${upperFirstWord(value.name)}`;
         if (value.as) result += ` as ${value.as}`;
+        if (index !== data.length - 1) result += ', ';
         return;
       }
 
@@ -285,15 +287,6 @@ function getStringOfTools(data: ProjectInterface['tools']) {
 
   if (isTool(data)) return (result = `${data.name} as ${data.as}`);
   return (result = `${data.toString()}`);
-}
-function isTool(
-  data:
-    | tool
-    | mongoose.Types.ObjectId
-    | mongoose.Types.Array<mongoose.Types.ObjectId>
-    | mongoose.Types.Array<tool>,
-): data is tool {
-  return (data as tool).name !== undefined;
 }
 
 function myLoader({ src }: { src: string }) {
