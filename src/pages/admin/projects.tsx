@@ -22,7 +22,13 @@ import {
 import firebaseConfig from '@src/config/firebase';
 import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
-import type { admin, DATA, Dispatch, DocAdminData } from '@src/types/admin';
+import type {
+  admin,
+  DATA,
+  Dispatch,
+  DocAdminData,
+  ResourceProjectInterface,
+} from '@src/types/admin';
 import type {
   DocDataDiscriminated,
   DocErrors,
@@ -39,6 +45,7 @@ import {
   getStorage,
   ref,
   uploadBytes,
+  FirebaseStorage,
 } from 'firebase/storage';
 import Head from 'next/head';
 import React, { useReducer, useRef, useState } from 'react';
@@ -239,41 +246,29 @@ function SwitchModal({
   */
   async function onSubmitModalDelete(id: string) {
     try {
-      if (!row) throw new Error('row is not found');
-      if (!row.attributes) throw new Error('row.attribues is not found');
-      if (row.type === 'Tools') throw new Error('type of row is wrong');
-      const images = row.attributes.images;
+      if (!modalNarrowing(row)) throw new Error('Invalid row format');
+      if (!row.attributes) throw new Error('row.attributes not found');
 
       dispatch({ type: 'modal/request/start' });
 
-      if (Array.isArray(images)) {
-        for (let i = 0; i < images.length; i++) {
-          const image = images[i];
-          const imgRef = ref(firebaseRootStroage, image.ref);
-          await deleteObject(imgRef);
-        }
-      }
+      await deleteImages(row.attributes.images, firebaseRootStroage);
+
       const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
         method: 'delete',
       });
 
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: request.meta.title as string },
-      });
-      await mutate('/api/projects');
+      await modalFinish(request.meta.title as string, dispatch, mutate);
     } catch (err) {
-      console.log(err);
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: 'error happend' },
-      });
-      await mutate('/api/projects');
+      await EventErrorHandler(err, dispatch, mutate).catch((err) =>
+        console.error(err),
+      );
     }
   }
   async function onSubmitModalAdd(event: React.FormEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
+      if (!modalNarrowing(row)) throw new Error('Invalid row format');
+      if (!row.attributes) throw new Error('row.attributes not found');
       const form2 = new FormData(event.currentTarget);
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
@@ -304,26 +299,15 @@ function SwitchModal({
         }
       }
 
+      if (!document.attributes) throw new Error('Document.attribute not found');
+
       // Logic
       dispatch({ type: 'modal/request/start' });
       if (fileImage) {
-        if (document.attributes) {
-          document.attributes.images = [];
-
-          for (let i = 0; i < fileImage.length; i++) {
-            const file = fileImage.item(i);
-
-            if (file) {
-              const name = `elbi-images-${Date.now()}-${file.name}`;
-              const imageRef = ref(firebaseRootStroage, `/images/${name}`);
-              await uploadBytes(imageRef, file);
-              document.attributes.images.push({
-                src: await getDownloadURL(imageRef),
-                ref: imageRef.fullPath,
-              });
-            }
-          }
-        }
+        document.attributes.images = await uploadImages(
+          fileImage,
+          firebaseRootStroage,
+        );
       }
 
       const request = await fetcherGeneric<DocMeta>('/api/projects', {
@@ -334,18 +318,11 @@ function SwitchModal({
         },
       });
 
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: request.meta.title as string },
-      });
-      await mutate('/api/projects');
+      await modalFinish(request.meta.title as string, dispatch, mutate);
     } catch (err) {
-      console.log(err);
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: 'error happend' },
-      });
-      await mutate('/api/projects');
+      await EventErrorHandler(err, dispatch, mutate).catch((err) =>
+        console.error(err),
+      );
     }
   }
 
@@ -355,13 +332,12 @@ function SwitchModal({
   ) {
     try {
       event.preventDefault();
+      if (!modalNarrowing(row)) throw new Error('Invalid row format');
+      if (!row.attributes) throw new Error('row.attributes not found');
       const form2 = new FormData(event.currentTarget);
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
 
-      if (!row) throw new Error('row is not found');
-      if (!row.attributes) throw new Error('row.attribues is not found');
-      if (row.type === 'Tools') throw new Error('type of row is wrong');
       const images = row.attributes.images.map((image) => ({
         src: image.src,
         ref: image.ref,
@@ -403,31 +379,11 @@ function SwitchModal({
       dispatch({ type: 'modal/request/start' });
       if (fileImage) {
         if (fileImage.length > 0) {
-          if (document.attributes) {
-            document.attributes.images = [];
-
-            if (Array.isArray(images)) {
-              for (let i = 0; i < images.length; i++) {
-                const image = images[i];
-                const imgRef = ref(firebaseRootStroage, image.ref);
-                await deleteObject(imgRef);
-              }
-            }
-
-            for (let i = 0; i < fileImage.length; i++) {
-              const file = fileImage.item(i);
-
-              if (file) {
-                const name = `elbi-images-${Date.now()}-${file.name}`;
-                const imageRef = ref(firebaseRootStroage, `/images/${name}`);
-                await uploadBytes(imageRef, file);
-                document.attributes.images.push({
-                  src: await getDownloadURL(imageRef),
-                  ref: imageRef.fullPath,
-                });
-              }
-            }
-          }
+          await deleteImages(row.attributes.images, firebaseRootStroage);
+          document.attributes.images = await uploadImages(
+            fileImage,
+            firebaseRootStroage,
+          );
         } else document.attributes.images = images as any as OObject;
       }
 
@@ -439,20 +395,11 @@ function SwitchModal({
         },
       });
 
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: request.meta.title as string },
-      });
-
-      await mutate('/api/projects');
+      await modalFinish(request.meta.title as string, dispatch, mutate);
     } catch (err) {
-      console.log(err);
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: 'error happend' },
-      });
-
-      await mutate('/api/projects');
+      await EventErrorHandler(err, dispatch, mutate).catch((err) =>
+        console.error(err),
+      );
     }
   }
 
@@ -868,6 +815,67 @@ function InputCollections({
   );
 }
 
+async function deleteImages(
+  images: projectSchema['images'],
+  stroage: FirebaseStorage,
+) {
+  for (let i = 0; i < images.length; i++) {
+    const image = images[i];
+    const imgRef = ref(stroage, image.ref);
+    await deleteObject(imgRef);
+  }
+}
+
+async function uploadImages(fileImage: FileList, storage: FirebaseStorage) {
+  const images: OObjectWithFiles = [];
+  for (let i = 0; i < fileImage.length; i++) {
+    const file = fileImage.item(i);
+
+    if (file) {
+      const name = `elbi-images-${Date.now()}-${file.name}`;
+      const imageRef = ref(storage, `/images/${name}`);
+      await uploadBytes(imageRef, file);
+      images.push({
+        src: await getDownloadURL(imageRef),
+        ref: imageRef.fullPath,
+      });
+    }
+  }
+
+  return images;
+}
+
+async function EventErrorHandler(
+  err: unknown,
+  dispatch: Dispatch,
+  mutate: mutateSWRCustom,
+) {
+  console.log(err);
+  dispatch({
+    type: 'modal/request/finish',
+    payload: { message: 'error happend' },
+  });
+  await mutate('/api/projects');
+}
+
+async function modalFinish(
+  message: string,
+  dispatch: Dispatch,
+  mutate: mutateSWRCustom,
+) {
+  dispatch({
+    type: 'modal/request/finish',
+    payload: { message },
+  });
+  await mutate('/api/projects');
+}
+
+function modalNarrowing(
+  row: DATA | null | ResourceProjectInterface,
+): row is ResourceProjectInterface {
+  if (row && row.type === 'Projects') return true;
+  else return false;
+}
 // Styled Component
 
 //

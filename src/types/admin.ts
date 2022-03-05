@@ -3,9 +3,18 @@ import { DocDataDiscriminated } from '@src/types/jsonApi/index';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
 import { Dispatch as ReactDispact } from 'react';
-export type DATA =
-  | ResourceObject<ProjectSchemaInterface, 'Projects'>
-  | ResourceObject<ToolSchemaInterface, 'Tools'>;
+
+export type ResourceProjectInterface = ResourceObject<
+  ProjectSchemaInterface,
+  'Projects'
+>;
+export type ResourceToolInterface = ResourceObject<
+  ToolSchemaInterface,
+  'Tools'
+>;
+
+export type DATA = ResourceProjectInterface | ResourceToolInterface;
+
 export type DocAdminData = DocDataDiscriminated<DATA[]>;
 
 export interface admin {
