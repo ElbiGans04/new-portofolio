@@ -7,7 +7,19 @@ import {
   RespondControllerRouter,
 } from '@src/types/controllersRoutersApi';
 import formatResource from '@src/utils/formatResource';
-import toolsService from './tools.service';
+import Joi from 'joi';
+import { OObject } from '@src/types/jsonApi/object';
+import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
+import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
+
+const ToolsSchemaValidation = Joi.object({
+  type: Joi.string().max(50).required(),
+  id: Joi.string().max(100),
+  attributes: Joi.object({
+    name: Joi.string().max(50).required(),
+    as: Joi.string().max(100).required(),
+  }).required(),
+}).required();
 
 class Tools {
   async getTool(req: RequestControllerRouter, res: RespondControllerRouter) {
@@ -42,7 +54,7 @@ class Tools {
   async postTools(req: RequestControllerRouter, res: RespondControllerRouter) {
     await runMiddleware(req, res, formidableHandler);
 
-    const valid = toolsService.validation(req.body);
+    const valid = this.validation(req.body);
 
     const tool = new toolSchema(valid.attributes);
     await tool.save();
@@ -62,7 +74,7 @@ class Tools {
 
     const { toolID } = req.query;
 
-    const valid = toolsService.validation(req.body);
+    const valid = this.validation(req.body);
 
     // Check karena di joi validation attribute id merupakan optional
     if (!valid.id)
@@ -96,6 +108,14 @@ class Tools {
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
     return res.end(JSON.stringify({ meta: { title: 'success deleted' } }));
+  }
+
+  validation(body: { [index: string]: OObject }) {
+    const validReqBody = Joi.attempt(
+      body,
+      ToolsSchemaValidation,
+    ) as TransformToDoc<ToolSchemaInterface>;
+    return validReqBody;
   }
 }
 
