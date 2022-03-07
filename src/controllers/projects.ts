@@ -34,7 +34,7 @@ const ProjectSchemaValidation = Joi.object({
     images: Joi.array()
       .items(
         Joi.object({
-          src: Joi.string().max(100).required(),
+          src: Joi.string().max(300).required(),
           ref: Joi.string().max(100).required(),
         }),
       )
