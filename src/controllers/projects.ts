@@ -29,12 +29,12 @@ const ProjectSchemaValidation = Joi.object({
       Joi.string().required(),
     ),
     typeProject: Joi.string().alphanum().max(50).required(),
-    description: Joi.string().max(200).required(),
+    description: Joi.string().max(500).required(),
     url: Joi.string().max(50).required(),
     images: Joi.array()
       .items(
         Joi.object({
-          src: Joi.string().max(500).required(),
+          src: Joi.string().max(100).required(),
           ref: Joi.string().max(100).required(),
         }),
       )
