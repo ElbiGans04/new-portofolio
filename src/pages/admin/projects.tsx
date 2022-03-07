@@ -264,8 +264,6 @@ function SwitchModal({
   async function onSubmitModalAdd(event: React.FormEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
-      if (!modalNarrowing(row)) throw new Error('Invalid row format');
-      if (!row.attributes) throw new Error('row.attributes not found');
       const form2 = new FormData(event.currentTarget);
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
