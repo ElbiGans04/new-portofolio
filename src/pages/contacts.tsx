@@ -15,22 +15,22 @@ function Contacts() {
       <Head>
         <title>Let&apos;s Connect with me</title>
       </Head>
-      <Paragraph minSize={1} lineHeight="1.5rem" size={1.5}>
+      <Paragraph minSize={1} lineHeight="1.5" size={1.5}>
         You can reach out via email at <span>rhafaelbijaksana04@gmail.com</span>
         , or via socials below:
       </Paragraph>
       <ContainerIcon>
         <a href="https://github.com/ElbiGans04">
-          <IoLogoGithub color="white" size="2rem" title="github account" />
+          <IoLogoGithub color="white" size="2em" title="github account" />
         </a>
         <a href="https://www.facebook.com/rhafael.bijaksana04">
-          <IoLogoFacebook color="white" size="2rem" title="facebook account" />
+          <IoLogoFacebook color="white" size="2em" title="facebook account" />
         </a>
         <a href="mailto:rhafaelbijaksana04@gmail.com">
-          <IoMail color="white" size="2rem" title="email account" />
+          <IoMail color="white" size="2em" title="email account" />
         </a>
         <a href="https://www.linkedin.com/in/rhafael-bijaksana">
-          <IoLogoLinkedin color="white" size="2rem" title="linkedin account" />
+          <IoLogoLinkedin color="white" size="2em" title="linkedin account" />
         </a>
       </ContainerIcon>
     </Container>
