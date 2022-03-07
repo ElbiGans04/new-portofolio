@@ -9,6 +9,7 @@ import ErrorComponent from '@src/components/Error';
 import React, { useState, ErrorInfo, ReactNode } from 'react';
 import { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
+import getRandom from '@src/utils/randomNumber';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -115,7 +116,7 @@ function NavBar({ active }: { active: string }) {
 
       <NavbarMain style={navbarOpen ? { top: 0 } : {}}>
         {urlComponents.map((value, index) => (
-          <Link href={value.url} passHref key={index}>
+          <Link href={value.url} passHref key={getRandom(index)}>
             {value.url === active ? (
               <ItemsActive onClick={() => setNavbarOpen(false)}>
                 {value.name}

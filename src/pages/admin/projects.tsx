@@ -118,9 +118,11 @@ function TableHeadBody({
       <tbody>
         {projects.map((project, index) => {
           return (
-            <React.Fragment key={getRandom(index)}>
-              <TableBodyRow dispatch={dispatch} project={project} />
-            </React.Fragment>
+            <TableBodyRow
+              key={getRandom(index)}
+              dispatch={dispatch}
+              project={project}
+            />
           );
         })}
       </tbody>
@@ -146,6 +148,17 @@ function TableBodyRow({
       </React.Fragment>
     );
 
+  const {
+    startDate,
+    endDate,
+    typeProject,
+    tools,
+    images,
+    url,
+    title,
+    description,
+  } = project.attributes;
+
   return (
     <React.Fragment>
       {/* Row Main */}
@@ -158,65 +171,49 @@ function TableBodyRow({
             <IoAddOutline />
           </Button>
         </td>
-        <td>{project.attributes.title}</td>
-        <td>{project.attributes.description}</td>
+        <td>{title}</td>
+        <td>{description}</td>
         <TdButton dispatch={dispatch} payload={project} />
       </tr>
       {/* Row Details */}
       <RowDetail ref={ref} open={detail} colSpan={3}>
-        <TableTrChild project={project} />
+        <React.Fragment>
+          <RowDetailsContentContentContent>
+            <div>Development start date</div>
+            <div>{parseDate(startDate)}</div>
+          </RowDetailsContentContentContent>
+          <RowDetailsContentContentContent>
+            <div>Development completion date</div>
+            <div>{parseDate(endDate)}</div>
+          </RowDetailsContentContentContent>
+          <RowDetailsContentContentContent>
+            <div>Images</div>
+            <div>{images.map((image) => image.ref).join(', ')}</div>
+          </RowDetailsContentContentContent>
+          <RowDetailsContentContentContent>
+            <div>Tools</div>
+            <div>
+              {Array.isArray(tools)
+                ? tools
+                    .map((tool) => (isTool(tool) ? tool.name : tool.toString()))
+                    .join(', ')
+                : isTool(tools)
+                ? tools.name
+                : tools.toString()}
+            </div>
+          </RowDetailsContentContentContent>
+          <RowDetailsContentContentContent>
+            <div>Website type</div>
+            <div>
+              {typeof typeProject == 'string' ? typeProject : typeProject.name}
+            </div>
+          </RowDetailsContentContentContent>
+          <RowDetailsContentContentContent>
+            <div>Website url</div>
+            <div>{url}</div>
+          </RowDetailsContentContentContent>
+        </React.Fragment>
       </RowDetail>
-    </React.Fragment>
-  );
-}
-
-function TableTrChild({ project }: { project: DATA }) {
-  if (project.type !== 'Projects' || project.attributes === undefined)
-    return (
-      <RowDetailsContentContentContent>
-        <div /> <div />
-      </RowDetailsContentContentContent>
-    );
-
-  const { startDate, endDate, typeProject, tools, images, url } =
-    project.attributes;
-
-  return (
-    <React.Fragment>
-      <RowDetailsContentContentContent>
-        <div>Development start date</div>
-        <div>{parseDate(startDate)}</div>
-      </RowDetailsContentContentContent>
-      <RowDetailsContentContentContent>
-        <div>Development completion date</div>
-        <div>{parseDate(endDate)}</div>
-      </RowDetailsContentContentContent>
-      <RowDetailsContentContentContent>
-        <div>Images</div>
-        <div>{images.map((image) => image.ref).join(', ')}</div>
-      </RowDetailsContentContentContent>
-      <RowDetailsContentContentContent>
-        <div>Tools</div>
-        <div>
-          {Array.isArray(tools)
-            ? tools
-                .map((tool) => (isTool(tool) ? tool.name : tool.toString()))
-                .join(', ')
-            : isTool(tools)
-            ? tools.name
-            : tools.toString()}
-        </div>
-      </RowDetailsContentContentContent>
-      <RowDetailsContentContentContent>
-        <div>Website type</div>
-        <div>
-          {typeof typeProject == 'string' ? typeProject : typeProject.name}
-        </div>
-      </RowDetailsContentContentContent>
-      <RowDetailsContentContentContent>
-        <div>Website url</div>
-        <div>{url}</div>
-      </RowDetailsContentContentContent>
     </React.Fragment>
   );
 }
@@ -548,7 +545,11 @@ function SwitchModal({
           </ModalFormFooter>
         </ModalForm>
       );
-    case 'delete':
+    case 'delete': {
+      if (!row) throw new Error('row is not found');
+      if (row.id === undefined) throw new Error('row.id not found');
+      const id = row.id;
+
       return (
         <ModalMain2>
           <ModalContent2>
@@ -557,27 +558,21 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button
-              onClick={() =>
-                onSubmitModalDelete(row ? (row.id ? row.id : '') : '')
-              }
-            >
-              DELETE
-            </Button>
+            <Button onClick={() => onSubmitModalDelete(id)}>DELETE</Button>
           </ModalFooter>
         </ModalMain2>
       );
+    }
+
     case 'update': {
       if (!row) throw new Error('row is not found');
       if (!row.attributes) throw new Error('row.attribues is not found');
       if (row.type === 'Tools') throw new Error('type of row is wrong');
+      if (row.id === undefined) throw new Error('row.id not found');
+      const id = row.id;
 
       return (
-        <ModalForm
-          onSubmit={(event) =>
-            onSubmitModalUpdate(event, row ? (row.id ? row.id : '') : '')
-          }
-        >
+        <ModalForm onSubmit={(event) => onSubmitModalUpdate(event, id)}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label size={1} minSize={1} htmlFor="title">
@@ -778,7 +773,7 @@ function InputCollections({
   for (let i = 0; i < inputState.length; i++) {
     const stateInput = inputState[i];
     const element = (
-      <ContainerInput key={i}>
+      <ContainerInput key={getRandom(i)}>
         <select
           onChange={(event) => onChange(event, i)}
           value={
