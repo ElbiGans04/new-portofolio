@@ -54,7 +54,7 @@ import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
 import toolSchema from '@src/types/mongoose/schemas/tool';
 import projectSchema from '@src/types/mongoose/schemas/project';
-import { isTool } from '@src/utils/typescript/narrowing';
+import { isTool, isObject } from '@src/utils/typescript/narrowing';
 import parseDate from '@src/utils/getStringDate';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
@@ -262,16 +262,15 @@ function SwitchModal({
     }
   }
   async function onSubmitModalAdd(event: React.FormEvent<HTMLFormElement>) {
+    const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
+      type: 'project',
+      attributes: {},
+    };
     try {
       event.preventDefault();
       const form2 = new FormData(event.currentTarget);
       const inputFiles = event.currentTarget[3] as HTMLInputElement;
       const fileImage = inputFiles.files;
-
-      const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
-        type: 'project',
-        attributes: {},
-      };
 
       for (const [fieldName, fieldValue] of form2.entries()) {
         if (document.attributes) {
@@ -315,6 +314,20 @@ function SwitchModal({
 
       await modalFinish(request.meta.title as string, dispatch, mutate);
     } catch (err) {
+      const images = document?.attributes?.images;
+      const imagesToDelete: Promise<void>[] = [];
+
+      if (images && Array.isArray(images)) {
+        images.forEach((image) => {
+          if (isObject(image)) {
+            imagesToDelete.push(
+              deleteObject(ref(firebaseRootStroage, image.ref as string)),
+            );
+          }
+        });
+      }
+
+      Promise.all(imagesToDelete).catch((err) => console.log(err));
       await EventErrorHandler(err, dispatch, mutate).catch((err) =>
         console.error(err),
       );
@@ -325,26 +338,26 @@ function SwitchModal({
     event: React.FormEvent<HTMLFormElement>,
     id: string,
   ) {
+    event.preventDefault();
+    const form2 = new FormData(event.currentTarget);
+    const inputFiles = event.currentTarget[3] as HTMLInputElement;
+    const fileImage = inputFiles.files;
+
+    const document: ResourceObject<{
+      [index: string]: OObjectWithFiles | OObject;
+    }> = {
+      id,
+      type: 'project',
+      attributes: {},
+    };
     try {
-      event.preventDefault();
       if (!modalNarrowing(row)) throw new Error('Invalid row format');
       if (!row.attributes) throw new Error('row.attributes not found');
-      const form2 = new FormData(event.currentTarget);
-      const inputFiles = event.currentTarget[3] as HTMLInputElement;
-      const fileImage = inputFiles.files;
 
       const images = row.attributes.images.map((image) => ({
         src: image.src,
         ref: image.ref,
       }));
-
-      const document: ResourceObject<{
-        [index: string]: OObjectWithFiles | OObject;
-      }> = {
-        id,
-        type: 'project',
-        attributes: {},
-      };
 
       if (document.attributes == undefined)
         throw new Error('document.attributes is missing');
@@ -372,15 +385,12 @@ function SwitchModal({
       }
       // Logic
       dispatch({ type: 'modal/request/start' });
-      if (fileImage) {
-        if (fileImage.length > 0) {
-          await deleteImages(row.attributes.images, firebaseRootStroage);
-          document.attributes.images = await uploadImages(
-            fileImage,
-            firebaseRootStroage,
-          );
-        } else document.attributes.images = images as any as OObject;
-      }
+      if (fileImage && fileImage.length > 0) {
+        document.attributes.images = await uploadImages(
+          fileImage,
+          firebaseRootStroage,
+        );
+      } else document.attributes.images = images as any as OObject;
 
       const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
         method: 'PATCH',
@@ -390,8 +400,27 @@ function SwitchModal({
         },
       });
 
+      if (fileImage && fileImage.length > 0)
+        await deleteImages(row.attributes.images, firebaseRootStroage);
+
       await modalFinish(request.meta.title as string, dispatch, mutate);
     } catch (err) {
+      if (fileImage && fileImage.length > 0) {
+        const images = document?.attributes?.images;
+        const imagesToDelete: Promise<void>[] = [];
+
+        if (images && Array.isArray(images)) {
+          images.forEach((image) => {
+            if (isObject(image)) {
+              imagesToDelete.push(
+                deleteObject(ref(firebaseRootStroage, image.ref as string)),
+              );
+            }
+          });
+        }
+
+        Promise.all(imagesToDelete).catch((err) => console.log(err));
+      }
       await EventErrorHandler(err, dispatch, mutate).catch((err) =>
         console.error(err),
       );
