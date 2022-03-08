@@ -1,12 +1,13 @@
 import Heading from '@src/components/Heading';
 import Modal from '@src/components/Modal';
 import Paragraph from '@src/components/Paragraph';
+import { projectsSchema } from '@src/database';
 import dbConnection from '@src/database/connection';
-import tool from '@src/types/mongoose/schemas/tool';
 import ProjectInterface from '@src/types/mongoose/schemas/project';
+import parseDate from '@src/utils/getStringDate';
+import getStringOfTools from '@src/utils/getStringOfTools';
 import getRandom from '@src/utils/randomNumber';
 import upperFirstWord from '@src/utils/upperFirstWord';
-import mongoose from 'mongoose';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -14,9 +15,6 @@ import React, { MouseEvent, useEffect, useRef, useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
-import { projectsSchema } from '@src/database';
-import { isTool } from '@src/utils/typescript/narrowing';
-import parseDate from '@src/utils/getStringDate';
 
 export const getServerSideProps: GetServerSideProps = async function () {
   await dbConnection();
@@ -257,32 +255,6 @@ function ImageSlider({
       </ModalImageCount>
     </ModalImage>
   );
-}
-
-function getStringOfTools(data: ProjectInterface['tools']) {
-  let result = '';
-  if (Array.isArray(data)) {
-    data.forEach(function (
-      value: mongoose.Types.ObjectId | tool,
-      index: number,
-    ) {
-      if (isTool(value)) {
-        result += `${upperFirstWord(value.name)}`;
-        if (value.as) result += ` as ${value.as}`;
-        if (index !== data.length - 1) result += ', ';
-        return;
-      }
-
-      result += `${value.toString()}`;
-
-      // tambahkan koma
-      if (index !== data.length - 1) result += ', ';
-    });
-    return result;
-  }
-
-  if (isTool(data)) return (result = `${data.name} as ${data.as}`);
-  return (result = `${data.toString()}`);
 }
 
 function myLoader({ src }: { src: string }) {

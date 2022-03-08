@@ -56,6 +56,7 @@ import toolSchema from '@src/types/mongoose/schemas/tool';
 import projectSchema from '@src/types/mongoose/schemas/project';
 import { isTool, isObject } from '@src/utils/typescript/narrowing';
 import parseDate from '@src/utils/getStringDate';
+import getStringOfTools from '@src/utils/getStringOfTools';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 
@@ -192,15 +193,7 @@ function TableBodyRow({
           </RowDetailsContentContentContent>
           <RowDetailsContentContentContent>
             <div>Tools</div>
-            <div>
-              {Array.isArray(tools)
-                ? tools
-                    .map((tool) => (isTool(tool) ? tool.name : tool.toString()))
-                    .join(', ')
-                : isTool(tools)
-                ? tools.name
-                : tools.toString()}
-            </div>
+            <div>{getStringOfTools(tools)}</div>
           </RowDetailsContentContentContent>
           <RowDetailsContentContentContent>
             <div>Website type</div>
