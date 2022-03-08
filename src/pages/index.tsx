@@ -53,7 +53,7 @@ const ContainerImage = styled.div`
   position: relative;
   border: 0.3rem solid var(--pink) !important;
   border-radius: 50%;
-
+  overflow: hidden;
   @media (max-width: 576px) {
     & {
       width: 250px;
