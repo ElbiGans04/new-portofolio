@@ -149,8 +149,6 @@ function TableBodyRow({
       </React.Fragment>
     );
 
-  console.log(ref?.current?.scrollHeight);
-
   const {
     startDate,
     endDate,
