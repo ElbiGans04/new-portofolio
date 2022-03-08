@@ -137,8 +137,8 @@ export function TdButton({
 
 export const RowDetail = React.forwardRef<
   HTMLTableRowElement,
-  { open: boolean; colSpan: number; children: JSX.Element }
->(({ open, colSpan, children }, ref) => {
+  { open: boolean; colSpan: number; children: JSX.Element; height: number }
+>(({ open, colSpan, children, height }, ref) => {
   return (
     <>
       <CSSTransition
@@ -147,9 +147,11 @@ export const RowDetail = React.forwardRef<
         in={open == true}
         timeout={500}
       >
-        <RowDetails ref={ref}>
+        <RowDetails borderBottom={open}>
           <RowDetailsContent colSpan={colSpan}>
-            <RowDetailsContentContent>{children}</RowDetailsContentContent>
+            <RowDetailsContentContent height={height} ref={ref}>
+              {children}
+            </RowDetailsContentContent>
           </RowDetailsContent>
         </RowDetails>
       </CSSTransition>
@@ -238,35 +240,25 @@ const Table = styled.table`
   }
 `;
 
-const RowDetails = styled.tr`
-  border: none !important;
-  transition: var(--transition);
-  line-height: 0;
-  height: 0%;
-  font-size: 0;
-
-  &.row-details-enter-done {
-    border-bottom: 2px solid rgba(0, 0, 0, 0.2) !important;
-  }
+const RowDetails = styled.tr<{ borderBottom: boolean }>`
+  border-bottom: ${({ borderBottom }) =>
+    borderBottom ? '2px solid rgba(0,0,0,0.2)' : '0'} !important;
 `;
 
 const RowDetailsContent = styled.td`
   padding: 0 !important;
-  overflow: hidden;
-  transition: var(--transition);
-  height: 0%;
 `;
 
-const RowDetailsContentContent = styled.div`
-  display: grid;
-  justify-items: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  transition: var(--transition);
+const RowDetailsContentContent = styled.div<{ height: number }>`
+  overflow: hidden;
+  max-height: ${({ height }) => `${height}px`};
   padding: 0;
   overflow: hidden;
   text-align: center;
+  transition: var(--transition);
+  display: grid;
+  justify-items: center;
+  align-items: center;
 `;
 
 export const RowDetailsContentContentContent = styled.div`
@@ -280,6 +272,7 @@ export const RowDetailsContentContentContent = styled.div`
   padding: 0;
   overflow: hidden;
   text-align: center;
+  margin: 1rem 0;
 `;
 
 export const TdActions = styled.div`

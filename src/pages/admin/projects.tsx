@@ -149,6 +149,8 @@ function TableBodyRow({
       </React.Fragment>
     );
 
+  console.log(ref?.current?.scrollHeight);
+
   const {
     startDate,
     endDate,
@@ -177,33 +179,38 @@ function TableBodyRow({
         <TdButton dispatch={dispatch} payload={project} />
       </tr>
       {/* Row Details */}
-      <RowDetail ref={ref} open={detail} colSpan={3}>
+      <RowDetail
+        ref={ref}
+        open={detail}
+        colSpan={4}
+        height={detail && ref.current ? ref.current.scrollHeight : 0}
+      >
         <React.Fragment>
           <RowDetailsContentContentContent>
-            <div>Development start date</div>
-            <div>{parseDate(startDate)}</div>
+            <p>Development start date</p>
+            <p>{parseDate(startDate)}</p>
           </RowDetailsContentContentContent>
           <RowDetailsContentContentContent>
-            <div>Development completion date</div>
-            <div>{parseDate(endDate)}</div>
+            <p>Development completion date</p>
+            <p>{parseDate(endDate)}</p>
           </RowDetailsContentContentContent>
           <RowDetailsContentContentContent>
-            <div>Images</div>
-            <div>{images.map((image) => image.ref).join(', ')}</div>
+            <p>Images</p>
+            <p>{images.map((image) => image.ref).join(', ')}</p>
           </RowDetailsContentContentContent>
           <RowDetailsContentContentContent>
-            <div>Tools</div>
-            <div>{getStringOfTools(tools)}</div>
+            <p>Tools</p>
+            <p>{getStringOfTools(tools)}</p>
           </RowDetailsContentContentContent>
           <RowDetailsContentContentContent>
-            <div>Website type</div>
-            <div>
+            <p>Website type</p>
+            <p>
               {typeof typeProject == 'string' ? typeProject : typeProject.name}
-            </div>
+            </p>
           </RowDetailsContentContentContent>
           <RowDetailsContentContentContent>
-            <div>Website url</div>
-            <div>{url}</div>
+            <p>Website url</p>
+            <p>{url}</p>
           </RowDetailsContentContentContent>
         </React.Fragment>
       </RowDetail>
