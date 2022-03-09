@@ -4,33 +4,24 @@ import {
 } from '@src/types/controllersRoutersApi';
 import runMiddleware from '@src/middleware/runMiddleware';
 import { formidableHandler } from '@src/middleware/formidable';
-import { isObject } from '@src/utils/typescript/narrowing';
 import HttpError from '@src/utils/httpError';
+import Joi from 'joi';
+import { OObject } from '@src/types/jsonApi/object';
+
+const LoginSchemaValidation = Joi.object({
+  type: Joi.string().max(50).required(),
+  id: Joi.string().max(100),
+  attributes: Joi.object({
+    email: Joi.string().max(100).required(),
+    password: Joi.string().max(50).required(),
+  }).required(),
+}).required();
 
 class Login {
   async postLogin(req: RequestControllerRouter, res: RespondControllerRouter) {
     await runMiddleware(req, res, formidableHandler);
 
-    const { attributes } = req.body;
-
-    if (!isObject(attributes) || Array.isArray(attributes)) {
-      throw new HttpError(
-        'Entity not valid',
-        406,
-        'This happens because the email and password not sent to server',
-      );
-    }
-
-    if (
-      typeof attributes.email !== 'string' ||
-      typeof attributes.password !== 'string'
-    ) {
-      throw new HttpError(
-        'Type of password field and username field not supported',
-        406,
-        'Please send password field and username field as string',
-      );
-    }
+    const { attributes } = this.validation(req.body);
 
     if (
       process.env.EMAIL !== attributes.email ||
@@ -51,6 +42,15 @@ class Login {
     return res.status(200).json({
       meta: { title: 'success to login', code: 200, isLoggedIn: true },
     });
+  }
+
+  validation(body: { [index: string]: OObject }) {
+    const valid = Joi.attempt(body, LoginSchemaValidation) as {
+      type: string;
+      id?: string;
+      attributes: { email: string; password: string };
+    };
+    return valid;
   }
 }
 
