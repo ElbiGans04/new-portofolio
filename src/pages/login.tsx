@@ -1,69 +1,54 @@
-import Head from 'next/head';
-import styled from 'styled-components';
+import Button from '@src/components/Button';
 import Input from '@src/components/Input';
 import Label from '@src/components/Label';
-import Button from '@src/components/Button';
-import { FormEvent, useState } from 'react';
-import { AiOutlineClose } from 'react-icons/ai';
 import { DocErrors, DocMeta } from '@src/types/jsonApi';
-import { Dispatch, SetStateAction } from 'react';
-import useUser from '../hooks/useUser';
+import { fetcherGeneric } from '@src/utils/fetcher';
+import Head from 'next/head';
+import { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { AiOutlineClose } from 'react-icons/ai';
 import { CSSTransition } from 'react-transition-group';
+import styled from 'styled-components';
+import useUser from '../hooks/useUser';
 
-interface EventTargetType extends FormEvent<HTMLFormElement> {
-  currentTarget: EventTarget &
-    HTMLFormElement & {
-      email: {
-        value: string;
-      };
-      password: {
-        value: string;
-      };
-    };
+interface DataForm {
+  email: string;
+  password: string;
 }
 
 export default function Login() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<DataForm>();
   const { mutateUser } = useUser({
     redirectTo: '/admin/projects',
     redirectIfFound: true,
   });
-  const [message, setMessage] = useState<null | DocErrors>(null);
-  async function onSubmit(event: EventTargetType) {
-    try {
-      event.preventDefault();
+  const ref = useRef<HTMLDivElement>(null);
+  const [errorMessage, setErrorMessage] = useState<null | DocErrors>(null);
 
-      // Value
-      if (event.currentTarget !== null) {
-        const body = {
-          type: 'account',
-          attributes: {
-            email: event.currentTarget.email.value,
-            password: event.currentTarget.password.value,
-          },
-        };
+  const onSubmit = handleSubmit((data) => {
+    fetcherGeneric<DocMeta>('/api/auth/login', {
+      method: 'post',
+      body: JSON.stringify({ type: 'Admin', attributes: data }),
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+      },
+    })
+      .then((res) => {
+        mutateUser(res).catch((err) => console.error(err));
+      })
+      .catch((err) => {
+        setErrorMessage(err as DocErrors);
+      });
+  });
 
-        // Mengembalikan Doc error atau metta
-        const request = await fetch('/api/auth/login', {
-          method: 'post',
-          body: JSON.stringify(body),
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
-          },
-        });
+  const maxHeightMessage =
+    ref.current &&
+    parseInt(getComputedStyle(ref.current).maxHeight.split('px')[0]);
 
-        if (!request.ok) {
-          const request2 = (await request.json()) as DocErrors;
-          setMessage(request2);
-        }
-
-        const request2 = (await request.json()) as DocMeta;
-
-        await mutateUser(request2);
-      }
-    } catch (err) {
-      alert('Found a error when trigger mutation data');
-    }
-  }
   return (
     <Container>
       <Head>
@@ -72,13 +57,34 @@ export default function Login() {
 
       {/* Transition */}
       <CSSTransition
-        in={message === null ? false : true}
+        in={errorMessage === null ? false : true}
         timeout={500}
         classNames="message-login"
+        nodeRef={ref}
       >
-        <MessageParent>
-          <MessageComponent setMessage={setMessage} message={message} />
-        </MessageParent>
+        <BoxCollapse
+          maxHeight={
+            ref.current && errorMessage !== null && maxHeightMessage !== null
+              ? maxHeightMessage <= 0
+                ? ref.current.scrollHeight
+                : maxHeightMessage
+              : 0
+          }
+          ref={ref}
+        >
+          <MessageParent>
+            <p>
+              {errorMessage?.errors &&
+                errorMessage.errors.map((error) => error.title).join(', ')}
+            </p>
+            <AiOutlineClose
+              title="close message"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setErrorMessage(null)}
+              size="1.3em"
+            />
+          </MessageParent>
+        </BoxCollapse>
       </CSSTransition>
       <Form onSubmit={onSubmit}>
         <FormRow>
@@ -89,8 +95,28 @@ export default function Login() {
             placeholder="Enter your email"
             type="email"
             id="email"
-            name="email"
+            borderColor={errors.email && 'var(--red2)'}
+            borderColor2={errors.email && 'var(--red)'}
+            {...register('email', {
+              required: { value: true, message: 'Please insert email' },
+              pattern: {
+                value:
+                  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                message: 'Please insert valid email',
+              },
+            })}
           />
+          {errors.email?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.email.message}
+            </p>
+          )}
         </FormRow>
         <FormRow>
           <Label size={1} minSize={1} htmlFor="password">
@@ -100,8 +126,23 @@ export default function Login() {
             placeholder="Enter your password"
             type="password"
             id="password"
-            name="password"
+            borderColor={errors.password && 'var(--red2)'}
+            borderColor2={errors.password && 'var(--red)'}
+            {...register('password', {
+              required: { value: true, message: 'Pleas insert your password' },
+            })}
           />
+          {errors.password?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.password.message}
+            </p>
+          )}
         </FormRow>
 
         <NewButton type="submit">Enter</NewButton>
@@ -110,56 +151,24 @@ export default function Login() {
   );
 }
 
-function MessageComponent({
-  message,
-  setMessage,
-}: {
-  message: DocErrors | null;
-  setMessage: Dispatch<SetStateAction<DocErrors | null>>;
-}) {
-  let messageText = '';
-  if (message !== null) {
-    message.errors.forEach((value) => {
-      messageText += `${value.title}, `;
-    });
-  }
-
-  return (
-    <MessageContainer>
-      {messageText}
-      <AiOutlineClose onClick={() => setMessage(null)} size="1.3rem" />
-    </MessageContainer>
-  );
-}
-const MessageParent = styled.div`
-  width: 100%;
-  height: 0;
+const BoxCollapse = styled.div<{ maxHeight: number }>`
   overflow: hidden;
-  transition: 0.5s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 0.5rem;
+  max-height: ${({ maxHeight }) => `${maxHeight}px`}!important;
+  transition: var(--transition);
   color: #842029;
   background-color: #f8d7da;
-  border-color: #f5c2c7;
-  line-height: 1.3rem;
-  border-radius: 0.4rem;
-`;
-const MessageContainer = styled.div`
   width: 100%;
-  height: 100%;
-  font-size: 0.9rem;
+  border-radius: 0.3rem;
+  padding: 0rem !important;
+`;
 
+const MessageParent = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: 0.5s;
-
-  & svg {
-    margin-left: 0.3rem;
-    cursor: pointer;
-  }
+  width: 100%;
+  padding: 1rem;
+  height: 100%;
 `;
 
 const Container = styled.div`
@@ -176,14 +185,15 @@ const Container = styled.div`
   }
 `;
 const Form = styled.form<{
-  onSubmit: (event: EventTargetType) => Promise<void>;
+  onSubmit: (e: any) => Promise<void>;
 }>`
   width: 100%;
   height: 100%;
-  display: grid;
-  justify-items: center;
+  display: flex;
+  justify-content: center;
   align-items: center;
   grid-template-rows: repeat(3, 1fr);
+  flex-flow: column;
 `;
 const FormRow = styled.div`
   width: 100%;
@@ -195,5 +205,5 @@ const FormRow = styled.div`
 
 const NewButton = styled(Button)`
   width: 100%;
-  margin-top: 0.3rem;
+  margin: 1rem 0;
 `;
