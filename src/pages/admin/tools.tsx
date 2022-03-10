@@ -21,12 +21,12 @@ import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
 import type { admin } from '@src/types/admin';
 import { Dispatch, DocAdminData } from '@src/types/admin';
-import type { DocMeta, ResourceObject } from '@src/types/jsonApi/index';
-import { OObjectWithFiles } from '@src/types/jsonApi/object';
+import type { DocMeta } from '@src/types/jsonApi/index';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import getRandom from '@src/utils/randomNumber';
 import Head from 'next/head';
-import React, { FormEvent, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
+import { useForm } from 'react-hook-form';
 import { useSWRConfig } from 'swr';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
@@ -116,9 +116,30 @@ function SwitchModal({
   dispatch: Dispatch;
 }): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
-
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+    reset,
+  } = useForm<{ name: string; as: string }>({
+    shouldUnregister: false,
+  });
   // Check apakah jenis data sesuai
   const row = state.row;
+
+  useEffect(() => {
+    if (
+      state.modal === 'update' &&
+      state.row &&
+      state.row.attributes &&
+      state.row.type === 'Tools'
+    ) {
+      reset(
+        { name: state.row.attributes.name, as: state.row.attributes.as },
+        { keepErrors: false },
+      );
+    }
+  }, [reset, state.modal, state.row]);
 
   /* 
 
@@ -126,130 +147,165 @@ function SwitchModal({
 
   */
 
-  async function onSubmitModalAdd(event: FormEvent<HTMLFormElement>) {
-    try {
-      event.preventDefault();
-      const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
-        type: 'tool',
-        attributes: {},
-      };
-      const form = new FormData(event.currentTarget);
+  const onSubmitModalAdd = handleSubmit((data) => {
+    dispatch({ type: 'modal/request/start' });
 
-      if (document.attributes !== undefined) {
-        for (const [index, value] of form.entries()) {
-          document.attributes[index] = value;
-        }
-
-        dispatch({ type: 'modal/request/start' });
-
-        const request = await fetcherGeneric<DocMeta>('/api/tools', {
-          method: 'post',
-          body: JSON.stringify(document),
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
-          },
-        });
-
+    fetcherGeneric<DocMeta>('/api/tools', {
+      method: 'post',
+      body: JSON.stringify({
+        type: 'Tool',
+        attributes: data,
+      }),
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+      },
+    })
+      .then((result) => {
         dispatch({
           type: 'modal/request/finish',
-          payload: { message: request.meta.title as string },
+          payload: { message: result.meta.title as string },
         });
-
-        await mutate('/api/tools');
-      }
-    } catch (err) {
-      alert('Error');
-      console.log(err);
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: 'Error happend when request' },
+        mutate('/api/tools').catch((err) => {
+          console.log(err);
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        dispatch({
+          type: 'modal/request/finish',
+          payload: { message: 'Failed When Send Data' },
+        });
+        mutate('/api/tools').catch((err) => {
+          console.log(err);
+        });
       });
-    }
-  }
+  });
 
-  async function onSubmitModalDelete(id: string) {
-    try {
+  function onSubmitModalDelete() {
+    if (row && row.id) {
       dispatch({ type: 'modal/request/start' });
 
-      const request = await fetcherGeneric<DocMeta>(`/api/tools/${id}`, {
-        method: 'delete',
-      });
-
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: request.meta.title as string },
-      });
-
-      await mutate('/api/tools');
-    } catch (err) {
-      alert('Error');
-      console.log(err);
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: 'Error happend when request' },
-      });
+      fetcherGeneric<DocMeta>(`/api/tools/${row.id}`, {
+        method: 'DELETE',
+      })
+        .then((result) => {
+          dispatch({
+            type: 'modal/request/finish',
+            payload: { message: result.meta.title as string },
+          });
+          mutate('/api/tools').catch((err) => {
+            console.log(err);
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+          dispatch({
+            type: 'modal/request/finish',
+            payload: { message: 'Failed When Send Data' },
+          });
+          mutate('/api/tools').catch((err) => {
+            console.log(err);
+          });
+        });
     }
   }
 
-  async function onSubmitModalUpdate(
-    event: FormEvent<HTMLFormElement>,
-    id: string,
-  ) {
-    try {
-      event.preventDefault();
-      const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
-        type: 'tool',
-        id,
-        attributes: {},
-      };
-      const form = new FormData(event.currentTarget);
-      if (document.attributes !== undefined) {
-        for (const [index, value] of form.entries()) {
-          document.attributes[index] = value;
-        }
+  const onSubmitModalUpdate = handleSubmit((data) => {
+    if (row && row.id) {
+      dispatch({ type: 'modal/request/start' });
 
-        dispatch({ type: 'modal/request/start' });
-        const request = await fetcherGeneric<DocMeta>(`/api/tools/${id}`, {
-          method: 'PATCH',
-          body: JSON.stringify(document),
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
-          },
+      fetcherGeneric<DocMeta>(`/api/tools/${row.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          type: 'Tool',
+          id: row.id,
+          attributes: data,
+        }),
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+        },
+      })
+        .then((result) => {
+          dispatch({
+            type: 'modal/request/finish',
+            payload: { message: result.meta.title as string },
+          });
+          mutate('/api/tools').catch((err) => {
+            console.log(err);
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+          dispatch({
+            type: 'modal/request/finish',
+            payload: { message: 'Failed When Send Data' },
+          });
+          mutate('/api/tools').catch((err) => {
+            console.log(err);
+          });
         });
-
-        dispatch({
-          type: 'modal/request/finish',
-          payload: { message: request.meta.title as string },
-        });
-
-        await mutate('/api/tools');
-      }
-    } catch (err) {
-      alert('Error');
-      console.log(err);
-      dispatch({
-        type: 'modal/request/finish',
-        payload: { message: 'Error happend when request' },
-      });
     }
-  }
+  });
 
   switch (state.modal) {
     case 'add': {
       return (
-        <ModalForm onSubmit={(event) => onSubmitModalAdd(event)}>
+        <ModalForm onSubmit={onSubmitModalAdd}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label minSize={1} size={1} htmlFor="name">
                 Name:
               </Label>
-              <Input name="name" id="name" placeholder="insert name" />
+              <Input
+                borderColor={errors.name && 'var(--red2)'}
+                borderColor2={errors.name && 'var(--red)'}
+                {...register('name', {
+                  maxLength: { value: 100, message: 'Maximum Length is 100' },
+                  required: {
+                    value: true,
+                    message: 'Please insert name field',
+                  },
+                })}
+                id="name"
+                placeholder="Insert name"
+              />
+              {errors.name?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.name.message}
+                </p>
+              )}
             </ModalFormContentRow>
             <ModalFormContentRow>
               <Label minSize={1} size={1} htmlFor="as">
                 As:
               </Label>
-              <Input name="as" id="as" placeholder="insert as" />
+              <Input
+                borderColor={errors.as && 'var(--red2)'}
+                borderColor2={errors.as && 'var(--red)'}
+                {...register('as', {
+                  maxLength: { value: 100, message: 'Maximum Length is 100' },
+                  required: { value: true, message: 'Please insert as field' },
+                })}
+                id="as"
+                placeholder="Insert as"
+              />
+              {errors.as?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.as.message}
+                </p>
+              )}
             </ModalFormContentRow>
           </ModalFormContent>
           <ModalFormFooter>
@@ -259,10 +315,6 @@ function SwitchModal({
       );
     }
     case 'delete': {
-      if (!row) throw new Error('row not found');
-      if (row.type === 'Projects') throw new Error('Type of row is wrong');
-      if (row.id == undefined) throw new Error('row id not found');
-
       return (
         <ModalMain2>
           <ModalContent2>
@@ -271,46 +323,70 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmitModalDelete(row.id ? row.id : '')}>
-              DELETE
-            </Button>
+            <Button onClick={() => onSubmitModalDelete()}>DELETE</Button>
           </ModalFooter>
         </ModalMain2>
       );
     }
 
     case 'update': {
-      if (!row) throw new Error('row not found');
-      if (row.id === undefined) throw new Error('row id not found');
-      if (row.type === 'Projects') throw new Error('Type of row is wrong');
-      if (row.attributes === undefined)
-        throw new Error('row.attributes is undefined');
       return (
-        <ModalForm
-          onSubmit={(event) => onSubmitModalUpdate(event, row.id ? row.id : '')}
-        >
+        <ModalForm onSubmit={onSubmitModalUpdate}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label minSize={1} size={1} htmlFor="name">
                 Name:
               </Label>
               <Input
-                name="name"
-                defaultValue={row.attributes.name}
+                borderColor={errors.name && 'var(--red2)'}
+                borderColor2={errors.name && 'var(--red)'}
+                {...register('name', {
+                  maxLength: { value: 100, message: 'Maximum Length is 100' },
+                  required: {
+                    value: true,
+                    message: 'Please insert name field',
+                  },
+                })}
                 id="name"
-                placeholder="insert name"
+                placeholder="Insert name"
               />
+              {errors.name?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.name.message}
+                </p>
+              )}
             </ModalFormContentRow>
             <ModalFormContentRow>
               <Label minSize={1} size={1} htmlFor="as">
                 As:
               </Label>
               <Input
-                name="as"
-                defaultValue={row.attributes.as}
+                borderColor={errors.as && 'var(--red2)'}
+                borderColor2={errors.as && 'var(--red)'}
+                {...register('as', {
+                  maxLength: { value: 100, message: 'Maximum Length is 100' },
+                  required: { value: true, message: 'Please insert as field' },
+                })}
                 id="as"
-                placeholder="insert as"
+                placeholder="Insert as"
               />
+              {errors.as?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.as.message}
+                </p>
+              )}
             </ModalFormContentRow>
           </ModalFormContent>
           <ModalFormFooter>
