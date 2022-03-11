@@ -35,7 +35,6 @@ import type {
   DocMeta,
   ResourceObject,
 } from '@src/types/jsonApi';
-import { OObject, OObjectWithFiles } from '@src/types/jsonApi/object';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import getRandom from '@src/utils/randomNumber';
 import { initializeApp } from 'firebase/app';
@@ -48,7 +47,7 @@ import {
   FirebaseStorage,
 } from 'firebase/storage';
 import Head from 'next/head';
-import React, { useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState, useEffect } from 'react';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
@@ -57,8 +56,25 @@ import projectSchema from '@src/types/mongoose/schemas/project';
 import { isTool, isObject } from '@src/utils/typescript/narrowing';
 import parseDate from '@src/utils/getStringDate';
 import getStringOfTools from '@src/utils/getStringOfTools';
+import {
+  useForm,
+  Controller,
+  Control,
+  UseFormUnregister,
+  UseFormSetValue,
+} from 'react-hook-form';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
+type ModalDataValidation = {
+  title: string;
+  startDate: string;
+  endDate: string;
+  tools: string[];
+  typeProject: string;
+  images: FileList;
+  description: string;
+  url: string;
+};
 
 export default function Projects() {
   const { data, user, error, ref } = useAdmin('/api/projects');
@@ -232,79 +248,105 @@ function SwitchModal({
     DocDataDiscriminated<ResourceObject<toolSchema>[]>,
     DocErrors
   >('/api/tools', fetcherGeneric);
-  const row = state.row;
   const firebaseApp = initializeApp(firebaseConfig);
   const firebaseRootStroage = getStorage(firebaseApp);
+  const {
+    reset,
+    formState: { errors },
+    register,
+    handleSubmit,
+    control,
+    unregister,
+    setValue,
+  } = useForm<ModalDataValidation>();
+  const row = state.row;
+  useEffect(() => {
+    if (
+      state.modal === 'update' &&
+      state.row &&
+      state.row.attributes &&
+      state.row.type === 'Projects'
+    ) {
+      const {
+        title,
+        startDate,
+        endDate,
+        url,
+        description,
+        typeProject,
+        tools,
+      } = state.row.attributes;
+      const fixTools = Array.isArray(tools)
+        ? tools.map((tool) => (isTool(tool) ? tool._id : tool.toString()))
+        : isTool(tools)
+        ? [tools._id]
+        : [tools.toString()];
+      reset(
+        {
+          title,
+          startDate: parseDate(startDate),
+          endDate: parseDate(endDate),
+          url,
+          description,
+          typeProject:
+            typeof typeProject == 'string' ? typeProject : typeProject._id,
+          tools: fixTools as string[],
+        },
+        { keepErrors: false },
+      );
+    }
+  }, [reset, state.modal, state.row]);
 
   /* 
     Event Handler function
   */
-  async function onSubmitModalDelete(id: string) {
+  async function onSubmitModalDelete() {
     try {
-      if (!modalNarrowing(row)) throw new Error('Invalid row format');
-      if (!row.attributes) throw new Error('row.attributes not found');
+      if (row && row.attributes && row.type == 'Projects' && row.id) {
+        dispatch({ type: 'modal/request/start' });
 
-      dispatch({ type: 'modal/request/start' });
+        await deleteImages(row.attributes.images, firebaseRootStroage);
 
-      await deleteImages(row.attributes.images, firebaseRootStroage);
+        const request = await fetcherGeneric<DocMeta>(
+          `/api/projects/${row.id}`,
+          {
+            method: 'delete',
+          },
+        );
 
-      const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
-        method: 'delete',
-      });
-
-      await modalFinish(request.meta.title as string, dispatch, mutate);
+        await modalFinish(request.meta.title as string, dispatch, mutate);
+      }
     } catch (err) {
       await EventErrorHandler(err, dispatch, mutate).catch((err) =>
         console.error(err),
       );
     }
   }
-  async function onSubmitModalAdd(event: React.FormEvent<HTMLFormElement>) {
-    const document: ResourceObject<{ [index: string]: OObjectWithFiles }> = {
+
+  const onSubmitModalAdd = handleSubmit(async function (data) {
+    const Doc: {
+      type: string;
+      attributes: {
+        [Property in keyof typeof data]: Property extends 'images'
+          ? typeof data['images'] | { src: string; ref: string }[]
+          : typeof data[Property];
+      };
+    } = {
       type: 'project',
-      attributes: {},
+      attributes: { ...data },
     };
+
     try {
-      event.preventDefault();
-      const form2 = new FormData(event.currentTarget);
-      const inputFiles = event.currentTarget[3] as HTMLInputElement;
-      const fileImage = inputFiles.files;
-
-      for (const [fieldName, fieldValue] of form2.entries()) {
-        if (document.attributes) {
-          // Check Jika tools properti sudah diisi
-          if (document.attributes.tools) {
-            // Jika sudah diganti sebelumnya
-            if (Array.isArray(document.attributes.tools)) {
-              document.attributes.tools.push(fieldValue as OObject);
-            } else {
-              document.attributes.tools = [
-                document.attributes.tools as OObject,
-                fieldValue as OObject,
-              ];
-            }
-
-            continue;
-          }
-
-          document.attributes[fieldName] = fieldValue;
-        }
-      }
-
-      if (!document.attributes) throw new Error('Document.attribute not found');
-
       // Logic
       dispatch({ type: 'modal/request/start' });
-      if (fileImage) {
-        document.attributes.images = await uploadImages(
-          fileImage,
-          firebaseRootStroage,
-        );
-      }
+      Doc.attributes.images = await uploadImages(
+        data.images,
+        firebaseRootStroage,
+      );
 
       const request = await fetcherGeneric<DocMeta>('/api/projects', {
         method: 'post',
-        body: JSON.stringify(document),
+        body: JSON.stringify(Doc),
         headers: {
           'content-type': 'application/vnd.api+json',
         },
@@ -312,118 +354,96 @@ function SwitchModal({
 
       await modalFinish(request.meta.title as string, dispatch, mutate);
     } catch (err) {
-      const images = document?.attributes?.images;
+      const images = Doc.attributes.images;
       const imagesToDelete: Promise<void>[] = [];
 
       if (images && Array.isArray(images)) {
         images.forEach((image) => {
           if (isObject(image)) {
             imagesToDelete.push(
-              deleteObject(ref(firebaseRootStroage, image.ref as string)),
+              deleteObject(ref(firebaseRootStroage, image.ref)),
             );
           }
         });
       }
 
       Promise.all(imagesToDelete).catch((err) => console.log(err));
+      console.log(err);
       await EventErrorHandler(err, dispatch, mutate).catch((err) =>
         console.error(err),
       );
     }
-  }
-
-  async function onSubmitModalUpdate(
-    event: React.FormEvent<HTMLFormElement>,
-    id: string,
-  ) {
-    event.preventDefault();
-    const form2 = new FormData(event.currentTarget);
-    const inputFiles = event.currentTarget[3] as HTMLInputElement;
-    const fileImage = inputFiles.files;
-
-    const document: ResourceObject<{
-      [index: string]: OObjectWithFiles | OObject;
-    }> = {
-      id,
+  });
+  const onSubmitModalUpdate = handleSubmit(async (data) => {
+    const Doc: {
+      type: string;
+      id: string;
+      attributes: {
+        [Property in keyof typeof data]: Property extends 'images'
+          ? typeof data['images'] | { src: string; ref: string }[]
+          : typeof data[Property];
+      };
+    } = {
       type: 'project',
-      attributes: {},
+      id: row?.id || '',
+      attributes: { ...data },
     };
-    try {
-      if (!modalNarrowing(row)) throw new Error('Invalid row format');
-      if (!row.attributes) throw new Error('row.attributes not found');
+    if (row && row.attributes && row.type == 'Projects' && row.id) {
+      try {
+        const imagesOld = row.attributes.images.map((image) => ({
+          src: image.src,
+          ref: image.ref,
+        }));
 
-      const images = row.attributes.images.map((image) => ({
-        src: image.src,
-        ref: image.ref,
-      }));
+        // Logic
+        dispatch({ type: 'modal/request/start' });
 
-      if (document.attributes == undefined)
-        throw new Error('document.attributes is missing');
+        if (data.images.length > 0) {
+          Doc.attributes.images = await uploadImages(
+            data.images,
+            firebaseRootStroage,
+          );
+        } else Doc.attributes.images = imagesOld;
 
-      for (const [fieldName, fieldValue] of form2.entries()) {
-        if (document.attributes) {
-          // Check Jika tools properti sudah diisi
-          if (document.attributes.tools) {
-            // Jika sudah diganti sebelumnya
-            if (Array.isArray(document.attributes.tools)) {
-              document.attributes.tools.push(fieldValue as OObject);
-            } else {
-              document.attributes.tools = [
-                document.attributes.tools as OObject,
-                fieldValue as OObject,
-              ];
-            }
+        const request = await fetcherGeneric<DocMeta>(
+          `/api/projects/${row.id}`,
+          {
+            method: 'PATCH',
+            body: JSON.stringify(Doc),
+            headers: {
+              'content-type': 'application/vnd.api+json',
+            },
+          },
+        );
 
-            continue;
+        if (data.images.length > 0)
+          await deleteImages(row.attributes.images, firebaseRootStroage);
+
+        await modalFinish(request.meta.title as string, dispatch, mutate);
+      } catch (err) {
+        if (data.images.length > 0) {
+          const images = Doc.attributes.images;
+          const imagesToDelete: Promise<void>[] = [];
+
+          if (images && Array.isArray(images)) {
+            images.forEach((image) => {
+              if (isObject(image)) {
+                imagesToDelete.push(
+                  deleteObject(ref(firebaseRootStroage, image.ref)),
+                );
+              }
+            });
           }
 
-          if (fieldName !== 'images')
-            document.attributes[fieldName] = fieldValue;
+          Promise.all(imagesToDelete).catch((err) => console.log(err));
         }
-      }
-      // Logic
-      dispatch({ type: 'modal/request/start' });
-      if (fileImage && fileImage.length > 0) {
-        document.attributes.images = await uploadImages(
-          fileImage,
-          firebaseRootStroage,
+        console.log(err);
+        await EventErrorHandler(err, dispatch, mutate).catch((err) =>
+          console.error(err),
         );
-      } else document.attributes.images = images as any as OObject;
-
-      const request = await fetcherGeneric<DocMeta>(`/api/projects/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(document),
-        headers: {
-          'content-type': 'application/vnd.api+json',
-        },
-      });
-
-      if (fileImage && fileImage.length > 0)
-        await deleteImages(row.attributes.images, firebaseRootStroage);
-
-      await modalFinish(request.meta.title as string, dispatch, mutate);
-    } catch (err) {
-      if (fileImage && fileImage.length > 0) {
-        const images = document?.attributes?.images;
-        const imagesToDelete: Promise<void>[] = [];
-
-        if (images && Array.isArray(images)) {
-          images.forEach((image) => {
-            if (isObject(image)) {
-              imagesToDelete.push(
-                deleteObject(ref(firebaseRootStroage, image.ref as string)),
-              );
-            }
-          });
-        }
-
-        Promise.all(imagesToDelete).catch((err) => console.log(err));
       }
-      await EventErrorHandler(err, dispatch, mutate).catch((err) =>
-        console.error(err),
-      );
     }
-  }
+  });
 
   if (error) {
     return (
@@ -452,19 +472,44 @@ function SwitchModal({
   switch (state.modal) {
     case 'add':
       return (
-        <ModalForm onSubmit={(event) => onSubmitModalAdd(event)}>
+        <ModalForm onSubmit={onSubmitModalAdd}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label size={1} minSize={1} htmlFor="title">
                 Title:{' '}
               </Label>
               <Input
-                required
                 type="text"
                 id="title"
-                placeholder="enter the project title"
-                name="title"
+                placeholder="enter the name of project"
+                borderColor={errors.title && 'var(--red2)'}
+                borderColor2={errors.title && 'var(--red)'}
+                {...register('title', {
+                  required: {
+                    value: true,
+                    message: 'Please insert title',
+                  },
+                  maxLength: {
+                    value: 50,
+                    message: 'Maximum string length is 50',
+                  },
+                  minLength: {
+                    value: 3,
+                    message: 'Minimum string length is 3',
+                  },
+                })}
               />
+              {errors.title?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.title.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -472,12 +517,37 @@ function SwitchModal({
                 Date start of development:{' '}
               </Label>
               <Input
-                required
                 type="date"
                 id="startDate"
-                placeholder="enter the start date of development"
-                name="startDate"
+                placeholder="Enter the start date of development"
+                borderColor={errors.startDate && 'var(--red2)'}
+                borderColor2={errors.startDate && 'var(--red)'}
+                {...register('startDate', {
+                  // valueAsDate: true,
+                  validate: (value) => {
+                    if (typeof value !== 'string') return 'INVALID DATE TYPE';
+                    const date = new Date(value);
+                    if (date.getFullYear() < 2018)
+                      return "that year you haven't learned coding";
+                    return true;
+                  },
+                  required: {
+                    value: true,
+                    message: 'Please insert date',
+                  },
+                })}
               />
+              {errors.startDate?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.startDate.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -485,12 +555,36 @@ function SwitchModal({
                 Date end of development:
               </Label>
               <Input
-                required
                 id="endDate"
                 type="date"
                 placeholder="enter the end date of development"
-                name="endDate"
+                borderColor={errors.endDate && 'var(--red2)'}
+                borderColor2={errors.endDate && 'var(--red)'}
+                {...register('endDate', {
+                  required: {
+                    value: true,
+                    message: 'Please insert date',
+                  },
+                  validate: (value) => {
+                    if (typeof value !== 'string') return 'INVALID DATE TYPE';
+                    const date = new Date(value);
+                    if (date.getFullYear() < 2018)
+                      return "that year you haven't learned coding";
+                    return true;
+                  },
+                })}
               />
+              {errors.endDate?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.endDate.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -498,13 +592,51 @@ function SwitchModal({
                 Images:
               </Label>
               <Input
-                required
-                name="images"
+                borderColor={errors.images && 'var(--red2)'}
+                borderColor2={errors.images && 'var(--red)'}
+                {...register('images', {
+                  required: {
+                    value: true,
+                    message: 'Please insert image',
+                  },
+                  validate: (files) => {
+                    if (files instanceof FileList === false)
+                      return 'INVALID VALUE';
+
+                    for (let i = 0; i < files.length; i++) {
+                      const file = files[i];
+                      const fileFormat = file.name
+                        .split('.')
+                        [file.name.split('.').length - 1].toLowerCase();
+                      if (
+                        fileFormat !== 'png' &&
+                        fileFormat !== 'jpg' &&
+                        fileFormat !== 'jpeg' &&
+                        fileFormat !== 'webp'
+                      )
+                        return 'ONLY SUPPORT IMAGE WITH FORMAT png, jpeg, jpg, webp';
+                      if (file.size > 2000000) return 'MAX IMAGE SIZE IS 2MB';
+                    }
+
+                    return true;
+                  },
+                })}
                 type="file"
                 id="file"
                 multiple
-                accept=".jpg, .png, .jpeg"
+                accept=".jpg, .png, .jpeg, .webp"
               />
+              {errors.images?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.images.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -512,12 +644,34 @@ function SwitchModal({
                 Url of website:
               </Label>
               <Input
-                required
                 type="text"
                 id="url"
                 placeholder="enter url"
-                name="url"
+                borderColor={errors.url && 'var(--red2)'}
+                borderColor2={errors.url && 'var(--red)'}
+                {...register('url', {
+                  required: {
+                    value: true,
+                    message: 'Please insert url',
+                  },
+                  pattern: {
+                    value:
+                      /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi,
+                    message: 'Please insert valid url, Prefix with http/https',
+                  },
+                })}
               />
+              {errors.url?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.url.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -525,12 +679,37 @@ function SwitchModal({
                 Description :
               </Label>
               <Input
-                required
                 type="text"
                 id="description"
-                name="description"
                 placeholder="enter description of project"
+                borderColor={errors.description && 'var(--red2)'}
+                borderColor2={errors.description && 'var(--red)'}
+                {...register('description', {
+                  required: {
+                    value: true,
+                    message: 'Please insert description',
+                  },
+                  maxLength: {
+                    value: 500,
+                    message: 'Maximum string length is 500',
+                  },
+                  minLength: {
+                    value: 20,
+                    message: 'Minimum string length is 20',
+                  },
+                })}
               />
+              {errors.description?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.description.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -539,14 +718,31 @@ function SwitchModal({
               </Label>
               <ContainerCheckbox>
                 <Checkbox>
-                  <Input name="typeProject" type="radio" id="work" value="A2" />
+                  <Input
+                    type="radio"
+                    id="work"
+                    value="A2"
+                    {...register('typeProject', {
+                      required: {
+                        value: true,
+                        message: 'Please choose one',
+                      },
+                    })}
+                  />
                   <Label size={1} minSize={1} htmlFor="work">
                     Work project
                   </Label>
                 </Checkbox>
                 <Checkbox>
                   <Input
-                    name="typeProject"
+                    borderColor={errors.typeProject && 'var(--red2)'}
+                    borderColor2={errors.typeProject && 'var(--red)'}
+                    {...register('typeProject', {
+                      required: {
+                        value: true,
+                        message: 'Please choose one',
+                      },
+                    })}
                     type="radio"
                     id="personal"
                     value="A1"
@@ -556,13 +752,29 @@ function SwitchModal({
                   </Label>
                 </Checkbox>
               </ContainerCheckbox>
+              {errors.typeProject?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.typeProject.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
               <Label size={1} minSize={1} htmlFor="tools">
-                tool :
+                Tool :
               </Label>
-              <InputCollections name="tools" data={data} />
+              <InputCollections
+                setValue={setValue}
+                unregister={unregister}
+                control={control}
+                data={data}
+              />
             </ModalFormContentRow>
           </ModalFormContent>
           <ModalFormFooter>
@@ -571,10 +783,6 @@ function SwitchModal({
         </ModalForm>
       );
     case 'delete': {
-      if (!row) throw new Error('row is not found');
-      if (row.id === undefined) throw new Error('row.id not found');
-      const id = row.id;
-
       return (
         <ModalMain2>
           <ModalContent2>
@@ -583,7 +791,7 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmitModalDelete(id)}>DELETE</Button>
+            <Button onClick={onSubmitModalDelete}>DELETE</Button>
           </ModalFooter>
         </ModalMain2>
       );
@@ -593,11 +801,9 @@ function SwitchModal({
       if (!row) throw new Error('row is not found');
       if (!row.attributes) throw new Error('row.attribues is not found');
       if (row.type === 'Tools') throw new Error('type of row is wrong');
-      if (row.id === undefined) throw new Error('row.id not found');
-      const id = row.id;
 
       return (
-        <ModalForm onSubmit={(event) => onSubmitModalUpdate(event, id)}>
+        <ModalForm onSubmit={onSubmitModalUpdate}>
           <ModalFormContent>
             <ModalFormContentRow>
               <Label size={1} minSize={1} htmlFor="title">
@@ -606,11 +812,35 @@ function SwitchModal({
               <Input
                 type="text"
                 id="title"
-                placeholder="enter the project title"
-                name="title"
-                required
-                defaultValue={row.attributes.title}
+                placeholder="enter the name of project"
+                borderColor={errors.title && 'var(--red2)'}
+                borderColor2={errors.title && 'var(--red)'}
+                {...register('title', {
+                  required: {
+                    value: true,
+                    message: 'Please insert title',
+                  },
+                  maxLength: {
+                    value: 50,
+                    message: 'Maximum string length is 50',
+                  },
+                  minLength: {
+                    value: 3,
+                    message: 'Minimum string length is 3',
+                  },
+                })}
               />
+              {errors.title?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.title.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -620,11 +850,35 @@ function SwitchModal({
               <Input
                 type="date"
                 id="startDate"
-                placeholder="enter the start date of development"
-                name="startDate"
-                required
-                defaultValue={parseDate(row.attributes.startDate)}
+                placeholder="Enter the start date of development"
+                borderColor={errors.startDate && 'var(--red2)'}
+                borderColor2={errors.startDate && 'var(--red)'}
+                {...register('startDate', {
+                  // valueAsDate: true,
+                  validate: (value) => {
+                    if (typeof value !== 'string') return 'INVALID DATE TYPE';
+                    const date = new Date(value);
+                    if (date.getFullYear() < 2018)
+                      return "that year you haven't learned coding";
+                    return true;
+                  },
+                  required: {
+                    value: true,
+                    message: 'Please insert date',
+                  },
+                })}
               />
+              {errors.startDate?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.startDate.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -635,23 +889,81 @@ function SwitchModal({
                 id="endDate"
                 type="date"
                 placeholder="enter the end date of development"
-                name="endDate"
-                required
-                defaultValue={parseDate(row.attributes.endDate)}
+                borderColor={errors.endDate && 'var(--red2)'}
+                borderColor2={errors.endDate && 'var(--red)'}
+                {...register('endDate', {
+                  required: {
+                    value: true,
+                    message: 'Please insert date',
+                  },
+                  validate: (value) => {
+                    if (typeof value !== 'string') return 'INVALID DATE TYPE';
+                    const date = new Date(value);
+                    if (date.getFullYear() < 2018)
+                      return "that year you haven't learned coding";
+                    return true;
+                  },
+                })}
               />
+              {errors.endDate?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.endDate.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
-              <Label size={1} minSize={1}>
+              <Label size={1} minSize={1} htmlFor="file">
                 Images:
               </Label>
               <Input
-                name="images"
+                borderColor={errors.images && 'var(--red2)'}
+                borderColor2={errors.images && 'var(--red)'}
+                {...register('images', {
+                  validate: (files) => {
+                    if (files instanceof FileList === false)
+                      return 'INVALID VALUE';
+
+                    for (let i = 0; i < files.length; i++) {
+                      const file = files[i];
+                      const fileFormat = file.name
+                        .split('.')
+                        [file.name.split('.').length - 1].toLowerCase();
+                      if (
+                        fileFormat !== 'png' &&
+                        fileFormat !== 'jpg' &&
+                        fileFormat !== 'jpeg' &&
+                        fileFormat !== 'webp'
+                      )
+                        return 'ONLY SUPPORT IMAGE WITH FORMAT png, jpeg, jpg, webp';
+                      if (file.size > 2000000) return 'MAX IMAGE SIZE IS 2MB';
+                    }
+
+                    return true;
+                  },
+                })}
                 type="file"
                 id="file"
                 multiple
-                accept=".jpg, .png, .jpeg"
+                accept=".jpg, .png, .jpeg, .webp"
               />
+              {errors.images?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.images.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -662,10 +974,31 @@ function SwitchModal({
                 type="text"
                 id="url"
                 placeholder="enter url"
-                name="url"
-                required
-                defaultValue={row.attributes.url}
+                borderColor={errors.url && 'var(--red2)'}
+                borderColor2={errors.url && 'var(--red)'}
+                {...register('url', {
+                  required: {
+                    value: true,
+                    message: 'Please insert url',
+                  },
+                  pattern: {
+                    value:
+                      /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi,
+                    message: 'Please insert valid url, Prefix with http/https',
+                  },
+                })}
               />
+              {errors.url?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.url.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -675,11 +1008,35 @@ function SwitchModal({
               <Input
                 type="text"
                 id="description"
-                name="description"
                 placeholder="enter description of project"
-                required
-                defaultValue={row.attributes.description}
+                borderColor={errors.description && 'var(--red2)'}
+                borderColor2={errors.description && 'var(--red)'}
+                {...register('description', {
+                  required: {
+                    value: true,
+                    message: 'Please insert description',
+                  },
+                  maxLength: {
+                    value: 500,
+                    message: 'Maximum string length is 500',
+                  },
+                  minLength: {
+                    value: 20,
+                    message: 'Minimum string length is 20',
+                  },
+                })}
               />
+              {errors.description?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.description.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
@@ -689,16 +1046,15 @@ function SwitchModal({
               <ContainerCheckbox>
                 <Checkbox>
                   <Input
-                    name="typeProject"
                     type="radio"
                     id="work"
                     value="A2"
-                    required
-                    defaultChecked={
-                      typeof row.attributes.typeProject === 'string'
-                        ? undefined
-                        : row.attributes.typeProject._id.toString() === 'A2'
-                    }
+                    {...register('typeProject', {
+                      required: {
+                        value: true,
+                        message: 'Please choose one',
+                      },
+                    })}
                   />
                   <Label size={1} minSize={1} htmlFor="work">
                     Work project
@@ -706,31 +1062,45 @@ function SwitchModal({
                 </Checkbox>
                 <Checkbox>
                   <Input
-                    name="typeProject"
+                    borderColor={errors.typeProject && 'var(--red2)'}
+                    borderColor2={errors.typeProject && 'var(--red)'}
+                    {...register('typeProject', {
+                      required: {
+                        value: true,
+                        message: 'Please choose one',
+                      },
+                    })}
                     type="radio"
                     id="personal"
                     value="A1"
-                    required
-                    defaultChecked={
-                      typeof row.attributes.typeProject === 'string'
-                        ? undefined
-                        : row.attributes.typeProject._id.toString() === 'A1'
-                    }
                   />
                   <Label size={1} minSize={1} htmlFor="work">
                     Personal Project
                   </Label>
                 </Checkbox>
               </ContainerCheckbox>
+              {errors.typeProject?.message && (
+                <p
+                  style={{
+                    fontSize: '.9rem',
+                    color: 'var(--red)',
+                    margin: '0.5rem 0',
+                  }}
+                >
+                  {errors.typeProject.message}
+                </p>
+              )}
             </ModalFormContentRow>
 
             <ModalFormContentRow>
               <Label size={1} minSize={1} htmlFor="tools">
-                Tools :
+                Tool :
               </Label>
               <InputCollections
-                name="tools"
                 defaultValues={row.attributes.tools}
+                setValue={setValue}
+                unregister={unregister}
+                control={control}
                 data={data}
               />
             </ModalFormContentRow>
@@ -749,29 +1119,37 @@ function SwitchModal({
 function InputCollections({
   data,
   defaultValues,
-  name,
+  control,
+  unregister,
+  setValue,
 }: {
   data: DocDataDiscriminated<ResourceObject<toolSchema>[]>;
-  name: string;
   defaultValues?: projectSchema['tools'];
+  control: Control<ModalDataValidation>;
+  unregister: UseFormUnregister<ModalDataValidation>;
+  setValue: UseFormSetValue<ModalDataValidation>;
 }) {
-  const [inputState, setInputState] = useState(() => {
+  const [inputState, setInputState] = useState<string[]>(() => {
     if (defaultValues) {
       if (Array.isArray(defaultValues)) {
-        return defaultValues.map((value) =>
-          isTool(value) ? value._id : value.toString(),
-        );
+        return defaultValues.map((value, index) => {
+          const realValue = isTool(value) ? value._id : value.toString();
+          setValue(`tools.${index}`, realValue as string);
+          return realValue as string;
+        });
       }
     }
 
     // Jika tidak ada nilai dafault
-    return data.data[0].id ? [data.data[0].id] : [];
+    const value = data.data[0].id ? [data.data[0].id] : [''];
+    setValue('tools', value);
+    return value;
   });
 
   const collectionInput = [];
 
   // callback
-  function onChange(
+  function onChangeItem(
     event: React.ChangeEvent<HTMLSelectElement>,
     index: number,
   ) {
@@ -785,12 +1163,18 @@ function InputCollections({
     index: number,
   ) {
     const newInputState = [...inputState].filter((value, idx) => index !== idx);
-    if (newInputState.length > 0) setInputState(newInputState);
+    if (newInputState.length > 0) {
+      setInputState(newInputState);
+      unregister(`tools.${index}`);
+      setValue('tools', newInputState);
+    }
   }
 
   function onAddItem() {
     const newInputState = [...inputState];
-    newInputState.push(data.data[0].id || '');
+    const value = data.data[0].id || '';
+    newInputState.push(value);
+    setValue(`tools.${newInputState.length - 1}`, value);
     setInputState(newInputState);
   }
 
@@ -798,30 +1182,42 @@ function InputCollections({
   for (let i = 0; i < inputState.length; i++) {
     const stateInput = inputState[i];
     const element = (
-      <ContainerInput key={getRandom(i)}>
-        <select
-          onChange={(event) => onChange(event, i)}
-          value={
-            typeof stateInput == 'string' ? stateInput : stateInput.toString()
-          }
-          key={getRandom(i)}
-          name={name}
-        >
-          {data.data.map((value) => {
-            const textOption = value.attributes
-              ? value.attributes.name
-              : 'undefined';
-            return (
-              <option key={getRandom(i)} value={value.id}>
-                {textOption}
-              </option>
-            );
-          })}
-        </select>
-        <Button type="button" onClick={(event) => onRemoveItem(event, i)}>
-          X
-        </Button>
-      </ContainerInput>
+      <Controller
+        name={`tools.${i}`}
+        control={control}
+        key={getRandom(i)}
+        render={({ field: { onBlur, onChange, ref, name } }) => {
+          return (
+            <ContainerInput>
+              <select
+                name={name}
+                onChange={(event) => {
+                  onChangeItem(event, i);
+                  onChange(event.currentTarget.value);
+                }}
+                onBlur={onBlur}
+                value={stateInput}
+                key={getRandom(i)}
+                ref={ref}
+              >
+                {data.data.map((value) => {
+                  const textOption = value.attributes
+                    ? value.attributes.name
+                    : 'undefined';
+                  return (
+                    <option key={getRandom(i)} value={value.id}>
+                      {textOption}
+                    </option>
+                  );
+                })}
+              </select>
+              <Button type="button" onClick={(event) => onRemoveItem(event, i)}>
+                X
+              </Button>
+            </ContainerInput>
+          );
+        }}
+      />
     );
     collectionInput.push(element);
   }
@@ -847,7 +1243,7 @@ async function deleteImages(
 }
 
 async function uploadImages(fileImage: FileList, storage: FirebaseStorage) {
-  const images: OObjectWithFiles = [];
+  const images: { src: string; ref: string }[] = [];
   for (let i = 0; i < fileImage.length; i++) {
     const file = fileImage.item(i);
 
@@ -890,12 +1286,6 @@ async function modalFinish(
   await mutate('/api/projects');
 }
 
-function modalNarrowing(
-  row: DATA | null | ResourceProjectInterface,
-): row is ResourceProjectInterface {
-  if (row && row.type === 'Projects') return true;
-  else return false;
-}
 // Styled Component
 
 //
