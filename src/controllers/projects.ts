@@ -25,7 +25,7 @@ const ProjectSchemaValidation = Joi.object({
     startDate: Joi.date().required(),
     endDate: Joi.date().required(),
     tools: Joi.alternatives().try(
-      Joi.array().items(Joi.string().required()).unique().min(2),
+      Joi.array().items(Joi.string().required()).unique().min(1),
       Joi.string().required(),
     ),
     typeProject: Joi.string().alphanum().max(50).required(),
