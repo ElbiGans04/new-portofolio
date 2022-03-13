@@ -22,13 +22,7 @@ import {
 import firebaseConfig from '@src/config/firebase';
 import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
-import type {
-  admin,
-  DATA,
-  Dispatch,
-  DocAdminData,
-  ResourceProjectInterface,
-} from '@src/types/admin';
+import type { admin, DATA, Dispatch, DocAdminData } from '@src/types/admin';
 import type {
   DocDataDiscriminated,
   DocErrors,
