@@ -22,7 +22,13 @@ import {
 import firebaseConfig from '@src/config/firebase';
 import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
-import type { admin, DATA, Dispatch, DocAdminData } from '@src/types/admin';
+import type {
+  admin,
+  DATA,
+  Dispatch,
+  DocAdminData,
+  ResourceToolInterface,
+} from '@src/types/admin';
 import type {
   DocDataDiscriminated,
   DocErrors,
@@ -56,6 +62,8 @@ import {
   Control,
   UseFormUnregister,
   UseFormSetValue,
+  FieldError,
+  UseFormRegister,
 } from 'react-hook-form';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
@@ -239,7 +247,7 @@ function SwitchModal({
 }): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
   const { data, error } = useSWR<
-    DocDataDiscriminated<ResourceObject<toolSchema>[]>,
+    DocDataDiscriminated<ResourceToolInterface[]>,
     DocErrors
   >('/api/tools', fetcherGeneric);
   const firebaseApp = initializeApp(firebaseConfig);
@@ -466,315 +474,16 @@ function SwitchModal({
   switch (state.modal) {
     case 'add':
       return (
-        <ModalForm onSubmit={onSubmitModalAdd}>
-          <ModalFormContent>
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="title">
-                Title:{' '}
-              </Label>
-              <Input
-                type="text"
-                id="title"
-                placeholder="enter the name of project"
-                borderColor={errors.title && 'var(--red2)'}
-                borderColor2={errors.title && 'var(--red)'}
-                {...register('title', {
-                  required: {
-                    value: true,
-                    message: 'Please insert title',
-                  },
-                  maxLength: {
-                    value: 50,
-                    message: 'Maximum string length is 50',
-                  },
-                  minLength: {
-                    value: 3,
-                    message: 'Minimum string length is 3',
-                  },
-                })}
-              />
-              {errors.title?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.title.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="startDate">
-                Date start of development:{' '}
-              </Label>
-              <Input
-                type="date"
-                id="startDate"
-                placeholder="Enter the start date of development"
-                borderColor={errors.startDate && 'var(--red2)'}
-                borderColor2={errors.startDate && 'var(--red)'}
-                {...register('startDate', {
-                  // valueAsDate: true,
-                  validate: (value) => {
-                    if (typeof value !== 'string') return 'INVALID DATE TYPE';
-                    const date = new Date(value);
-                    if (date.getFullYear() < 2018)
-                      return "that year you haven't learned coding";
-                    return true;
-                  },
-                  required: {
-                    value: true,
-                    message: 'Please insert date',
-                  },
-                })}
-              />
-              {errors.startDate?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.startDate.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="endDate">
-                Date end of development:
-              </Label>
-              <Input
-                id="endDate"
-                type="date"
-                placeholder="enter the end date of development"
-                borderColor={errors.endDate && 'var(--red2)'}
-                borderColor2={errors.endDate && 'var(--red)'}
-                {...register('endDate', {
-                  required: {
-                    value: true,
-                    message: 'Please insert date',
-                  },
-                  validate: (value) => {
-                    if (typeof value !== 'string') return 'INVALID DATE TYPE';
-                    const date = new Date(value);
-                    if (date.getFullYear() < 2018)
-                      return "that year you haven't learned coding";
-                    return true;
-                  },
-                })}
-              />
-              {errors.endDate?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.endDate.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="file">
-                Images:
-              </Label>
-              <Input
-                borderColor={errors.images && 'var(--red2)'}
-                borderColor2={errors.images && 'var(--red)'}
-                {...register('images', {
-                  required: {
-                    value: true,
-                    message: 'Please insert image',
-                  },
-                  validate: (files) => {
-                    if (files instanceof FileList === false)
-                      return 'INVALID VALUE';
-
-                    for (let i = 0; i < files.length; i++) {
-                      const file = files[i];
-                      const fileFormat = file.name
-                        .split('.')
-                        [file.name.split('.').length - 1].toLowerCase();
-                      if (
-                        fileFormat !== 'png' &&
-                        fileFormat !== 'jpg' &&
-                        fileFormat !== 'jpeg' &&
-                        fileFormat !== 'webp'
-                      )
-                        return 'ONLY SUPPORT IMAGE WITH FORMAT png, jpeg, jpg, webp';
-                      if (file.size > 2000000) return 'MAX IMAGE SIZE IS 2MB';
-                    }
-
-                    return true;
-                  },
-                })}
-                type="file"
-                id="file"
-                multiple
-                accept=".jpg, .png, .jpeg, .webp"
-              />
-              {errors.images?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.images.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="url">
-                Url of website:
-              </Label>
-              <Input
-                type="text"
-                id="url"
-                placeholder="enter url"
-                borderColor={errors.url && 'var(--red2)'}
-                borderColor2={errors.url && 'var(--red)'}
-                {...register('url', {
-                  required: {
-                    value: true,
-                    message: 'Please insert url',
-                  },
-                  pattern: {
-                    value:
-                      /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi,
-                    message: 'Please insert valid url, Prefix with http/https',
-                  },
-                })}
-              />
-              {errors.url?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.url.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="description">
-                Description :
-              </Label>
-              <Input
-                type="text"
-                id="description"
-                placeholder="enter description of project"
-                borderColor={errors.description && 'var(--red2)'}
-                borderColor2={errors.description && 'var(--red)'}
-                {...register('description', {
-                  required: {
-                    value: true,
-                    message: 'Please insert description',
-                  },
-                  maxLength: {
-                    value: 500,
-                    message: 'Maximum string length is 500',
-                  },
-                  minLength: {
-                    value: 20,
-                    message: 'Minimum string length is 20',
-                  },
-                })}
-              />
-              {errors.description?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.description.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1}>
-                Type of project :
-              </Label>
-              <ContainerCheckbox>
-                <Checkbox>
-                  <Input
-                    type="radio"
-                    id="work"
-                    value="A2"
-                    {...register('typeProject', {
-                      required: {
-                        value: true,
-                        message: 'Please choose one',
-                      },
-                    })}
-                  />
-                  <Label size={1} minSize={1} htmlFor="work">
-                    Work project
-                  </Label>
-                </Checkbox>
-                <Checkbox>
-                  <Input
-                    borderColor={errors.typeProject && 'var(--red2)'}
-                    borderColor2={errors.typeProject && 'var(--red)'}
-                    {...register('typeProject', {
-                      required: {
-                        value: true,
-                        message: 'Please choose one',
-                      },
-                    })}
-                    type="radio"
-                    id="personal"
-                    value="A1"
-                  />
-                  <Label size={1} minSize={1} htmlFor="work">
-                    Personal Project
-                  </Label>
-                </Checkbox>
-              </ContainerCheckbox>
-              {errors.typeProject?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.typeProject.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="tools">
-                Tool :
-              </Label>
-              <InputCollections
-                setValue={setValue}
-                unregister={unregister}
-                control={control}
-                data={data}
-              />
-            </ModalFormContentRow>
-          </ModalFormContent>
-          <ModalFormFooter>
-            <Button type="submit">ADD Project</Button>
-          </ModalFormFooter>
-        </ModalForm>
+        <ModalAddUpdate
+          handler={onSubmitModalAdd}
+          errors={errors}
+          register={register}
+          data={data}
+          control={control}
+          unregister={unregister}
+          setValue={setValue}
+          modal="ADD"
+        />
       );
     case 'delete': {
       return (
@@ -797,317 +506,369 @@ function SwitchModal({
       if (row.type === 'Tools') throw new Error('type of row is wrong');
 
       return (
-        <ModalForm onSubmit={onSubmitModalUpdate}>
-          <ModalFormContent>
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="title">
-                Title:{' '}
-              </Label>
-              <Input
-                type="text"
-                id="title"
-                placeholder="enter the name of project"
-                borderColor={errors.title && 'var(--red2)'}
-                borderColor2={errors.title && 'var(--red)'}
-                {...register('title', {
-                  required: {
-                    value: true,
-                    message: 'Please insert title',
-                  },
-                  maxLength: {
-                    value: 50,
-                    message: 'Maximum string length is 50',
-                  },
-                  minLength: {
-                    value: 3,
-                    message: 'Minimum string length is 3',
-                  },
-                })}
-              />
-              {errors.title?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.title.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="startDate">
-                Date start of development:{' '}
-              </Label>
-              <Input
-                type="date"
-                id="startDate"
-                placeholder="Enter the start date of development"
-                borderColor={errors.startDate && 'var(--red2)'}
-                borderColor2={errors.startDate && 'var(--red)'}
-                {...register('startDate', {
-                  // valueAsDate: true,
-                  validate: (value) => {
-                    if (typeof value !== 'string') return 'INVALID DATE TYPE';
-                    const date = new Date(value);
-                    if (date.getFullYear() < 2018)
-                      return "that year you haven't learned coding";
-                    return true;
-                  },
-                  required: {
-                    value: true,
-                    message: 'Please insert date',
-                  },
-                })}
-              />
-              {errors.startDate?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.startDate.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="endDate">
-                Date end of development:
-              </Label>
-              <Input
-                id="endDate"
-                type="date"
-                placeholder="enter the end date of development"
-                borderColor={errors.endDate && 'var(--red2)'}
-                borderColor2={errors.endDate && 'var(--red)'}
-                {...register('endDate', {
-                  required: {
-                    value: true,
-                    message: 'Please insert date',
-                  },
-                  validate: (value) => {
-                    if (typeof value !== 'string') return 'INVALID DATE TYPE';
-                    const date = new Date(value);
-                    if (date.getFullYear() < 2018)
-                      return "that year you haven't learned coding";
-                    return true;
-                  },
-                })}
-              />
-              {errors.endDate?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.endDate.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="file">
-                Images:
-              </Label>
-              <Input
-                borderColor={errors.images && 'var(--red2)'}
-                borderColor2={errors.images && 'var(--red)'}
-                {...register('images', {
-                  validate: (files) => {
-                    if (files instanceof FileList === false)
-                      return 'INVALID VALUE';
-
-                    for (let i = 0; i < files.length; i++) {
-                      const file = files[i];
-                      const fileFormat = file.name
-                        .split('.')
-                        [file.name.split('.').length - 1].toLowerCase();
-                      if (
-                        fileFormat !== 'png' &&
-                        fileFormat !== 'jpg' &&
-                        fileFormat !== 'jpeg' &&
-                        fileFormat !== 'webp'
-                      )
-                        return 'ONLY SUPPORT IMAGE WITH FORMAT png, jpeg, jpg, webp';
-                      if (file.size > 2000000) return 'MAX IMAGE SIZE IS 2MB';
-                    }
-
-                    return true;
-                  },
-                })}
-                type="file"
-                id="file"
-                multiple
-                accept=".jpg, .png, .jpeg, .webp"
-              />
-              {errors.images?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.images.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="url">
-                Url of website:
-              </Label>
-              <Input
-                type="text"
-                id="url"
-                placeholder="enter url"
-                borderColor={errors.url && 'var(--red2)'}
-                borderColor2={errors.url && 'var(--red)'}
-                {...register('url', {
-                  required: {
-                    value: true,
-                    message: 'Please insert url',
-                  },
-                  pattern: {
-                    value:
-                      /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi,
-                    message: 'Please insert valid url, Prefix with http/https',
-                  },
-                })}
-              />
-              {errors.url?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.url.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="description">
-                Description :
-              </Label>
-              <Input
-                type="text"
-                id="description"
-                placeholder="enter description of project"
-                borderColor={errors.description && 'var(--red2)'}
-                borderColor2={errors.description && 'var(--red)'}
-                {...register('description', {
-                  required: {
-                    value: true,
-                    message: 'Please insert description',
-                  },
-                  maxLength: {
-                    value: 500,
-                    message: 'Maximum string length is 500',
-                  },
-                  minLength: {
-                    value: 20,
-                    message: 'Minimum string length is 20',
-                  },
-                })}
-              />
-              {errors.description?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.description.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1}>
-                Type of project :
-              </Label>
-              <ContainerCheckbox>
-                <Checkbox>
-                  <Input
-                    type="radio"
-                    id="work"
-                    value="A2"
-                    {...register('typeProject', {
-                      required: {
-                        value: true,
-                        message: 'Please choose one',
-                      },
-                    })}
-                  />
-                  <Label size={1} minSize={1} htmlFor="work">
-                    Work project
-                  </Label>
-                </Checkbox>
-                <Checkbox>
-                  <Input
-                    borderColor={errors.typeProject && 'var(--red2)'}
-                    borderColor2={errors.typeProject && 'var(--red)'}
-                    {...register('typeProject', {
-                      required: {
-                        value: true,
-                        message: 'Please choose one',
-                      },
-                    })}
-                    type="radio"
-                    id="personal"
-                    value="A1"
-                  />
-                  <Label size={1} minSize={1} htmlFor="work">
-                    Personal Project
-                  </Label>
-                </Checkbox>
-              </ContainerCheckbox>
-              {errors.typeProject?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.typeProject.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-
-            <ModalFormContentRow>
-              <Label size={1} minSize={1} htmlFor="tools">
-                Tool :
-              </Label>
-              <InputCollections
-                defaultValues={row.attributes.tools}
-                setValue={setValue}
-                unregister={unregister}
-                control={control}
-                data={data}
-              />
-            </ModalFormContentRow>
-          </ModalFormContent>
-          <ModalFormFooter>
-            <Button type="submit">Update Project</Button>
-          </ModalFormFooter>
-        </ModalForm>
+        <ModalAddUpdate
+          handler={onSubmitModalUpdate}
+          errors={errors}
+          register={register}
+          data={data}
+          control={control}
+          unregister={unregister}
+          setValue={setValue}
+          defaultValues={row.attributes.tools}
+          modal="UPDATE"
+        />
       );
     }
     default:
       return <> </>;
   }
+}
+
+function ModalAddUpdate({
+  handler,
+  errors,
+  register,
+  control,
+  unregister,
+  setValue,
+  data,
+  defaultValues,
+  modal,
+}: {
+  handler: (e: React.SyntheticEvent) => Promise<void>;
+  errors: {
+    [Property in keyof ModalDataValidation]?: Property extends 'tools'
+      ? FieldError[]
+      : FieldError;
+  };
+  register: UseFormRegister<ModalDataValidation>;
+  control: Control<ModalDataValidation>;
+  unregister: UseFormUnregister<ModalDataValidation>;
+  setValue: UseFormSetValue<ModalDataValidation>;
+  data: DocDataDiscriminated<ResourceToolInterface[]>;
+  defaultValues?: projectSchema['tools'];
+  modal: 'ADD' | 'UPDATE';
+}) {
+  return (
+    <ModalForm onSubmit={handler}>
+      <ModalFormContent>
+        <ModalFormContentRow>
+          <Label size={1} minSize={1} htmlFor="title">
+            Title:{' '}
+          </Label>
+          <Input
+            type="text"
+            id="title"
+            placeholder="enter the name of project"
+            borderColor={errors.title && 'var(--red2)'}
+            borderColor2={errors.title && 'var(--red)'}
+            {...register('title', {
+              required: {
+                value: true,
+                message: 'Please insert title',
+              },
+              maxLength: {
+                value: 50,
+                message: 'Maximum string length is 50',
+              },
+              minLength: {
+                value: 3,
+                message: 'Minimum string length is 3',
+              },
+            })}
+          />
+          {errors.title?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.title.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+
+        <ModalFormContentRow>
+          <Label size={1} minSize={1} htmlFor="startDate">
+            Date start of development:{' '}
+          </Label>
+          <Input
+            type="date"
+            id="startDate"
+            placeholder="Enter the start date of development"
+            borderColor={errors.startDate && 'var(--red2)'}
+            borderColor2={errors.startDate && 'var(--red)'}
+            {...register('startDate', {
+              // valueAsDate: true,
+              validate: (value) => {
+                if (typeof value !== 'string') return 'INVALID DATE TYPE';
+                const date = new Date(value);
+                if (date.getFullYear() < 2018)
+                  return "that year you haven't learned coding";
+                return true;
+              },
+              required: {
+                value: true,
+                message: 'Please insert date',
+              },
+            })}
+          />
+          {errors.startDate?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.startDate.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+
+        <ModalFormContentRow>
+          <Label size={1} minSize={1} htmlFor="endDate">
+            Date end of development:
+          </Label>
+          <Input
+            id="endDate"
+            type="date"
+            placeholder="enter the end date of development"
+            borderColor={errors.endDate && 'var(--red2)'}
+            borderColor2={errors.endDate && 'var(--red)'}
+            {...register('endDate', {
+              required: {
+                value: true,
+                message: 'Please insert date',
+              },
+              validate: (value) => {
+                if (typeof value !== 'string') return 'INVALID DATE TYPE';
+                const date = new Date(value);
+                if (date.getFullYear() < 2018)
+                  return "that year you haven't learned coding";
+                return true;
+              },
+            })}
+          />
+          {errors.endDate?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.endDate.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+
+        <ModalFormContentRow>
+          <Label size={1} minSize={1} htmlFor="file">
+            Images:
+          </Label>
+          <Input
+            borderColor={errors.images && 'var(--red2)'}
+            borderColor2={errors.images && 'var(--red)'}
+            {...register('images', {
+              required: {
+                value: modal === 'ADD' ? true : false,
+                message: 'Please insert image',
+              },
+              validate: (files) => {
+                if (files instanceof FileList === false) return 'INVALID VALUE';
+
+                for (let i = 0; i < files.length; i++) {
+                  const file = files[i];
+                  const fileFormat = file.name
+                    .split('.')
+                    [file.name.split('.').length - 1].toLowerCase();
+                  if (
+                    fileFormat !== 'png' &&
+                    fileFormat !== 'jpg' &&
+                    fileFormat !== 'jpeg' &&
+                    fileFormat !== 'webp'
+                  )
+                    return 'ONLY SUPPORT IMAGE WITH FORMAT png, jpeg, jpg, webp';
+                  if (file.size > 2000000) return 'MAX IMAGE SIZE IS 2MB';
+                }
+
+                return true;
+              },
+            })}
+            type="file"
+            id="file"
+            multiple
+            accept=".jpg, .png, .jpeg, .webp"
+          />
+          {errors.images?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.images.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+
+        <ModalFormContentRow>
+          <Label size={1} minSize={1} htmlFor="url">
+            Url of website:
+          </Label>
+          <Input
+            type="text"
+            id="url"
+            placeholder="enter url"
+            borderColor={errors.url && 'var(--red2)'}
+            borderColor2={errors.url && 'var(--red)'}
+            {...register('url', {
+              required: {
+                value: true,
+                message: 'Please insert url',
+              },
+              pattern: {
+                value:
+                  /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi,
+                message: 'Please insert valid url, Prefix with http/https',
+              },
+            })}
+          />
+          {errors.url?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.url.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+
+        <ModalFormContentRow>
+          <Label size={1} minSize={1} htmlFor="description">
+            Description :
+          </Label>
+          <Input
+            type="text"
+            id="description"
+            placeholder="enter description of project"
+            borderColor={errors.description && 'var(--red2)'}
+            borderColor2={errors.description && 'var(--red)'}
+            {...register('description', {
+              required: {
+                value: true,
+                message: 'Please insert description',
+              },
+              maxLength: {
+                value: 500,
+                message: 'Maximum string length is 500',
+              },
+              minLength: {
+                value: 20,
+                message: 'Minimum string length is 20',
+              },
+            })}
+          />
+          {errors.description?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.description.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+
+        <ModalFormContentRow>
+          <Label size={1} minSize={1}>
+            Type of project :
+          </Label>
+          <ContainerCheckbox>
+            <Checkbox>
+              <Input
+                type="radio"
+                id="work"
+                value="A2"
+                {...register('typeProject', {
+                  required: {
+                    value: true,
+                    message: 'Please choose one',
+                  },
+                })}
+              />
+              <Label size={1} minSize={1} htmlFor="work">
+                Work project
+              </Label>
+            </Checkbox>
+            <Checkbox>
+              <Input
+                borderColor={errors.typeProject && 'var(--red2)'}
+                borderColor2={errors.typeProject && 'var(--red)'}
+                {...register('typeProject', {
+                  required: {
+                    value: true,
+                    message: 'Please choose one',
+                  },
+                })}
+                type="radio"
+                id="personal"
+                value="A1"
+              />
+              <Label size={1} minSize={1} htmlFor="work">
+                Personal Project
+              </Label>
+            </Checkbox>
+          </ContainerCheckbox>
+          {errors.typeProject?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.typeProject.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+
+        <ModalFormContentRow>
+          <Label size={1} minSize={1} htmlFor="tools">
+            Tool :
+          </Label>
+          {defaultValues ? (
+            <InputCollections
+              setValue={setValue}
+              unregister={unregister}
+              control={control}
+              data={data}
+              defaultValues={defaultValues}
+            />
+          ) : (
+            <InputCollections
+              setValue={setValue}
+              unregister={unregister}
+              control={control}
+              data={data}
+            />
+          )}
+        </ModalFormContentRow>
+      </ModalFormContent>
+      <ModalFormFooter>
+        <Button type="submit">SUBMIT</Button>
+      </ModalFormFooter>
+    </ModalForm>
+  );
 }
 
 function InputCollections({
@@ -1117,7 +878,7 @@ function InputCollections({
   unregister,
   setValue,
 }: {
-  data: DocDataDiscriminated<ResourceObject<toolSchema>[]>;
+  data: DocDataDiscriminated<ResourceToolInterface[]>;
   defaultValues?: projectSchema['tools'];
   control: Control<ModalDataValidation>;
   unregister: UseFormUnregister<ModalDataValidation>;

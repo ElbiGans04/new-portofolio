@@ -26,10 +26,14 @@ import { fetcherGeneric } from '@src/utils/fetcher';
 import getRandom from '@src/utils/randomNumber';
 import Head from 'next/head';
 import React, { useEffect, useReducer } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormRegister, FieldError } from 'react-hook-form';
 import { useSWRConfig } from 'swr';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
+type ModalDataValidation = {
+  name: string;
+  as: string;
+};
 
 export default function Tools() {
   const { data, user, error, ref } = useAdmin('/api/tools');
@@ -121,7 +125,7 @@ function SwitchModal({
     register,
     formState: { errors },
     reset,
-  } = useForm<{ name: string; as: string }>({
+  } = useForm<ModalDataValidation>({
     shouldUnregister: false,
   });
   // Check apakah jenis data sesuai
@@ -250,68 +254,11 @@ function SwitchModal({
   switch (state.modal) {
     case 'add': {
       return (
-        <ModalForm onSubmit={onSubmitModalAdd}>
-          <ModalFormContent>
-            <ModalFormContentRow>
-              <Label minSize={1} size={1} htmlFor="name">
-                Name:
-              </Label>
-              <Input
-                borderColor={errors.name && 'var(--red2)'}
-                borderColor2={errors.name && 'var(--red)'}
-                {...register('name', {
-                  maxLength: { value: 100, message: 'Maximum Length is 100' },
-                  required: {
-                    value: true,
-                    message: 'Please insert name field',
-                  },
-                })}
-                id="name"
-                placeholder="Insert name"
-              />
-              {errors.name?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.name.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-            <ModalFormContentRow>
-              <Label minSize={1} size={1} htmlFor="as">
-                As:
-              </Label>
-              <Input
-                borderColor={errors.as && 'var(--red2)'}
-                borderColor2={errors.as && 'var(--red)'}
-                {...register('as', {
-                  maxLength: { value: 100, message: 'Maximum Length is 100' },
-                  required: { value: true, message: 'Please insert as field' },
-                })}
-                id="as"
-                placeholder="Insert as"
-              />
-              {errors.as?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.as.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-          </ModalFormContent>
-          <ModalFormFooter>
-            <Button type="submit">SUBMIT</Button>
-          </ModalFormFooter>
-        </ModalForm>
+        <ModalAddUpdate
+          handler={onSubmitModalAdd}
+          errors={errors}
+          register={register}
+        />
       );
     }
     case 'delete': {
@@ -331,71 +278,89 @@ function SwitchModal({
 
     case 'update': {
       return (
-        <ModalForm onSubmit={onSubmitModalUpdate}>
-          <ModalFormContent>
-            <ModalFormContentRow>
-              <Label minSize={1} size={1} htmlFor="name">
-                Name:
-              </Label>
-              <Input
-                borderColor={errors.name && 'var(--red2)'}
-                borderColor2={errors.name && 'var(--red)'}
-                {...register('name', {
-                  maxLength: { value: 100, message: 'Maximum Length is 100' },
-                  required: {
-                    value: true,
-                    message: 'Please insert name field',
-                  },
-                })}
-                id="name"
-                placeholder="Insert name"
-              />
-              {errors.name?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.name.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-            <ModalFormContentRow>
-              <Label minSize={1} size={1} htmlFor="as">
-                As:
-              </Label>
-              <Input
-                borderColor={errors.as && 'var(--red2)'}
-                borderColor2={errors.as && 'var(--red)'}
-                {...register('as', {
-                  maxLength: { value: 100, message: 'Maximum Length is 100' },
-                  required: { value: true, message: 'Please insert as field' },
-                })}
-                id="as"
-                placeholder="Insert as"
-              />
-              {errors.as?.message && (
-                <p
-                  style={{
-                    fontSize: '.9rem',
-                    color: 'var(--red)',
-                    margin: '0.5rem 0',
-                  }}
-                >
-                  {errors.as.message}
-                </p>
-              )}
-            </ModalFormContentRow>
-          </ModalFormContent>
-          <ModalFormFooter>
-            <Button type="submit">SUBMIT</Button>
-          </ModalFormFooter>
-        </ModalForm>
+        <ModalAddUpdate
+          handler={onSubmitModalUpdate}
+          errors={errors}
+          register={register}
+        />
       );
     }
     default:
       return <> </>;
   }
+}
+
+function ModalAddUpdate({
+  handler,
+  register,
+  errors,
+}: {
+  handler: (e: React.SyntheticEvent) => Promise<void>;
+  register: UseFormRegister<ModalDataValidation>;
+  errors: { [Property in keyof ModalDataValidation]?: FieldError };
+}) {
+  return (
+    <ModalForm onSubmit={handler}>
+      <ModalFormContent>
+        <ModalFormContentRow>
+          <Label minSize={1} size={1} htmlFor="name">
+            Name:
+          </Label>
+          <Input
+            borderColor={errors.name && 'var(--red2)'}
+            borderColor2={errors.name && 'var(--red)'}
+            {...register('name', {
+              maxLength: { value: 100, message: 'Maximum Length is 100' },
+              required: {
+                value: true,
+                message: 'Please insert name field',
+              },
+            })}
+            id="name"
+            placeholder="Insert name"
+          />
+          {errors.name?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.name.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+        <ModalFormContentRow>
+          <Label minSize={1} size={1} htmlFor="as">
+            As:
+          </Label>
+          <Input
+            borderColor={errors.as && 'var(--red2)'}
+            borderColor2={errors.as && 'var(--red)'}
+            {...register('as', {
+              maxLength: { value: 100, message: 'Maximum Length is 100' },
+              required: { value: true, message: 'Please insert as field' },
+            })}
+            id="as"
+            placeholder="Insert as"
+          />
+          {errors.as?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errors.as.message}
+            </p>
+          )}
+        </ModalFormContentRow>
+      </ModalFormContent>
+      <ModalFormFooter>
+        <Button type="submit">SUBMIT</Button>
+      </ModalFormFooter>
+    </ModalForm>
+  );
 }
