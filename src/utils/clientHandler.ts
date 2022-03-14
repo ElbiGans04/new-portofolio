@@ -7,16 +7,15 @@ export async function clientHandlerError(
   mutate: Mutate,
   url: string,
 ) {
-  if (err instanceof HttpError) {
-    dispatch({
-      type: 'modal/request/finish',
-      payload: {
-        message: `Errors: ${err.message}`,
-      },
-    });
-    await mutate(url);
-    return;
-  }
+  dispatch({
+    type: 'modal/request/finish',
+    payload: {
+      message: `Errors: ${
+        err instanceof HttpError ? err.message : 'Error when try request'
+      }`,
+    },
+  });
+  await mutate(url);
 
   console.error(err);
 }
