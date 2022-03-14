@@ -380,7 +380,6 @@ function SwitchModal({
       }
 
       Promise.all(imagesToDelete).catch((err) => console.log(err));
-      console.log(err);
       await EventErrorHandler(err, dispatch, mutate).catch((err) =>
         console.error(err),
       );
@@ -449,7 +448,6 @@ function SwitchModal({
 
           Promise.all(imagesToDelete).catch((err) => console.log(err));
         }
-        console.log(err);
         await EventErrorHandler(err, dispatch, mutate).catch((err) =>
           console.error(err),
         );
@@ -1031,10 +1029,15 @@ async function EventErrorHandler(
   dispatch: Dispatch,
   mutate: mutateSWRCustom,
 ) {
-  console.log(err);
+  const errors = err as DocErrors;
+  console.log(errors);
   dispatch({
     type: 'modal/request/finish',
-    payload: { message: 'error happend' },
+    payload: {
+      message: `Errors: ${errors.errors
+        .map((error) => error.title)
+        .join(', ')}`,
+    },
   });
   await mutate('/api/projects');
 }

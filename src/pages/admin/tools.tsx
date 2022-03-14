@@ -21,7 +21,7 @@ import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
 import type { admin } from '@src/types/admin';
 import { Dispatch, DocAdminData } from '@src/types/admin';
-import type { DocMeta } from '@src/types/jsonApi/index';
+import type { DocMeta, DocErrors } from '@src/types/jsonApi/index';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import getRandom from '@src/utils/randomNumber';
 import Head from 'next/head';
@@ -179,10 +179,15 @@ function SwitchModal({
         });
       })
       .catch((err) => {
-        console.log(err);
+        const errors = err as DocErrors;
+        console.log(errors);
         dispatch({
           type: 'modal/request/finish',
-          payload: { message: 'Failed When Send Data' },
+          payload: {
+            message: `Errors: ${errors.errors
+              .map((error) => error.title)
+              .join(', ')}`,
+          },
         });
         mutate('/api/tools').catch((err) => {
           console.log(err);
@@ -207,10 +212,15 @@ function SwitchModal({
           });
         })
         .catch((err) => {
-          console.log(err);
+          const errors = err as DocErrors;
+          console.log(errors);
           dispatch({
             type: 'modal/request/finish',
-            payload: { message: 'Failed When Send Data' },
+            payload: {
+              message: `Errors: ${errors.errors
+                .map((error) => error.title)
+                .join(', ')}`,
+            },
           });
           mutate('/api/tools').catch((err) => {
             console.log(err);
@@ -244,10 +254,15 @@ function SwitchModal({
           });
         })
         .catch((err) => {
-          console.log(err);
+          const errors = err as DocErrors;
+          console.log(errors);
           dispatch({
             type: 'modal/request/finish',
-            payload: { message: 'Failed When Send Data' },
+            payload: {
+              message: `Errors: ${errors.errors
+                .map((error) => error.title)
+                .join(', ')}`,
+            },
           });
           mutate('/api/tools').catch((err) => {
             console.log(err);
