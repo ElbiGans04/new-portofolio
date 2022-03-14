@@ -33,38 +33,36 @@ import type {
   DocDataDiscriminated,
   DocErrors,
   DocMeta,
-  ResourceObject,
 } from '@src/types/jsonApi';
+import projectSchema from '@src/types/mongoose/schemas/project';
 import { fetcherGeneric } from '@src/utils/fetcher';
+import parseDate from '@src/utils/getStringDate';
+import getStringOfTools from '@src/utils/getStringOfTools';
 import getRandom from '@src/utils/randomNumber';
+import { isObject, isTool } from '@src/utils/typescript/narrowing';
 import { initializeApp } from 'firebase/app';
 import {
   deleteObject,
+  FirebaseStorage,
   getDownloadURL,
   getStorage,
   ref,
   uploadBytes,
-  FirebaseStorage,
 } from 'firebase/storage';
 import Head from 'next/head';
-import React, { useReducer, useRef, useState, useEffect } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
+import {
+  Control,
+  Controller,
+  FieldError,
+  useForm,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormUnregister,
+} from 'react-hook-form';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
-import toolSchema from '@src/types/mongoose/schemas/tool';
-import projectSchema from '@src/types/mongoose/schemas/project';
-import { isTool, isObject } from '@src/utils/typescript/narrowing';
-import parseDate from '@src/utils/getStringDate';
-import getStringOfTools from '@src/utils/getStringOfTools';
-import {
-  useForm,
-  Controller,
-  Control,
-  UseFormUnregister,
-  UseFormSetValue,
-  FieldError,
-  UseFormRegister,
-} from 'react-hook-form';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
@@ -263,7 +261,19 @@ function SwitchModal({
   } = useForm<ModalDataValidation>();
   const row = state.row;
   useEffect(() => {
-    if (
+    if (state.modal == 'add') {
+      reset(
+        {
+          title: '',
+          startDate: '',
+          endDate: '',
+          url: '',
+          description: '',
+          typeProject: '',
+        },
+        { keepErrors: false, keepDirty: false, keepValues: false },
+      );
+    } else if (
       state.modal === 'update' &&
       state.row &&
       state.row.attributes &&
@@ -294,7 +304,7 @@ function SwitchModal({
             typeof typeProject == 'string' ? typeProject : typeProject._id,
           tools: fixTools as string[],
         },
-        { keepErrors: false },
+        { keepErrors: false, keepDirty: false, keepValues: false },
       );
     }
   }, [reset, state.modal, state.row]);

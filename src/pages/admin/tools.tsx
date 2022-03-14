@@ -132,7 +132,12 @@ function SwitchModal({
   const row = state.row;
 
   useEffect(() => {
-    if (
+    if (state.modal === 'add') {
+      reset(
+        { name: '', as: '' },
+        { keepErrors: false, keepDirty: false, keepValues: false },
+      );
+    } else if (
       state.modal === 'update' &&
       state.row &&
       state.row.attributes &&
@@ -140,7 +145,7 @@ function SwitchModal({
     ) {
       reset(
         { name: state.row.attributes.name, as: state.row.attributes.as },
-        { keepErrors: false },
+        { keepErrors: false, keepDirty: false, keepValues: false },
       );
     }
   }, [reset, state.modal, state.row]);
