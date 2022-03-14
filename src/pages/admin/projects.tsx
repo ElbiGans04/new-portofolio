@@ -136,7 +136,7 @@ function TableHeadBody({
         {projects.map((project, index) => {
           return (
             <TableBodyRow
-              key={getRandom(index)}
+              key={project.id || getRandom(index)}
               dispatch={dispatch}
               project={project}
             />
@@ -970,7 +970,7 @@ function InputCollections({
                     ? value.attributes.name
                     : 'undefined';
                   return (
-                    <option key={getRandom(i)} value={value.id}>
+                    <option key={value.id || getRandom(i)} value={value.id}>
                       {textOption}
                     </option>
                   );

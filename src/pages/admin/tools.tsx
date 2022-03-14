@@ -77,7 +77,7 @@ function TableHeadBody({
   data: DocAdminData;
   dispatch: Dispatch;
 }) {
-  const projects = data.data;
+  const tools = data.data;
 
   return (
     <React.Fragment>
@@ -89,8 +89,8 @@ function TableHeadBody({
         </tr>
       </thead>
       <tbody>
-        {projects.map((project, index) => {
-          if (project.type == 'Projects' || project.attributes === undefined)
+        {tools.map((tool, index) => {
+          if (tool.type == 'Projects' || tool.attributes === undefined)
             return (
               <React.Fragment>
                 <tr />
@@ -98,11 +98,11 @@ function TableHeadBody({
               </React.Fragment>
             );
           return (
-            <React.Fragment key={getRandom(index)}>
+            <React.Fragment key={tool.id || getRandom(index)}>
               <tr>
-                <td>{project.attributes.name}</td>
-                <td>{project.attributes.as}</td>
-                <TdButton dispatch={dispatch} payload={project} />
+                <td>{tool.attributes.name}</td>
+                <td>{tool.attributes.as}</td>
+                <TdButton dispatch={dispatch} payload={tool} />
               </tr>
             </React.Fragment>
           );
