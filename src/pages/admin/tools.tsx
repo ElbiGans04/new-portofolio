@@ -21,13 +21,17 @@ import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
 import type { admin } from '@src/types/admin';
 import { Dispatch, DocAdminData } from '@src/types/admin';
-import type { DocMeta, DocErrors } from '@src/types/jsonApi/index';
+import type { DocMeta } from '@src/types/jsonApi/index';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import getRandom from '@src/utils/randomNumber';
 import Head from 'next/head';
 import React, { useEffect, useReducer } from 'react';
 import { useForm, UseFormRegister, FieldError } from 'react-hook-form';
 import { useSWRConfig } from 'swr';
+import {
+  clientHandlerSuccess,
+  clientHandlerError,
+} from '@src/utils/clientHandler';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
@@ -170,28 +174,19 @@ function SwitchModal({
       },
     })
       .then((result) => {
-        dispatch({
-          type: 'modal/request/finish',
-          payload: { message: result.meta.title as string },
-        });
-        mutate('/api/tools').catch((err) => {
+        clientHandlerSuccess(
+          result.meta.title as string,
+          dispatch,
+          mutate,
+          '/api/tools',
+        ).catch((err) => {
           console.log(err);
         });
       })
       .catch((err) => {
-        const errors = err as DocErrors;
-        console.log(errors);
-        dispatch({
-          type: 'modal/request/finish',
-          payload: {
-            message: `Errors: ${errors.errors
-              .map((error) => error.title)
-              .join(', ')}`,
-          },
-        });
-        mutate('/api/tools').catch((err) => {
-          console.log(err);
-        });
+        clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
+          console.error(err),
+        );
       });
   });
 
@@ -203,28 +198,19 @@ function SwitchModal({
         method: 'DELETE',
       })
         .then((result) => {
-          dispatch({
-            type: 'modal/request/finish',
-            payload: { message: result.meta.title as string },
-          });
-          mutate('/api/tools').catch((err) => {
+          clientHandlerSuccess(
+            result.meta.title as string,
+            dispatch,
+            mutate,
+            '/api/tools',
+          ).catch((err) => {
             console.log(err);
           });
         })
         .catch((err) => {
-          const errors = err as DocErrors;
-          console.log(errors);
-          dispatch({
-            type: 'modal/request/finish',
-            payload: {
-              message: `Errors: ${errors.errors
-                .map((error) => error.title)
-                .join(', ')}`,
-            },
-          });
-          mutate('/api/tools').catch((err) => {
-            console.log(err);
-          });
+          clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
+            console.error(err),
+          );
         });
     }
   }
@@ -245,28 +231,19 @@ function SwitchModal({
         },
       })
         .then((result) => {
-          dispatch({
-            type: 'modal/request/finish',
-            payload: { message: result.meta.title as string },
-          });
-          mutate('/api/tools').catch((err) => {
+          clientHandlerSuccess(
+            result.meta.title as string,
+            dispatch,
+            mutate,
+            '/api/tools',
+          ).catch((err) => {
             console.log(err);
           });
         })
         .catch((err) => {
-          const errors = err as DocErrors;
-          console.log(errors);
-          dispatch({
-            type: 'modal/request/finish',
-            payload: {
-              message: `Errors: ${errors.errors
-                .map((error) => error.title)
-                .join(', ')}`,
-            },
-          });
-          mutate('/api/tools').catch((err) => {
-            console.log(err);
-          });
+          clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
+            console.error(err),
+          );
         });
     }
   });

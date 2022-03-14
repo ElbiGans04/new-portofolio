@@ -63,6 +63,10 @@ import {
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
+import {
+  clientHandlerSuccess,
+  clientHandlerError,
+} from '@src/utils/clientHandler';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
@@ -326,10 +330,17 @@ function SwitchModal({
           },
         );
 
-        await modalFinish(request.meta.title as string, dispatch, mutate);
+        clientHandlerSuccess(
+          request.meta.title as string,
+          dispatch,
+          mutate,
+          '/api/projects',
+        ).catch((err) => {
+          console.log(err);
+        });
       }
     } catch (err) {
-      await EventErrorHandler(err, dispatch, mutate).catch((err) =>
+      clientHandlerError(err, dispatch, mutate, '/api/projects').catch((err) =>
         console.error(err),
       );
     }
@@ -364,7 +375,14 @@ function SwitchModal({
         },
       });
 
-      await modalFinish(request.meta.title as string, dispatch, mutate);
+      clientHandlerSuccess(
+        request.meta.title as string,
+        dispatch,
+        mutate,
+        '/api/projects',
+      ).catch((err) => {
+        console.log(err);
+      });
     } catch (err) {
       const images = Doc.attributes.images;
       const imagesToDelete: Promise<void>[] = [];
@@ -380,7 +398,7 @@ function SwitchModal({
       }
 
       Promise.all(imagesToDelete).catch((err) => console.log(err));
-      await EventErrorHandler(err, dispatch, mutate).catch((err) =>
+      clientHandlerError(err, dispatch, mutate, '/api/projects').catch((err) =>
         console.error(err),
       );
     }
@@ -430,7 +448,14 @@ function SwitchModal({
         if (data.images.length > 0)
           await deleteImages(row.attributes.images, firebaseRootStroage);
 
-        await modalFinish(request.meta.title as string, dispatch, mutate);
+        clientHandlerSuccess(
+          request.meta.title as string,
+          dispatch,
+          mutate,
+          '/api/projects',
+        ).catch((err) => {
+          console.log(err);
+        });
       } catch (err) {
         if (data.images.length > 0) {
           const images = Doc.attributes.images;
@@ -448,8 +473,8 @@ function SwitchModal({
 
           Promise.all(imagesToDelete).catch((err) => console.log(err));
         }
-        await EventErrorHandler(err, dispatch, mutate).catch((err) =>
-          console.error(err),
+        clientHandlerError(err, dispatch, mutate, '/api/projects').catch(
+          (err) => console.error(err),
         );
       }
     }
@@ -1022,36 +1047,6 @@ async function uploadImages(fileImage: FileList, storage: FirebaseStorage) {
   }
 
   return images;
-}
-
-async function EventErrorHandler(
-  err: unknown,
-  dispatch: Dispatch,
-  mutate: mutateSWRCustom,
-) {
-  const errors = err as DocErrors;
-  console.log(errors);
-  dispatch({
-    type: 'modal/request/finish',
-    payload: {
-      message: `Errors: ${errors.errors
-        .map((error) => error.title)
-        .join(', ')}`,
-    },
-  });
-  await mutate('/api/projects');
-}
-
-async function modalFinish(
-  message: string,
-  dispatch: Dispatch,
-  mutate: mutateSWRCustom,
-) {
-  dispatch({
-    type: 'modal/request/finish',
-    payload: { message },
-  });
-  await mutate('/api/projects');
 }
 
 // Styled Component
