@@ -1,5 +1,5 @@
 import { Dispatch } from '@src/types/admin';
-import { DocErrors } from '@src/types/jsonApi';
+import HttpError from '@src/utils/httpError';
 type Mutate = <T>(key: string) => Promise<T>;
 export async function clientHandlerError(
   err: unknown,
@@ -7,17 +7,18 @@ export async function clientHandlerError(
   mutate: Mutate,
   url: string,
 ) {
-  const errors = err as DocErrors;
-  console.log(errors);
-  dispatch({
-    type: 'modal/request/finish',
-    payload: {
-      message: `Errors: ${errors.errors
-        .map((error) => error.title)
-        .join(', ')}`,
-    },
-  });
-  await mutate(url);
+  if (err instanceof HttpError) {
+    dispatch({
+      type: 'modal/request/finish',
+      payload: {
+        message: `Errors: ${err.message}`,
+      },
+    });
+    await mutate(url);
+    return;
+  }
+
+  console.error(err);
 }
 
 export async function clientHandlerSuccess(
