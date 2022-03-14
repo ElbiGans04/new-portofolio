@@ -275,7 +275,7 @@ function SwitchModal({
             </Heading>
           </ModalContent2>
           <ModalFooter>
-            <Button onClick={() => onSubmitModalDelete()}>DELETE</Button>
+            <Button onClick={onSubmitModalDelete}>DELETE</Button>
           </ModalFooter>
         </ModalMain2>
       );
