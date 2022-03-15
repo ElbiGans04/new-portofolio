@@ -160,91 +160,85 @@ function SwitchModal({
 
   */
 
-  const onSubmitModalAdd = handleSubmit((data) => {
-    dispatch({ type: 'modal/request/start' });
-
-    fetcherGeneric<DocMeta>('/api/tools', {
-      method: 'post',
-      body: JSON.stringify({
-        type: 'Tool',
-        attributes: data,
-      }),
-      headers: {
-        'Content-Type': 'application/vnd.api+json',
-      },
-    })
-      .then((result) => {
-        clientHandlerSuccess(
-          result.meta.title as string,
-          dispatch,
-          mutate,
-          '/api/tools',
-        ).catch((err) => {
-          console.log(err);
-        });
-      })
-      .catch((err) => {
-        clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
-          console.error(err),
-        );
-      });
-  });
-
-  function onSubmitModalDelete() {
-    if (row && row.id) {
+  const onSubmitModalAdd = handleSubmit(async (data) => {
+    try {
       dispatch({ type: 'modal/request/start' });
 
-      fetcherGeneric<DocMeta>(`/api/tools/${row.id}`, {
-        method: 'DELETE',
-      })
-        .then((result) => {
-          clientHandlerSuccess(
-            result.meta.title as string,
-            dispatch,
-            mutate,
-            '/api/tools',
-          ).catch((err) => {
-            console.log(err);
-          });
-        })
-        .catch((err) => {
-          clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
-            console.error(err),
-          );
-        });
-    }
-  }
-
-  const onSubmitModalUpdate = handleSubmit((data) => {
-    if (row && row.id) {
-      dispatch({ type: 'modal/request/start' });
-
-      fetcherGeneric<DocMeta>(`/api/tools/${row.id}`, {
-        method: 'PATCH',
+      const request = await fetcherGeneric<DocMeta>('/api/tools', {
+        method: 'post',
         body: JSON.stringify({
           type: 'Tool',
-          id: row.id,
           attributes: data,
         }),
         headers: {
           'Content-Type': 'application/vnd.api+json',
         },
-      })
-        .then((result) => {
-          clientHandlerSuccess(
-            result.meta.title as string,
-            dispatch,
-            mutate,
-            '/api/tools',
-          ).catch((err) => {
-            console.log(err);
-          });
-        })
-        .catch((err) => {
-          clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
-            console.error(err),
-          );
+      });
+
+      await clientHandlerSuccess(
+        request.meta.title as string,
+        dispatch,
+        mutate,
+        '/api/tools',
+      );
+    } catch (err) {
+      clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
+        console.error(err),
+      );
+    }
+  });
+
+  async function onSubmitModalDelete() {
+    if (row && row.id) {
+      try {
+        dispatch({ type: 'modal/request/start' });
+
+        const result = await fetcherGeneric<DocMeta>(`/api/tools/${row.id}`, {
+          method: 'DELETE',
         });
+
+        await clientHandlerSuccess(
+          result.meta.title as string,
+          dispatch,
+          mutate,
+          '/api/tools',
+        );
+      } catch (err) {
+        clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
+          console.error(err),
+        );
+      }
+    }
+  }
+
+  const onSubmitModalUpdate = handleSubmit(async (data) => {
+    if (row && row.id) {
+      try {
+        dispatch({ type: 'modal/request/start' });
+
+        const result = await fetcherGeneric<DocMeta>(`/api/tools/${row.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            type: 'Tool',
+            id: row.id,
+            attributes: data,
+          }),
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+          },
+        });
+
+        await clientHandlerSuccess(
+          result.meta.title as string,
+          dispatch,
+          mutate,
+          '/api/tools',
+        );
+      } catch (err) {
+        clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
+          console.error(err),
+        );
+      }
     }
   });
 
