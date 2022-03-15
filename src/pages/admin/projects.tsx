@@ -39,7 +39,7 @@ import { fetcherGeneric } from '@src/utils/fetcher';
 import parseDate from '@src/utils/getStringDate';
 import getStringOfTools from '@src/utils/getStringOfTools';
 import getRandom from '@src/utils/randomNumber';
-import { isObject, isTool } from '@src/utils/typescript/narrowing';
+import { isTool } from '@src/utils/typescript/narrowing';
 import { initializeApp } from 'firebase/app';
 import {
   deleteObject,
@@ -67,6 +67,7 @@ import {
   clientHandlerSuccess,
   clientHandlerError,
 } from '@src/utils/clientHandler';
+import HttpErrror from '@src/utils/httpError';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
@@ -380,20 +381,14 @@ function SwitchModal({
         '/api/projects',
       );
     } catch (err) {
-      const images = Doc.attributes.images;
-      const imagesToDelete: Promise<void>[] = [];
+      /* 
+        Jika fetchGeneric melemparkan error (yang dikembalikan oleh /api kita)
+        maka berarti gambar yang dipilih telah diupload kedalam database maka kita harus 
+        menghapus gambar yang sudah terupload tersebut
+      */
+      if (err instanceof HttpErrror)
+        imageErrorHandling(Doc.attributes.images, firebaseRootStroage);
 
-      if (images && Array.isArray(images)) {
-        images.forEach((image) => {
-          if (isObject(image)) {
-            imagesToDelete.push(
-              deleteObject(ref(firebaseRootStroage, image.ref)),
-            );
-          }
-        });
-      }
-
-      Promise.all(imagesToDelete).catch((err) => console.log(err));
       clientHandlerError(err, dispatch, mutate, '/api/projects').catch((err) =>
         console.error(err),
       );
@@ -451,22 +446,15 @@ function SwitchModal({
           '/api/projects',
         );
       } catch (err) {
-        if (data.images.length > 0) {
-          const images = Doc.attributes.images;
-          const imagesToDelete: Promise<void>[] = [];
+        /* 
+            Jika fetchGeneric melemparkan error (yang dikembalikan oleh /api kita)
+            maka berarti gambar yang dipilih telah diupload kedalam database maka kita harus 
+            menghapus gambar yang sudah terupload tersebut
+        */
 
-          if (images && Array.isArray(images)) {
-            images.forEach((image) => {
-              if (isObject(image)) {
-                imagesToDelete.push(
-                  deleteObject(ref(firebaseRootStroage, image.ref)),
-                );
-              }
-            });
-          }
+        if (data.images.length > 0 && err instanceof HttpErrror)
+          imageErrorHandling(Doc.attributes.images, firebaseRootStroage);
 
-          Promise.all(imagesToDelete).catch((err) => console.log(err));
-        }
         clientHandlerError(err, dispatch, mutate, '/api/projects').catch(
           (err) => console.error(err),
         );
@@ -1041,6 +1029,21 @@ async function uploadImages(fileImage: FileList, storage: FirebaseStorage) {
   }
 
   return images;
+}
+
+function imageErrorHandling(
+  images: { src: string; ref: string }[] | FileList,
+  firebaseRootStroage: FirebaseStorage,
+) {
+  const imagesToDelete: Promise<void>[] = [];
+
+  if (Array.isArray(images)) {
+    images.forEach((image) => {
+      imagesToDelete.push(deleteObject(ref(firebaseRootStroage, image.ref)));
+    });
+  }
+
+  Promise.all(imagesToDelete).catch((err) => console.log(err));
 }
 
 // Styled Component
