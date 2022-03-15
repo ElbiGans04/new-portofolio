@@ -26,7 +26,7 @@ import { fetcherGeneric } from '@src/utils/fetcher';
 import getRandom from '@src/utils/randomNumber';
 import Head from 'next/head';
 import React, { useEffect, useReducer } from 'react';
-import { useForm, UseFormRegister, FieldError } from 'react-hook-form';
+import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 import { useSWRConfig } from 'swr';
 import {
   clientHandlerSuccess,
@@ -124,20 +124,13 @@ function SwitchModal({
   dispatch: Dispatch;
 }): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
-  const {
-    handleSubmit,
-    register,
-    formState: { errors },
-    reset,
-  } = useForm<ModalDataValidation>({
-    shouldUnregister: false,
-  });
+  const reactForm = useForm<ModalDataValidation>();
   // Check apakah jenis data sesuai
   const row = state.row;
 
   useEffect(() => {
     if (state.modal === 'add') {
-      reset(
+      reactForm.reset(
         { name: '', as: '' },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
@@ -147,12 +140,12 @@ function SwitchModal({
       state.row.attributes &&
       state.row.type === 'Tools'
     ) {
-      reset(
+      reactForm.reset(
         { name: state.row.attributes.name, as: state.row.attributes.as },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
     }
-  }, [reset, state.modal, state.row]);
+  }, [reactForm, state.modal, state.row]);
 
   /* 
 
@@ -160,7 +153,7 @@ function SwitchModal({
 
   */
 
-  const onSubmitModalAdd = handleSubmit(async (data) => {
+  const onSubmitModalAdd = reactForm.handleSubmit(async (data) => {
     try {
       dispatch({ type: 'modal/request/start' });
 
@@ -211,7 +204,7 @@ function SwitchModal({
     }
   }
 
-  const onSubmitModalUpdate = handleSubmit(async (data) => {
+  const onSubmitModalUpdate = reactForm.handleSubmit(async (data) => {
     if (row && row.id) {
       try {
         dispatch({ type: 'modal/request/start' });
@@ -245,11 +238,9 @@ function SwitchModal({
   switch (state.modal) {
     case 'add': {
       return (
-        <ModalAddUpdate
-          handler={onSubmitModalAdd}
-          errors={errors}
-          register={register}
-        />
+        <FormProvider {...reactForm}>
+          <ModalAddUpdate handler={onSubmitModalAdd} />
+        </FormProvider>
       );
     }
     case 'delete': {
@@ -269,11 +260,9 @@ function SwitchModal({
 
     case 'update': {
       return (
-        <ModalAddUpdate
-          handler={onSubmitModalUpdate}
-          errors={errors}
-          register={register}
-        />
+        <FormProvider {...reactForm}>
+          <ModalAddUpdate handler={onSubmitModalUpdate} />
+        </FormProvider>
       );
     }
     default:
@@ -283,13 +272,14 @@ function SwitchModal({
 
 function ModalAddUpdate({
   handler,
-  register,
-  errors,
 }: {
   handler: (e: React.SyntheticEvent) => Promise<void>;
-  register: UseFormRegister<ModalDataValidation>;
-  errors: { [Property in keyof ModalDataValidation]?: FieldError };
 }) {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<ModalDataValidation>();
+
   return (
     <ModalForm onSubmit={handler}>
       <ModalFormContent>
