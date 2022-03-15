@@ -321,8 +321,6 @@ function SwitchModal({
       if (row && row.attributes && row.type == 'Projects' && row.id) {
         dispatch({ type: 'modal/request/start' });
 
-        await deleteImages(row.attributes.images, firebaseRootStroage);
-
         const request = await fetcherGeneric<DocMeta>(
           `/api/projects/${row.id}`,
           {
@@ -330,14 +328,14 @@ function SwitchModal({
           },
         );
 
-        clientHandlerSuccess(
+        await deleteImages(row.attributes.images, firebaseRootStroage);
+
+        await clientHandlerSuccess(
           request.meta.title as string,
           dispatch,
           mutate,
           '/api/projects',
-        ).catch((err) => {
-          console.log(err);
-        });
+        );
       }
     } catch (err) {
       clientHandlerError(err, dispatch, mutate, '/api/projects').catch((err) =>
@@ -375,14 +373,12 @@ function SwitchModal({
         },
       });
 
-      clientHandlerSuccess(
+      await clientHandlerSuccess(
         request.meta.title as string,
         dispatch,
         mutate,
         '/api/projects',
-      ).catch((err) => {
-        console.log(err);
-      });
+      );
     } catch (err) {
       const images = Doc.attributes.images;
       const imagesToDelete: Promise<void>[] = [];
@@ -448,14 +444,12 @@ function SwitchModal({
         if (data.images.length > 0)
           await deleteImages(row.attributes.images, firebaseRootStroage);
 
-        clientHandlerSuccess(
+        await clientHandlerSuccess(
           request.meta.title as string,
           dispatch,
           mutate,
           '/api/projects',
-        ).catch((err) => {
-          console.log(err);
-        });
+        );
       } catch (err) {
         if (data.images.length > 0) {
           const images = Doc.attributes.images;

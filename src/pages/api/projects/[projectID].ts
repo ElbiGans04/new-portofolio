@@ -35,6 +35,12 @@ export default withIronSession(
           }
         }
 
+        throw new HttpError(
+          'please login ahead',
+          403,
+          "can't fulfill the request because access is not allowed",
+        );
+
         switch (method) {
           case 'PATCH': {
             if (req.headers['content-type'] !== 'application/vnd.api+json') {
