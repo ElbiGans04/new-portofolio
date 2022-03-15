@@ -35,9 +35,14 @@ import type {
   DocMeta,
 } from '@src/types/jsonApi';
 import projectSchema from '@src/types/mongoose/schemas/project';
+import {
+  clientHandlerError,
+  clientHandlerSuccess,
+} from '@src/utils/clientHandler';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import parseDate from '@src/utils/getStringDate';
 import getStringOfTools from '@src/utils/getStringOfTools';
+import HttpErrror from '@src/utils/httpError';
 import getRandom from '@src/utils/randomNumber';
 import { isTool } from '@src/utils/typescript/narrowing';
 import { initializeApp } from 'firebase/app';
@@ -52,22 +57,14 @@ import {
 import Head from 'next/head';
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import {
-  Control,
   Controller,
-  FieldError,
+  FormProvider,
   useForm,
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormUnregister,
+  useFormContext,
 } from 'react-hook-form';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
-import {
-  clientHandlerSuccess,
-  clientHandlerError,
-} from '@src/utils/clientHandler';
-import HttpErrror from '@src/utils/httpError';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
@@ -255,19 +252,20 @@ function SwitchModal({
   >('/api/tools', fetcherGeneric);
   const firebaseApp = initializeApp(firebaseConfig);
   const firebaseRootStroage = getStorage(firebaseApp);
-  const {
-    reset,
-    formState: { errors },
-    register,
-    handleSubmit,
-    control,
-    unregister,
-    setValue,
-  } = useForm<ModalDataValidation>();
+  // const {
+  //   reset,
+  //   formState: { errors },
+  //   register,
+  //   handleSubmit,
+  //   control,
+  //   unregister,
+  //   setValue,
+  // } = useForm<ModalDataValidation>();
+  const reactForm = useForm<ModalDataValidation>();
   const row = state.row;
   useEffect(() => {
     if (state.modal == 'add') {
-      reset(
+      reactForm.reset(
         {
           title: '',
           startDate: '',
@@ -298,7 +296,7 @@ function SwitchModal({
         : isTool(tools)
         ? [tools._id]
         : [tools.toString()];
-      reset(
+      reactForm.reset(
         {
           title,
           startDate: parseDate(startDate),
@@ -312,7 +310,7 @@ function SwitchModal({
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
     }
-  }, [reset, state.modal, state.row]);
+  }, [reactForm, state.modal, state.row]);
 
   /* 
     Event Handler function
@@ -345,7 +343,7 @@ function SwitchModal({
     }
   }
 
-  const onSubmitModalAdd = handleSubmit(async function (data) {
+  const onSubmitModalAdd = reactForm.handleSubmit(async function (data) {
     const Doc: {
       type: string;
       attributes: {
@@ -394,7 +392,7 @@ function SwitchModal({
       );
     }
   });
-  const onSubmitModalUpdate = handleSubmit(async (data) => {
+  const onSubmitModalUpdate = reactForm.handleSubmit(async (data) => {
     const Doc: {
       type: string;
       id: string;
@@ -489,16 +487,9 @@ function SwitchModal({
   switch (state.modal) {
     case 'add':
       return (
-        <ModalAddUpdate
-          handler={onSubmitModalAdd}
-          errors={errors}
-          register={register}
-          data={data}
-          control={control}
-          unregister={unregister}
-          setValue={setValue}
-          modal="ADD"
-        />
+        <FormProvider {...reactForm}>
+          <ModalAddUpdate handler={onSubmitModalAdd} data={data} modal="ADD" />
+        </FormProvider>
       );
     case 'delete': {
       return (
@@ -521,17 +512,14 @@ function SwitchModal({
       if (row.type === 'Tools') throw new Error('type of row is wrong');
 
       return (
-        <ModalAddUpdate
-          handler={onSubmitModalUpdate}
-          errors={errors}
-          register={register}
-          data={data}
-          control={control}
-          unregister={unregister}
-          setValue={setValue}
-          defaultValues={row.attributes.tools}
-          modal="UPDATE"
-        />
+        <FormProvider {...reactForm}>
+          <ModalAddUpdate
+            handler={onSubmitModalUpdate}
+            data={data}
+            defaultValues={row.attributes.tools}
+            modal="UPDATE"
+          />
+        </FormProvider>
       );
     }
     default:
@@ -540,30 +528,21 @@ function SwitchModal({
 }
 
 function ModalAddUpdate({
-  handler,
-  errors,
-  register,
-  control,
-  unregister,
-  setValue,
   data,
   defaultValues,
   modal,
+  handler,
 }: {
   handler: (e: React.SyntheticEvent) => Promise<void>;
-  errors: {
-    [Property in keyof ModalDataValidation]?: Property extends 'tools'
-      ? FieldError[]
-      : FieldError;
-  };
-  register: UseFormRegister<ModalDataValidation>;
-  control: Control<ModalDataValidation>;
-  unregister: UseFormUnregister<ModalDataValidation>;
-  setValue: UseFormSetValue<ModalDataValidation>;
   data: DocDataDiscriminated<ResourceToolInterface[]>;
   defaultValues?: projectSchema['tools'];
   modal: 'ADD' | 'UPDATE';
 }) {
+  const {
+    formState: { errors },
+    register,
+  } = useFormContext<ModalDataValidation>();
+
   return (
     <ModalForm onSubmit={handler}>
       <ModalFormContent>
@@ -862,20 +841,9 @@ function ModalAddUpdate({
             Tool :
           </Label>
           {defaultValues ? (
-            <InputCollections
-              setValue={setValue}
-              unregister={unregister}
-              control={control}
-              data={data}
-              defaultValues={defaultValues}
-            />
+            <InputCollections data={data} defaultValues={defaultValues} />
           ) : (
-            <InputCollections
-              setValue={setValue}
-              unregister={unregister}
-              control={control}
-              data={data}
-            />
+            <InputCollections data={data} />
           )}
         </ModalFormContentRow>
       </ModalFormContent>
@@ -889,16 +857,12 @@ function ModalAddUpdate({
 function InputCollections({
   data,
   defaultValues,
-  control,
-  unregister,
-  setValue,
 }: {
   data: DocDataDiscriminated<ResourceToolInterface[]>;
   defaultValues?: projectSchema['tools'];
-  control: Control<ModalDataValidation>;
-  unregister: UseFormUnregister<ModalDataValidation>;
-  setValue: UseFormSetValue<ModalDataValidation>;
 }) {
+  const { control, unregister, setValue } =
+    useFormContext<ModalDataValidation>();
   const [inputState, setInputState] = useState<string[]>(() => {
     if (defaultValues) {
       if (Array.isArray(defaultValues)) {
