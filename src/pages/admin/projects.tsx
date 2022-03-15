@@ -595,7 +595,6 @@ function ModalAddUpdate({
             borderColor={errors.startDate && 'var(--red2)'}
             borderColor2={errors.startDate && 'var(--red)'}
             {...register('startDate', {
-              // valueAsDate: true,
               validate: (value) => {
                 if (typeof value !== 'string') return 'INVALID DATE TYPE';
                 const date = new Date(value);
@@ -866,18 +865,20 @@ function InputCollections({
   const [inputState, setInputState] = useState<string[]>(() => {
     if (defaultValues) {
       if (Array.isArray(defaultValues)) {
-        return defaultValues.map((value, index) => {
+        return defaultValues.map((value) => {
           const realValue = isTool(value) ? value._id : value.toString();
-          setValue(`tools.${index}`, realValue as string);
           return realValue as string;
         });
       }
+
+      const realValue = isTool(defaultValues)
+        ? defaultValues._id
+        : defaultValues.toString();
+      return [realValue as string];
     }
 
     // Jika tidak ada nilai dafault
-    const value = data.data[0].id ? [data.data[0].id] : [''];
-    setValue('tools', value);
-    return value;
+    return [data.data[0].id || ''];
   });
 
   const collectionInput = [];
@@ -908,7 +909,6 @@ function InputCollections({
     const newInputState = [...inputState];
     const value = data.data[0].id || '';
     newInputState.push(value);
-    setValue(`tools.${newInputState.length - 1}`, value);
     setInputState(newInputState);
   }
 
@@ -920,7 +920,8 @@ function InputCollections({
         name={`tools.${i}`}
         control={control}
         key={getRandom(i)}
-        render={({ field: { onBlur, onChange, ref, name } }) => {
+        defaultValue={stateInput || ''}
+        render={({ field: { onBlur, onChange, ref, name, value } }) => {
           return (
             <ContainerInput>
               <select
@@ -930,7 +931,7 @@ function InputCollections({
                   onChange(event.currentTarget.value);
                 }}
                 onBlur={onBlur}
-                value={stateInput}
+                value={value}
                 key={getRandom(i)}
                 ref={ref}
               >
