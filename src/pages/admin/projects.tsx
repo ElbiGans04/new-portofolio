@@ -797,6 +797,11 @@ function ModalAddUpdate({
                     value: true,
                     message: 'Please choose one',
                   },
+                  validate: (value) => {
+                    if (value !== 'A1' && value !== 'A2')
+                      return 'invalid value';
+                    else return true;
+                  },
                 })}
               />
               <Label size={1} minSize={1} htmlFor="work">
@@ -811,6 +816,11 @@ function ModalAddUpdate({
                   required: {
                     value: true,
                     message: 'Please choose one',
+                  },
+                  validate: (value) => {
+                    if (value !== 'A1' && value !== 'A2')
+                      return 'invalid value';
+                    else return true;
                   },
                 })}
                 type="radio"
