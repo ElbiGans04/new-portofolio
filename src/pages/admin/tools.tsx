@@ -26,7 +26,12 @@ import { fetcherGeneric } from '@src/utils/fetcher';
 import getRandom from '@src/utils/randomNumber';
 import Head from 'next/head';
 import React, { useEffect, useReducer } from 'react';
-import { useForm, FormProvider, useFormContext } from 'react-hook-form';
+import {
+  useForm,
+  FormProvider,
+  useFormContext,
+  useFormState,
+} from 'react-hook-form';
 import { useSWRConfig } from 'swr';
 import {
   clientHandlerSuccess,
@@ -275,11 +280,8 @@ function ModalAddUpdate({
 }: {
   handler: (e: React.SyntheticEvent) => Promise<void>;
 }) {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext<ModalDataValidation>();
-
+  const { register, control } = useFormContext<ModalDataValidation>();
+  const { errors } = useFormState({ control });
   return (
     <ModalForm onSubmit={handler}>
       <ModalFormContent>

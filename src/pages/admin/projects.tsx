@@ -62,6 +62,7 @@ import {
   useForm,
   useFormContext,
   useFieldArray,
+  useFormState,
 } from 'react-hook-form';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
@@ -538,10 +539,8 @@ function ModalAddUpdate({
   defaultValues?: projectSchema['tools'];
   modal: 'ADD' | 'UPDATE';
 }) {
-  const {
-    formState: { errors },
-    register,
-  } = useFormContext<ModalDataValidation>();
+  const { register, control } = useFormContext<ModalDataValidation>();
+  const { errors } = useFormState({ control });
 
   return (
     <ModalForm onSubmit={handler}>
