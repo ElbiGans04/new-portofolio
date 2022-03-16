@@ -1,8 +1,9 @@
 import Button from '@src/components/Button';
 import Input from '@src/components/Input';
 import Label from '@src/components/Label';
-import { DocErrors, DocMeta } from '@src/types/jsonApi';
+import { DocMeta } from '@src/types/jsonApi';
 import { fetcherGeneric } from '@src/utils/fetcher';
+import HttpError from '@src/utils/httpError';
 import Head from 'next/head';
 import { useRef, useState } from 'react';
 import { useForm, FieldError, UseFormRegister } from 'react-hook-form';
@@ -11,6 +12,7 @@ import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import useUser from '../hooks/useUser';
+import upperFirstWord from '@src/utils/upperFirstWord';
 
 interface DataForm {
   email: string;
@@ -28,7 +30,7 @@ export default function Login() {
     redirectIfFound: true,
   });
   const ref = useRef<HTMLDivElement>(null);
-  const [errorMessage, setErrorMessage] = useState<null | DocErrors>(null);
+  const [errorMessage, setErrorMessage] = useState<null | string>(null);
 
   const onSubmit = handleSubmit((data) => {
     fetcherGeneric<DocMeta>('/api/auth/login', {
@@ -42,7 +44,9 @@ export default function Login() {
         mutateUser(res).catch((err) => console.error(err));
       })
       .catch((err) => {
-        setErrorMessage(err as DocErrors);
+        const message =
+          err instanceof HttpError ? err.message : 'Error when request';
+        setErrorMessage(message);
       });
   });
 
@@ -74,10 +78,7 @@ export default function Login() {
           ref={ref}
         >
           <MessageParent>
-            <p>
-              {errorMessage?.errors &&
-                errorMessage.errors.map((error) => error.title).join(', ')}
-            </p>
+            {errorMessage && <p>{upperFirstWord(errorMessage)}</p>}
             <AiOutlineClose
               title="close message"
               style={{ cursor: 'pointer' }}
@@ -137,7 +138,7 @@ export default function Login() {
           )}
         </FormRow>
 
-        <NewButton type="submit">Enter</NewButton>
+        <NewButton type="submit">Login</NewButton>
       </Form>
     </Container>
   );
