@@ -61,6 +61,7 @@ import {
   FormProvider,
   useForm,
   useFormContext,
+  useFieldArray,
 } from 'react-hook-form';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
@@ -71,7 +72,7 @@ type ModalDataValidation = {
   title: string;
   startDate: string;
   endDate: string;
-  tools: string[];
+  tools: { value: string }[];
   typeProject: string;
   images: FileList;
   description: string;
@@ -252,17 +253,9 @@ function SwitchModal({
   >('/api/tools', fetcherGeneric);
   const firebaseApp = initializeApp(firebaseConfig);
   const firebaseRootStroage = getStorage(firebaseApp);
-  // const {
-  //   reset,
-  //   formState: { errors },
-  //   register,
-  //   handleSubmit,
-  //   control,
-  //   unregister,
-  //   setValue,
-  // } = useForm<ModalDataValidation>();
   const reactForm = useForm<ModalDataValidation>();
   const row = state.row;
+
   useEffect(() => {
     if (state.modal == 'add') {
       reactForm.reset(
@@ -273,6 +266,7 @@ function SwitchModal({
           url: '',
           description: '',
           typeProject: '',
+          tools: [{ value: data && data.data[0]?.id ? data.data[0].id : '' }],
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
@@ -291,11 +285,17 @@ function SwitchModal({
         typeProject,
         tools,
       } = state.row.attributes;
+
       const fixTools = Array.isArray(tools)
-        ? tools.map((tool) => (isTool(tool) ? tool._id : tool.toString()))
+        ? tools.map(
+            (tool) =>
+              ({ value: isTool(tool) ? tool._id : tool.toString() } as {
+                value: string;
+              }),
+          )
         : isTool(tools)
-        ? [tools._id]
-        : [tools.toString()];
+        ? [{ value: tools._id }]
+        : ([{ value: tools.toString() }] as { value: string }[]);
       reactForm.reset(
         {
           title,
@@ -305,12 +305,12 @@ function SwitchModal({
           description,
           typeProject:
             typeof typeProject == 'string' ? typeProject : typeProject._id,
-          tools: fixTools as string[],
+          tools: fixTools as { value: string }[],
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
     }
-  }, [reactForm, state.modal, state.row]);
+  }, [reactForm, state.modal, state.row, data]);
 
   /* 
     Event Handler function
@@ -860,8 +860,8 @@ function InputCollections({
   data: DocDataDiscriminated<ResourceToolInterface[]>;
   defaultValues?: projectSchema['tools'];
 }) {
-  const { control, unregister, setValue } =
-    useFormContext<ModalDataValidation>();
+  const { control, unregister } = useFormContext<ModalDataValidation>();
+  const { fields, append, replace } = useFieldArray({ control, name: 'tools' });
   const [inputState, setInputState] = useState<string[]>(() => {
     if (defaultValues) {
       if (Array.isArray(defaultValues)) {
@@ -878,10 +878,9 @@ function InputCollections({
     }
 
     // Jika tidak ada nilai dafault
-    return [data.data[0].id || ''];
+    const realValue = data.data[0].id || '';
+    return [realValue];
   });
-
-  const collectionInput = [];
 
   // callback
   function onChangeItem(
@@ -900,8 +899,8 @@ function InputCollections({
     const newInputState = [...inputState].filter((value, idx) => index !== idx);
     if (newInputState.length > 0) {
       setInputState(newInputState);
-      unregister(`tools.${index}`);
-      setValue('tools', newInputState);
+      unregister(`tools.${index}.value`);
+      replace(newInputState.map((value) => ({ value })));
     }
   }
 
@@ -910,58 +909,61 @@ function InputCollections({
     const value = data.data[0].id || '';
     newInputState.push(value);
     setInputState(newInputState);
+    append({ value });
   }
 
-  // Looping untuk select element yang diperlukan
-  for (let i = 0; i < inputState.length; i++) {
-    const stateInput = inputState[i];
-    const element = (
-      <Controller
-        name={`tools.${i}`}
-        control={control}
-        key={getRandom(i)}
-        defaultValue={stateInput || ''}
-        render={({ field: { onBlur, onChange, ref, name, value } }) => {
-          return (
-            <ContainerInput>
-              <select
-                name={name}
-                onChange={(event) => {
-                  onChangeItem(event, i);
-                  onChange(event.currentTarget.value);
-                }}
-                onBlur={onBlur}
-                value={value}
-                key={getRandom(i)}
-                ref={ref}
-              >
-                {data.data.map((value) => {
-                  const textOption = value.attributes
-                    ? value.attributes.name
-                    : 'undefined';
-                  return (
-                    <option key={value.id || getRandom(i)} value={value.id}>
-                      {textOption}
-                    </option>
-                  );
-                })}
-              </select>
-              <Button type="button" onClick={(event) => onRemoveItem(event, i)}>
-                X
-              </Button>
-            </ContainerInput>
-          );
-        }}
-      />
-    );
-    collectionInput.push(element);
-  }
   return (
     <ContainerInputs>
       <Button className="add" type="button" onClick={() => onAddItem()}>
         <IoAddOutline />
       </Button>
-      {collectionInput}
+      {fields.map((field, index) => {
+        return (
+          <Controller
+            name={`tools.${index}.value`}
+            control={control}
+            key={getRandom(index)}
+            defaultValue={field.value}
+            render={({ field: { onBlur, onChange, ref, name, value } }) => {
+              return (
+                <ContainerInput>
+                  <select
+                    name={name}
+                    onChange={(event) => {
+                      onChangeItem(event, index);
+                      onChange(event.currentTarget.value);
+                    }}
+                    onBlur={onBlur}
+                    value={value}
+                    key={getRandom(index)}
+                    ref={ref}
+                  >
+                    {data.data.map((value) => {
+                      const textOption = value.attributes
+                        ? value.attributes.name
+                        : 'undefined';
+                      return (
+                        <option
+                          key={value.id || getRandom(index)}
+                          value={value.id}
+                        >
+                          {textOption}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <Button
+                    type="button"
+                    onClick={(event) => onRemoveItem(event, index)}
+                  >
+                    X
+                  </Button>
+                </ContainerInput>
+              );
+            }}
+          />
+        );
+      })}
     </ContainerInputs>
   );
 }
