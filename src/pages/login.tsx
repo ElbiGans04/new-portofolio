@@ -72,6 +72,8 @@ export default function Login() {
             ref.current && errorMessage !== null && maxHeightMessage !== null
               ? maxHeightMessage <= 0
                 ? ref.current.scrollHeight
+                : maxHeightMessage <= ref.current.scrollHeight
+                ? ref.current.scrollHeight
                 : maxHeightMessage
               : 0
           }
