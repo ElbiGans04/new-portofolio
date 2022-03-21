@@ -11,7 +11,7 @@ import upperFirstWord from '@src/utils/upperFirstWord';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import React, { MouseEvent, useEffect, useRef, useState } from 'react';
+import React, { MouseEvent, useRef, useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
@@ -107,7 +107,7 @@ function Projects({ projects }: { projects: string }) {
               updateState={setModal}
               defaultState={{ open: false, index: 0 }}
             >
-              <ImageSlider showModal={modal.open} project={project} />
+              <ImageSlider project={project} />
               <ModalContentContent>
                 <Heading minSize={1.5} size={2}>
                   <span>{upperFirstWord(project.title)}</span>
@@ -167,13 +167,7 @@ function Projects({ projects }: { projects: string }) {
 
 export default Projects;
 
-function ImageSlider({
-  showModal,
-  project,
-}: {
-  showModal: boolean;
-  project: ProjectInterface;
-}) {
+function ImageSlider({ project }: { project: ProjectInterface }) {
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const nodeRef = useRef<HTMLDivElement>(null);
 

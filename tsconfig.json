@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["es6", "dom", "dom.iterable", "esnext"],
+    "lib": [
+      "es6",
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -15,13 +20,29 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-        "@public/*": ["public/*"],
-        "@src/*": ["./src/*"],
+      "@public/*": [
+        "public/*"
+      ],
+      "@src/*": [
+        "./src/*"
+      ]
     },
-    "typeRoots": ["./node_modules/@types", "./src/types/definition-file"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types/definition-file"
+    ],
+    "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
-  "exclude": ["node_modules", ".next", ".vercel", "out"],
-
-  
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".vercel",
+    "out"
+  ]
 }

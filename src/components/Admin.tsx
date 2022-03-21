@@ -136,7 +136,7 @@ export function TdButton({
 }
 
 export const RowDetail = React.forwardRef<
-  HTMLTableRowElement,
+  HTMLDivElement,
   { open: boolean; colSpan: number; children: JSX.Element; height: number }
 >(({ open, colSpan, children, height }, ref) => {
   return (

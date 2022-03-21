@@ -196,7 +196,7 @@ export const ModalContent2 = styled.div`
 // // Modal Form
 //
 
-export const ModalForm = styled.form<{ onSubmit: (e: any) => Promise<void> }>`
+export const ModalForm = styled.form`
   width: 100%;
   height: 100%;
 `;

@@ -20,7 +20,6 @@ import {
   ModalMain2,
 } from '@src/components/Modal';
 import firebaseConfig from '@src/config/firebase';
-import tools from '@src/database/schemas/tools';
 import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
 import type {
@@ -316,37 +315,41 @@ function SwitchModal({
   /* 
     Event Handler function
   */
-  async function onSubmitModalDelete() {
-    try {
-      if (
-        state.row &&
-        state.row.attributes &&
-        state.row.type == 'Projects' &&
-        state.row.id
-      ) {
-        dispatch({ type: 'modal/request/start' });
+  function onSubmitModalDelete() {
+    const callback = async () => {
+      try {
+        if (
+          state.row &&
+          state.row.attributes &&
+          state.row.type == 'Projects' &&
+          state.row.id
+        ) {
+          dispatch({ type: 'modal/request/start' });
 
-        const request = await fetcherGeneric<DocMeta>(
-          `/api/projects/${state.row.id}`,
-          {
-            method: 'delete',
-          },
-        );
+          const request = await fetcherGeneric<DocMeta>(
+            `/api/projects/${state.row.id}`,
+            {
+              method: 'delete',
+            },
+          );
 
-        await deleteImages(state.row.attributes.images, firebaseRootStroage);
+          await deleteImages(state.row.attributes.images, firebaseRootStroage);
 
-        await clientHandlerSuccess(
-          request.meta.title as string,
-          dispatch,
-          mutate,
-          '/api/projects',
+          await clientHandlerSuccess(
+            request.meta.title as string,
+            dispatch,
+            mutate,
+            '/api/projects',
+          );
+        }
+      } catch (err) {
+        clientHandlerError(err, dispatch, mutate, '/api/projects').catch(
+          (err) => console.error(err),
         );
       }
-    } catch (err) {
-      clientHandlerError(err, dispatch, mutate, '/api/projects').catch((err) =>
-        console.error(err),
-      );
-    }
+    };
+
+    callback().catch((err) => console.error(err));
   }
 
   const onSubmitModalAdd = reactForm.handleSubmit(async function (data) {
@@ -549,16 +552,19 @@ function ModalAddUpdate({
   modal,
   handler,
 }: {
-  handler: (e: React.SyntheticEvent) => Promise<void>;
+  handler: (e: React.BaseSyntheticEvent) => Promise<void>;
   data: DocDataDiscriminated<ResourceToolInterface[]>;
   defaultValues?: projectSchema['tools'];
   modal: 'ADD' | 'UPDATE';
 }) {
   const { register, control } = useFormContext<ModalDataValidation>();
   const { errors } = useFormState({ control });
+  const Handler = (e: React.BaseSyntheticEvent) => {
+    handler(e).catch((err) => console.error(err));
+  };
 
   return (
-    <ModalForm onSubmit={handler}>
+    <ModalForm onSubmit={Handler}>
       <ModalFormContent>
         <ModalFormContentRow>
           <Label size={1} minSize={1} htmlFor="title">

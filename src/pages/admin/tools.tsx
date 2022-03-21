@@ -23,7 +23,6 @@ import type { admin } from '@src/types/admin';
 import { Dispatch, DocAdminData } from '@src/types/admin';
 import type { DocMeta } from '@src/types/jsonApi/index';
 import { fetcherGeneric } from '@src/utils/fetcher';
-import getRandom from '@src/utils/randomNumber';
 import Head from 'next/head';
 import React, { useEffect, useReducer } from 'react';
 import {
@@ -98,7 +97,7 @@ function TableHeadBody({
         </tr>
       </thead>
       <tbody>
-        {tools.map((tool, index) => {
+        {tools.map((tool) => {
           if (tool.type == 'Projects' || tool.attributes === undefined)
             return (
               <React.Fragment>
@@ -184,30 +183,34 @@ function SwitchModal({
     }
   });
 
-  async function onSubmitModalDelete() {
-    if (state.row && state.row.id) {
-      try {
-        dispatch({ type: 'modal/request/start' });
+  function onSubmitModalDelete() {
+    const callback = async () => {
+      if (state.row && state.row.id) {
+        try {
+          dispatch({ type: 'modal/request/start' });
 
-        const result = await fetcherGeneric<DocMeta>(
-          `/api/tools/${state.row.id}`,
-          {
-            method: 'DELETE',
-          },
-        );
+          const result = await fetcherGeneric<DocMeta>(
+            `/api/tools/${state.row.id}`,
+            {
+              method: 'DELETE',
+            },
+          );
 
-        await clientHandlerSuccess(
-          result.meta.title as string,
-          dispatch,
-          mutate,
-          '/api/tools',
-        );
-      } catch (err) {
-        clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
-          console.error(err),
-        );
+          await clientHandlerSuccess(
+            result.meta.title as string,
+            dispatch,
+            mutate,
+            '/api/tools',
+          );
+        } catch (err) {
+          clientHandlerError(err, dispatch, mutate, '/api/tools').catch((err) =>
+            console.error(err),
+          );
+        }
       }
-    }
+    };
+
+    callback().catch((err) => console.error(err));
   }
 
   const onSubmitModalUpdate = reactForm.handleSubmit(async (data) => {
@@ -282,12 +285,15 @@ function SwitchModal({
 function ModalAddUpdate({
   handler,
 }: {
-  handler: (e: React.SyntheticEvent) => Promise<void>;
+  handler: (e: React.BaseSyntheticEvent) => Promise<void>;
 }) {
   const { register, control } = useFormContext<ModalDataValidation>();
   const { errors } = useFormState({ control });
+  const Handler = (e: React.BaseSyntheticEvent) => {
+    handler(e).catch((err) => console.error(err));
+  };
   return (
-    <ModalForm onSubmit={handler}>
+    <ModalForm onSubmit={Handler}>
       <ModalFormContent>
         <ModalFormContentRow>
           <Label minSize={1} size={1} htmlFor="name">

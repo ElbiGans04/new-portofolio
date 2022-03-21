@@ -32,23 +32,27 @@ export default function Login() {
   const ref = useRef<HTMLDivElement>(null);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
 
-  const onSubmit = handleSubmit((data) => {
-    fetcherGeneric<DocMeta>('/api/auth/login', {
-      method: 'post',
-      body: JSON.stringify({ type: 'Admin', attributes: data }),
-      headers: {
-        'Content-Type': 'application/vnd.api+json',
-      },
-    })
-      .then((res) => {
-        mutateUser(res).catch((err) => console.error(err));
+  const onSubmit = () => {
+    const callback = handleSubmit((data) => {
+      fetcherGeneric<DocMeta>('/api/auth/login', {
+        method: 'post',
+        body: JSON.stringify({ type: 'Admin', attributes: data }),
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+        },
       })
-      .catch((err) => {
-        const message =
-          err instanceof HttpError ? err.message : 'Error when request';
-        setErrorMessage(message);
-      });
-  });
+        .then((res) => {
+          mutateUser(res).catch((err) => console.error(err));
+        })
+        .catch((err) => {
+          const message =
+            err instanceof HttpError ? err.message : 'Error when request';
+          setErrorMessage(message);
+        });
+    });
+
+    callback().catch((err) => console.error(err));
+  };
 
   const maxHeightMessage =
     ref.current &&
@@ -229,9 +233,7 @@ const Container = styled.div`
     }
   }
 `;
-const Form = styled.form<{
-  onSubmit: (e: any) => Promise<void>;
-}>`
+const Form = styled.form`
   width: 100%;
   height: 100%;
   display: flex;
