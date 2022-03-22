@@ -332,7 +332,7 @@ const ModalImage = styled.div`
   overflow: hidden;
   position: relative;
 
-  &:hover div:first-child {
+  &:hover span:first-child {
     opacity: 1;
   }
 
