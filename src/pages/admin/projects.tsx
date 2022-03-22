@@ -20,6 +20,7 @@ import {
   ModalMain2,
 } from '@src/components/Modal';
 import firebaseConfig from '@src/config/firebase';
+import tools from '@src/database/schemas/tools';
 import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
 import type {
@@ -352,13 +353,16 @@ function SwitchModal({
     const Doc: {
       type: string;
       attributes: {
-        [Property in keyof typeof data]: Property extends 'images'
+        [Property in keyof typeof data as Exclude<
+          Property,
+          'tools'
+        >]: Property extends 'images'
           ? typeof data['images'] | { src: string; ref: string }[]
           : typeof data[Property];
-      };
+      } & { tools: string[] };
     } = {
       type: 'project',
-      attributes: { ...data },
+      attributes: { ...data, tools: data.tools.map((tool) => tool.value) },
     };
 
     try {
@@ -402,14 +406,17 @@ function SwitchModal({
       type: string;
       id: string;
       attributes: {
-        [Property in keyof typeof data]: Property extends 'images'
+        [Property in keyof typeof data as Exclude<
+          Property,
+          'tools'
+        >]: Property extends 'images'
           ? typeof data['images'] | { src: string; ref: string }[]
           : typeof data[Property];
-      };
+      } & { tools: string[] };
     } = {
       type: 'project',
       id: state.row?.id || '',
-      attributes: { ...data },
+      attributes: { ...data, tools: data.tools.map((tool) => tool.value) },
     };
     if (
       state.row &&
