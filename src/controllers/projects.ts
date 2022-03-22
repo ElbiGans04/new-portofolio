@@ -101,6 +101,8 @@ class Projects {
 
     await project.save();
 
+    await res.unstable_revalidate('/projects');
+
     // atur headers
     res.setHeader('Location', `/api/projects/${project._id as string}`);
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -150,6 +152,7 @@ class Projects {
         'project with that id not found',
       );
     }
+    await res.unstable_revalidate('/projects');
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
@@ -168,6 +171,7 @@ class Projects {
     if (!result)
       throw new HttpError('Project not found', 404, 'Project not found in db');
 
+    await res.unstable_revalidate('/projects');
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
     return res.end(

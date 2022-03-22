@@ -8,7 +8,7 @@ import parseDate from '@src/utils/getStringDate';
 import getStringOfTools from '@src/utils/getStringOfTools';
 import getRandom from '@src/utils/randomNumber';
 import upperFirstWord from '@src/utils/upperFirstWord';
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, { MouseEvent, useRef, useState } from 'react';
@@ -16,7 +16,7 @@ import { CSSTransition } from 'react-transition-group';
 import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
 
-export const getServerSideProps: GetServerSideProps = async function () {
+export const getStaticProps: GetStaticProps = async function () {
   await dbConnection();
   const result = await projectsSchema
     .find()
