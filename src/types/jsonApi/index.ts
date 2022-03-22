@@ -23,7 +23,7 @@ interface ResourceIdentifierObject {
 
 export interface ResourceObject<T = { [index: string]: OObject }, T2 = string> {
   type: T2;
-  id?: string;
+  id: string;
   attributes?: T;
   relationships?: {
     [index: string]: {

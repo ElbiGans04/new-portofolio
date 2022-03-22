@@ -266,7 +266,7 @@ function SwitchModal({
           url: '',
           description: '',
           typeProject: '',
-          tools: [{ value: data && data.data[0]?.id ? data.data[0].id : '' }],
+          tools: [{ value: data && data.data[0] ? data.data[0].id : '' }],
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
@@ -895,7 +895,7 @@ function InputCollections({
     }
 
     // Jika tidak ada nilai dafault
-    const realValue = data.data[0].id || '';
+    const realValue = data.data[0].id;
     return [realValue];
   });
 
@@ -923,7 +923,7 @@ function InputCollections({
 
   function onAddItem() {
     const newInputState = [...inputState];
-    const value = data.data[0].id || '';
+    const value = data.data[0].id;
     newInputState.push(value);
     setInputState(newInputState);
     append({ value });
@@ -960,10 +960,7 @@ function InputCollections({
                         ? value.attributes.name
                         : 'undefined';
                       return (
-                        <option
-                          key={value.id || getRandom(index)}
-                          value={value.id}
-                        >
+                        <option key={value.id} value={value.id}>
                           {textOption}
                         </option>
                       );

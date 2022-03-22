@@ -107,7 +107,7 @@ function TableHeadBody({
               </React.Fragment>
             );
           return (
-            <React.Fragment key={tool.id || getRandom(index)}>
+            <React.Fragment key={tool.id}>
               <tr>
                 <td>{tool.attributes.name}</td>
                 <td>{tool.attributes.as}</td>
