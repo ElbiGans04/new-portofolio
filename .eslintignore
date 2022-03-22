@@ -19,3 +19,4 @@ next-env.d.ts
 .lintstagedrc.js
 commitlint.config.js
 test.js
+next.config.js
