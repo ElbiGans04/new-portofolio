@@ -177,11 +177,6 @@ function ImageSlider({
   const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
   const nodeRef = useRef<HTMLDivElement>(null);
 
-  // Reset state saat modal diclose
-  useEffect(() => {
-    if (!showModal) setSlide({ slide: 0, translateX: 0 });
-  }, [showModal, setSlide]);
-
   function changeImageAction(event: MouseEvent, action: number): void {
     if (
       project.images.length > 1 &&
