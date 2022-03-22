@@ -17,12 +17,28 @@ export type DATA = ResourceProjectInterface | ResourceToolInterface;
 
 export type DocAdminData = DocDataDiscriminated<DATA[]>;
 
-export interface admin {
+type baseAdmin = {
   status: 'iddle' | 'loading' | 'error';
-  modal: 'add' | 'update' | 'delete' | null;
   message: string | null;
-  row: DATA | null;
-}
+};
+
+export type admin =
+  | (baseAdmin & {
+      modal: null;
+      row: null;
+    })
+  | (baseAdmin & {
+      modal: 'add';
+      row: null;
+    })
+  | (baseAdmin & {
+      modal: 'update';
+      row: DATA;
+    })
+  | (baseAdmin & {
+      modal: 'delete';
+      row: DATA;
+    });
 
 export type action =
   | { type: 'modal/open/add' }

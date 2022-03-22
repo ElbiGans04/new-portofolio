@@ -255,7 +255,6 @@ function SwitchModal({
   const firebaseApp = initializeApp(firebaseConfig);
   const firebaseRootStroage = getStorage(firebaseApp);
   const reactForm = useForm<ModalDataValidation>();
-  const row = state.row;
 
   useEffect(() => {
     if (state.modal == 'add') {
@@ -318,17 +317,22 @@ function SwitchModal({
   */
   async function onSubmitModalDelete() {
     try {
-      if (row && row.attributes && row.type == 'Projects' && row.id) {
+      if (
+        state.row &&
+        state.row.attributes &&
+        state.row.type == 'Projects' &&
+        state.row.id
+      ) {
         dispatch({ type: 'modal/request/start' });
 
         const request = await fetcherGeneric<DocMeta>(
-          `/api/projects/${row.id}`,
+          `/api/projects/${state.row.id}`,
           {
             method: 'delete',
           },
         );
 
-        await deleteImages(row.attributes.images, firebaseRootStroage);
+        await deleteImages(state.row.attributes.images, firebaseRootStroage);
 
         await clientHandlerSuccess(
           request.meta.title as string,
@@ -404,12 +408,17 @@ function SwitchModal({
       };
     } = {
       type: 'project',
-      id: row?.id || '',
+      id: state.row?.id || '',
       attributes: { ...data },
     };
-    if (row && row.attributes && row.type == 'Projects' && row.id) {
+    if (
+      state.row &&
+      state.row.attributes &&
+      state.row.type == 'Projects' &&
+      state.row.id
+    ) {
       try {
-        const imagesOld = row.attributes.images.map((image) => ({
+        const imagesOld = state.row.attributes.images.map((image) => ({
           src: image.src,
           ref: image.ref,
         }));
@@ -425,7 +434,7 @@ function SwitchModal({
         } else Doc.attributes.images = imagesOld;
 
         const request = await fetcherGeneric<DocMeta>(
-          `/api/projects/${row.id}`,
+          `/api/projects/${state.row.id}`,
           {
             method: 'PATCH',
             body: JSON.stringify(Doc),
@@ -436,7 +445,7 @@ function SwitchModal({
         );
 
         if (data.images.length > 0)
-          await deleteImages(row.attributes.images, firebaseRootStroage);
+          await deleteImages(state.row.attributes.images, firebaseRootStroage);
 
         await clientHandlerSuccess(
           request.meta.title as string,
@@ -508,16 +517,15 @@ function SwitchModal({
     }
 
     case 'update': {
-      if (!row) throw new Error('row is not found');
-      if (!row.attributes) throw new Error('row.attribues is not found');
-      if (row.type === 'Tools') throw new Error('type of row is wrong');
+      if (!state.row.attributes) throw new Error('row.attribues is not found');
+      if (state.row.type === 'Tools') throw new Error('type of row is wrong');
 
       return (
         <FormProvider {...reactForm}>
           <ModalAddUpdate
             handler={onSubmitModalUpdate}
             data={data}
-            defaultValues={row.attributes.tools}
+            defaultValues={state.row.attributes.tools}
             modal="UPDATE"
           />
         </FormProvider>

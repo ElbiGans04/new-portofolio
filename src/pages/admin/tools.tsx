@@ -130,8 +130,6 @@ function SwitchModal({
 }): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
   const reactForm = useForm<ModalDataValidation>();
-  // Check apakah jenis data sesuai
-  const row = state.row;
 
   useEffect(() => {
     if (state.modal === 'add') {
@@ -187,13 +185,16 @@ function SwitchModal({
   });
 
   async function onSubmitModalDelete() {
-    if (row && row.id) {
+    if (state.row && state.row.id) {
       try {
         dispatch({ type: 'modal/request/start' });
 
-        const result = await fetcherGeneric<DocMeta>(`/api/tools/${row.id}`, {
-          method: 'DELETE',
-        });
+        const result = await fetcherGeneric<DocMeta>(
+          `/api/tools/${state.row.id}`,
+          {
+            method: 'DELETE',
+          },
+        );
 
         await clientHandlerSuccess(
           result.meta.title as string,
@@ -210,21 +211,24 @@ function SwitchModal({
   }
 
   const onSubmitModalUpdate = reactForm.handleSubmit(async (data) => {
-    if (row && row.id) {
+    if (state.row && state.row.id) {
       try {
         dispatch({ type: 'modal/request/start' });
 
-        const result = await fetcherGeneric<DocMeta>(`/api/tools/${row.id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            type: 'Tool',
-            id: row.id,
-            attributes: data,
-          }),
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
+        const result = await fetcherGeneric<DocMeta>(
+          `/api/tools/${state.row.id}`,
+          {
+            method: 'PATCH',
+            body: JSON.stringify({
+              type: 'Tool',
+              id: state.row.id,
+              attributes: data,
+            }),
+            headers: {
+              'Content-Type': 'application/vnd.api+json',
+            },
           },
-        });
+        );
 
         await clientHandlerSuccess(
           result.meta.title as string,

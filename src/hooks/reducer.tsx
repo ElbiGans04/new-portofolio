@@ -3,7 +3,7 @@ import type { admin, action } from '@src/types/admin';
 export function reducer(state: admin, action: action): admin {
   switch (action.type) {
     case 'modal/open/add': {
-      return { ...state, modal: 'add' };
+      return { message: null, row: null, status: 'iddle', modal: 'add' };
     }
     case 'modal/open/update': {
       return {
@@ -34,7 +34,7 @@ export function reducer(state: admin, action: action): admin {
     }
     case 'modal/close': {
       return {
-        ...state,
+        row: null,
         status: 'iddle',
         modal: null,
         message: null,
