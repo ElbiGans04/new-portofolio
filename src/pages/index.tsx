@@ -25,10 +25,12 @@ export default function Home() {
         <Heading size={2.5} minSize={1.5}>
           Hello, i&apos;m <span>Rhafael Bijaksana</span>
         </Heading>
-        <Heading size={2} minSize={1.3}>
+        {/* <Heading size={2} minSize={1.3}>
           I&apos;m a <span>Fullstack Developer</span>
+        </Heading> */}
+        <Heading size={1.5} minSize={0.9}>
+          Reach me via email <span>rhafaelbijaksana04@gmail.com</span>
         </Heading>
-        {/* <Heading>Reach me via email <span>rhafaelbijaksana04@gmail.com</span></Heading> */}
       </TextParent>
     </Container>
   );

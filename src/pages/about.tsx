@@ -17,7 +17,7 @@ function About() {
       </Paragraph>
       <Paragraph minSize={1} size={1.5} lineHeight="2">
         Since then till now, I focus on <span>JavaScript development</span>{' '}
-        mostly on <span>react js, redux, js next js</span> sometimes
+        mostly on <span>react js, typescript, next js</span> sometimes
       </Paragraph>
     </Container>
   );
