@@ -11,7 +11,7 @@ import upperFirstWord from '@src/utils/upperFirstWord';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import React, { MouseEvent, useRef, useState } from 'react';
+import React, { MouseEvent, useRef, useReducer } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
@@ -29,19 +29,51 @@ export const getStaticProps: GetStaticProps = async function () {
   };
 };
 
+type stateProjects =
+  | {
+      open: true;
+      index: number;
+      modal: {
+        imageIndex: number;
+        imageTransition: number;
+      };
+    }
+  | { open: false; index: number; modal: null };
+
+type actionProjects =
+  | {
+      type: 'open-modal';
+      payload: {
+        index: number;
+      };
+    }
+  | {
+      type: 'close-modal';
+    }
+  | {
+      type: 'change-image';
+      payload: {
+        imageTransform: number;
+        imageIndex: number;
+      };
+    };
 function Projects({ projects }: { projects: string }) {
   const projectsResult = JSON.parse(projects) as ProjectInterface[];
   // React hooks
-  const [modal, setModal] = useState({ open: false, index: 0 });
+  const [state, dispatch] = useReducer(reducer, {
+    modal: null,
+    open: false,
+    index: 0,
+  });
   const nodeRef = useRef<HTMLDivElement>(null);
 
   // Variabel Biasa
-  const project = projectsResult[modal.index];
+  const project = projectsResult[state.index];
 
   return (
     <>
       {/* Saat modal terlihat matikan overflow untuk body */}
-      {modal.open && <GlobalStyle />}
+      {state.open && <GlobalStyle />}
 
       <Container>
         <Head>
@@ -58,7 +90,7 @@ function Projects({ projects }: { projects: string }) {
             projectsResult.map((value, index) => (
               <Project
                 onClick={() => {
-                  setModal({ open: true, index });
+                  dispatch({ type: 'open-modal', payload: { index } });
                 }}
                 key={index}
               >
@@ -97,17 +129,21 @@ function Projects({ projects }: { projects: string }) {
           <CSSTransition
             nodeRef={nodeRef}
             classNames="modal"
-            in={modal.open}
+            in={state.open}
             timeout={500}
           >
             <Modal
               width="100%"
               height=""
               ref={nodeRef}
-              updateState={setModal}
-              defaultState={{ open: false, index: 0 }}
+              updateState={dispatch}
+              defaultState={{ type: 'close-modal' }}
             >
-              <ImageSlider project={project} />
+              <ImageSlider
+                modal={state.modal}
+                dispatch={dispatch}
+                project={project}
+              />
               <ModalContentContent>
                 <Heading minSize={1.5} size={2}>
                   <span>{upperFirstWord(project.title)}</span>
@@ -167,35 +203,49 @@ function Projects({ projects }: { projects: string }) {
 
 export default Projects;
 
-function ImageSlider({ project }: { project: ProjectInterface }) {
-  const [slide, setSlide] = useState({ slide: 0, translateX: 0 });
+function ImageSlider({
+  project,
+  dispatch,
+  modal,
+}: {
+  modal: stateProjects['modal'];
+  project: ProjectInterface;
+  dispatch: React.Dispatch<actionProjects>;
+}) {
   const nodeRef = useRef<HTMLDivElement>(null);
 
   function changeImageAction(event: MouseEvent, action: number): void {
     if (
       project.images.length > 1 &&
       event.currentTarget.parentElement !== null &&
-      event.currentTarget.parentElement.parentElement !== null
+      event.currentTarget.parentElement.parentElement !== null &&
+      modal !== null
     ) {
-      const modal = event.currentTarget.parentElement.parentElement;
-      const { width: modalWidth } = modal.getBoundingClientRect();
+      const modalElement = event.currentTarget.parentElement.parentElement;
+      const { width: modalWidth } = modalElement.getBoundingClientRect();
 
       // Jika nilai berikutnya ditambah lalu melebihi panjang gambar maka nilai akan menjadi ke 0
       // Jika nilai berikutnya dikurang lalu kurang dari 0 maka nilai akan menjadi jumlah gambar
       let result = 0;
       if (action === 0) {
         // // Jika hasil Operasi berikutnya kurang dari 0 maka setel ke jumlah gambar dikurangi 1
-        if (slide.slide - 1 < 0) result = project.images.length - 1;
-        else result = slide.slide - 1;
+        if (modal.imageIndex - 1 < 0) result = project.images.length - 1;
+        else result = modal.imageIndex - 1;
       } else {
         // Jika hasil Operasi berikutnya melebihi panjang gambar
-        if (slide.slide + 1 > project.images.length - 1) result = 0;
-        else result = slide.slide + 1;
+        if (modal.imageIndex + 1 > project.images.length - 1) result = 0;
+        else result = modal.imageIndex + 1;
       }
 
-      setSlide({ slide: result, translateX: result * -modalWidth });
+      // setSlide({ slide: result, translateX: result * -modalWidth });
+      dispatch({
+        type: 'change-image',
+        payload: { imageIndex: result, imageTransform: result * -modalWidth },
+      });
     }
   }
+
+  if (!modal) return <ModalImage ref={nodeRef} />;
   return (
     <ModalImage ref={nodeRef}>
       {project.images.length > 1 && (
@@ -218,7 +268,7 @@ function ImageSlider({ project }: { project: ProjectInterface }) {
       )}
 
       {/* Content Images */}
-      <ModalImageContent translateX={slide.translateX}>
+      <ModalImageContent translateX={modal.imageTransition}>
         {project.images.map((value, index) => (
           <ModalImageContentContent key={getRandom(index)}>
             <Image
@@ -238,12 +288,40 @@ function ImageSlider({ project }: { project: ProjectInterface }) {
         {project.images.map((value, index) => (
           <ModalImageCountCount
             key={getRandom(index)}
-            opacity={slide.slide === index ? '1' : '0.5'}
+            opacity={modal.imageIndex === index ? '1' : '0.5'}
           />
         ))}
       </ModalImageCount>
     </ModalImage>
   );
+}
+
+function reducer(state: stateProjects, action: actionProjects): stateProjects {
+  switch (action.type) {
+    case 'open-modal': {
+      return {
+        open: true,
+        index: action.payload.index,
+        modal: { imageTransition: 0, imageIndex: 0 },
+      };
+    }
+    case 'close-modal': {
+      return { ...state, open: false, modal: null };
+    }
+    case 'change-image': {
+      return {
+        ...state,
+        open: true,
+        modal: {
+          imageTransition: action.payload.imageTransform,
+          imageIndex: action.payload.imageIndex,
+        },
+      };
+    }
+    default: {
+      throw new Error('action.type not match anything');
+    }
+  }
 }
 
 function myLoader({ src }: { src: string }) {
@@ -345,7 +423,6 @@ const ModalImage = styled.div`
 
 const ModalImageActions = styled.div`
   transition: var(--transition);
-  opacity: 0;
   width: 100%;
   height: 350px;
   position: absolute;
