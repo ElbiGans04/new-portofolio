@@ -66,8 +66,6 @@ function Projects({ projects }: { projects: string }) {
     index: 0,
   });
   const nodeRef = useRef<HTMLDivElement>(null);
-
-  // Variabel Biasa
   const project = projectsResult[state.index];
 
   return (
@@ -86,115 +84,112 @@ function Projects({ projects }: { projects: string }) {
 
         {/* Inti Content */}
         <ContainerProjects>
-          {project &&
-            projectsResult.map((value, index) => (
-              <Project
-                onClick={() => {
-                  dispatch({ type: 'open-modal', payload: { index } });
-                }}
-                key={index}
-              >
-                <ProjectImageContainer>
-                  {value.images[0] && (
-                    <Image
-                      loader={myLoader}
-                      alt="project"
-                      className={projectsStyled.project}
-                      src={`${value.images[0].src}`}
-                      layout="fill"
-                      unoptimized
-                    />
-                  )}
-                </ProjectImageContainer>
+          {projectsResult.map((value, index) => (
+            <Project
+              onClick={() => {
+                dispatch({ type: 'open-modal', payload: { index } });
+              }}
+              key={index}
+            >
+              <ProjectImageContainer>
+                {value.images[0] && (
+                  <Image
+                    loader={myLoader}
+                    alt="project"
+                    className={projectsStyled.project}
+                    src={`${value.images[0].src}`}
+                    layout="fill"
+                    unoptimized
+                  />
+                )}
+              </ProjectImageContainer>
 
-                <ProjectTextContainer>
-                  <Heading minSize={1} size={1.3}>
-                    <span>{upperFirstWord(value.title)}</span>
-                  </Heading>
-                  <Heading minSize={1} size={1}>
-                    {upperFirstWord(
-                      typeof value.typeProject !== 'string'
-                        ? value.typeProject.name
-                        : 'Unkown',
-                    )}
-                  </Heading>
-                </ProjectTextContainer>
-              </Project>
-            ))}
+              <ProjectTextContainer>
+                <Heading minSize={1} size={1.3}>
+                  <span>{upperFirstWord(value.title)}</span>
+                </Heading>
+                <Heading minSize={1} size={1}>
+                  {upperFirstWord(
+                    typeof value.typeProject !== 'string'
+                      ? value.typeProject.name
+                      : 'Unkown',
+                  )}
+                </Heading>
+              </ProjectTextContainer>
+            </Project>
+          ))}
         </ContainerProjects>
         {/* Akhir dari inti Content */}
 
         {/* Modal */}
-        {project && (
-          <CSSTransition
-            nodeRef={nodeRef}
-            classNames="modal"
-            in={state.open}
-            timeout={500}
+        <CSSTransition
+          nodeRef={nodeRef}
+          classNames="modal"
+          in={state.open}
+          timeout={500}
+        >
+          <Modal
+            width="100%"
+            height=""
+            ref={nodeRef}
+            updateState={dispatch}
+            defaultState={{ type: 'close-modal' }}
           >
-            <Modal
-              width="100%"
-              height=""
-              ref={nodeRef}
-              updateState={dispatch}
-              defaultState={{ type: 'close-modal' }}
-            >
-              <ImageSlider
-                modal={state.modal}
-                dispatch={dispatch}
-                project={project}
-              />
-              <ModalContentContent>
-                <Heading minSize={1.5} size={2}>
-                  <span>{upperFirstWord(project.title)}</span>
-                </Heading>
-                <ModalContentContentList>
-                  <ModalContentContentListTitle>
-                    <Heading minSize={1} size={1}>
-                      Development Date Process
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      Tools
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      Project Type
-                    </Heading>
-                  </ModalContentContentListTitle>
-                  <ModalContentContentListValue>
-                    <Heading minSize={1} size={1}>
-                      :&nbsp;
-                      {parseDate(project.startDate)}
-                      {' - '}
-                      {parseDate(project.endDate)}
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      :&nbsp; {getStringOfTools(project.tools)}
-                    </Heading>
-                    <Heading minSize={1} size={1}>
-                      :&nbsp;
-                      {upperFirstWord(
-                        typeof project.typeProject !== 'string'
-                          ? project.typeProject.name
-                          : 'Unkown',
-                      )}
-                    </Heading>
-                  </ModalContentContentListValue>
-                </ModalContentContentList>
-                <Paragraph
-                  minSize={1}
-                  size={1}
-                  align="start"
-                  textIndent="2rem"
-                  fontWeight="normal"
-                  lineHeight="1.5rem"
-                >
-                  {project.description}.{' '}
-                  {project.url && <GoTo href={project.url}>{project.url}</GoTo>}
-                </Paragraph>
-              </ModalContentContent>
-            </Modal>
-          </CSSTransition>
-        )}
+            <ImageSlider
+              modal={state.modal}
+              dispatch={dispatch}
+              project={project}
+            />
+            <ModalContentContent>
+              <Heading minSize={1.5} size={2}>
+                <span>{upperFirstWord(project.title)}</span>
+              </Heading>
+              <ModalContentContentList>
+                <ModalContentContentListTitle>
+                  <Heading minSize={1} size={1}>
+                    Development Date Process
+                  </Heading>
+                  <Heading minSize={1} size={1}>
+                    Tools
+                  </Heading>
+                  <Heading minSize={1} size={1}>
+                    Project Type
+                  </Heading>
+                </ModalContentContentListTitle>
+                <ModalContentContentListValue>
+                  <Heading minSize={1} size={1}>
+                    :&nbsp;
+                    {parseDate(project.startDate)}
+                    {' - '}
+                    {parseDate(project.endDate)}
+                  </Heading>
+                  <Heading minSize={1} size={1}>
+                    :&nbsp; {getStringOfTools(project.tools)}
+                  </Heading>
+                  <Heading minSize={1} size={1}>
+                    :&nbsp;
+                    {upperFirstWord(
+                      typeof project.typeProject !== 'string'
+                        ? project.typeProject.name
+                        : 'Unkown',
+                    )}
+                  </Heading>
+                </ModalContentContentListValue>
+              </ModalContentContentList>
+              <Paragraph
+                minSize={1}
+                size={1}
+                align="start"
+                textIndent="2rem"
+                fontWeight="normal"
+                lineHeight="1.5rem"
+              >
+                {project.description}.{' '}
+                {project.url && <GoTo href={project.url}>{project.url}</GoTo>}
+              </Paragraph>
+            </ModalContentContent>
+          </Modal>
+        </CSSTransition>
         {/* end of Modal */}
       </Container>
     </>
