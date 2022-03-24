@@ -1,6 +1,5 @@
 import Controller from '@src/controllers/tools';
 import dbConnect from '@src/database/connection';
-import withIronSession from '@src/utils/withSession';
 import routerErrorHandling from '@src/utils/routerErrorHandling';
 import type {
   RequestControllerRouter,
@@ -14,45 +13,35 @@ export const config = {
   },
 };
 
-export default withIronSession(
-  async (req: RequestControllerRouter, res: RespondControllerRouter) => {
-    try {
-      const { method } = req;
-      await dbConnect();
+export default async function Tool(
+  req: RequestControllerRouter,
+  res: RespondControllerRouter,
+) {
+  try {
+    const { method } = req;
+    await dbConnect();
 
-      if (method === 'GET') await Controller.getTool(req, res);
-      else {
-        // Jika belum login
-        if (req.session) {
-          if (!req.session.get('user')) {
-            throw new HttpError(
-              'please login ahead',
-              403,
-              "can't fulfill the request because access is not allowed",
-            );
-          }
+    if (method === 'GET') await Controller.getTool(req, res);
+    else {
+      switch (method) {
+        case 'PATCH': {
+          await Controller.patchTool(req, res);
+          break;
+        }
+        case 'DELETE': {
+          await Controller.deleteTool(req, res);
+          break;
         }
 
-        switch (method) {
-          case 'PATCH': {
-            await Controller.patchTool(req, res);
-            break;
-          }
-          case 'DELETE': {
-            await Controller.deleteTool(req, res);
-            break;
-          }
-
-          default:
-            throw new HttpError(
-              'request not support',
-              406,
-              'The requested HTTP method could not be fulfilled by the server',
-            );
-        }
+        default:
+          throw new HttpError(
+            'request not support',
+            406,
+            'The requested HTTP method could not be fulfilled by the server',
+          );
       }
-    } catch (err) {
-      routerErrorHandling(res, err);
     }
-  },
-);
+  } catch (err) {
+    routerErrorHandling(res, err);
+  }
+}

@@ -5,7 +5,7 @@ import { DocMeta } from '@src/types/jsonApi';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import HttpError from '@src/utils/httpError';
 import Head from 'next/head';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useForm, FieldError, UseFormRegister } from 'react-hook-form';
 import { AiOutlineClose } from 'react-icons/ai';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
@@ -32,7 +32,8 @@ export default function Login() {
   const ref = useRef<HTMLDivElement>(null);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
 
-  const onSubmit = () => {
+  const onSubmit = (e: React.BaseSyntheticEvent) => {
+    e.preventDefault();
     const callback = handleSubmit((data) => {
       fetcherGeneric<DocMeta>('/api/auth/login', {
         method: 'post',

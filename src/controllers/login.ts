@@ -7,6 +7,8 @@ import { formidableHandler } from '@src/middleware/formidable';
 import HttpError from '@src/utils/httpError';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
+import jwt from 'jsonwebtoken';
+import Cookies from 'cookies';
 
 const LoginSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -34,10 +36,16 @@ class Login {
       );
     }
 
-    if (req.session) {
-      req.session.set('user', { isLoggedIn: true });
-      await req.session.save();
-    }
+    if (!process.env.PRIVATE_KEY) throw new Error('PRIVATE KEY NOT FOUND');
+
+    const cookies = new Cookies(req, res);
+
+    cookies.set(
+      'token',
+      jwt.sign({ isLoggedIn: true }, process.env.PRIVATE_KEY, {
+        algorithm: 'RS256',
+      }),
+    );
 
     return res.status(200).json({
       meta: { title: 'success to login', code: 200, isLoggedIn: true },
