@@ -193,6 +193,21 @@ const ContainerTable = styled.div`
   width: 100%;
   height: 100%;
   overflow: auto;
+  /* width */
+  &::-webkit-scrollbar {
+    height: 7px;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background: var(--dark2);
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    background: var(--pink);
+    border-radius: 10px;
+  }
 `;
 
 const Table = styled.table`
