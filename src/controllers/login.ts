@@ -7,8 +7,8 @@ import { formidableHandler } from '@src/middleware/formidable';
 import HttpError from '@src/utils/httpError';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
-import jwt from 'jsonwebtoken';
 import Cookies from 'cookies';
+import * as jose from 'jose';
 
 const LoginSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -40,12 +40,16 @@ class Login {
 
     const cookies = new Cookies(req, res);
 
-    cookies.set(
-      'token',
-      jwt.sign({ isLoggedIn: true }, process.env.PRIVATE_KEY, {
-        algorithm: 'RS256',
-      }),
+    const privateKey = await jose.importPKCS8(
+      process.env.PRIVATE_KEY,
+      'RS2567',
     );
+    const token = await new jose.SignJWT({ isLoggedIn: true })
+      .setIssuedAt()
+      .setProtectedHeader({ alg: 'RS256' })
+      .sign(privateKey);
+
+    cookies.set('token', token);
 
     return res.status(200).json({
       meta: { title: 'success to login', code: 200, isLoggedIn: true },

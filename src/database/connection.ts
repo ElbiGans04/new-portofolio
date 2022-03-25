@@ -48,6 +48,7 @@ async function dbConnect() {
     cached.conn = await cached.promise;
     return cached.conn;
   } catch (err) {
+    console.log(err);
     console.log(`\n\n\nDB CONNECTION FAILED\n\n\n`);
   }
 }
