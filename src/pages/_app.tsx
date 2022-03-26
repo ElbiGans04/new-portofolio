@@ -89,7 +89,6 @@ const urlComponents = [
   { name: 'About', url: '/about' },
   { name: 'Contacts', url: '/contacts' },
   { name: 'Projects', url: '/projects' },
-  { name: 'Tools', url: '/tools' },
 ];
 
 function NavBar({ active }: { active: string }) {

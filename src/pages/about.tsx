@@ -9,15 +9,18 @@ function About() {
         <title>About Me</title>
       </Head>
       <Paragraph minSize={1} size={1.5} lineHeight="2">
-        Yes it&apos;s me, My name is <span>Rhafael Bijaksana</span> my friends
-        call me by the name <span>Elbi</span>. Since entering high school for
-        some reason I have become fond of programming, for me it is very
-        interesting to learn and there is a sense of satisfaction after solving
-        the problems at hand.
+        Hello Everybody, I&apos;m <span>Rhafael Bijaksana (Elbi)</span>. Since
+        entering high school for some reason I have become fond of programming,
+        for me it is very interesting to learn and there is a sense of
+        satisfaction after solving the problems at hand.
       </Paragraph>
       <Paragraph minSize={1} size={1.5} lineHeight="2">
-        Since then till now, I focus on <span>JavaScript development</span>{' '}
-        mostly on <span>react js, typescript, next js</span> sometimes
+        Since then till now, I focus on{' '}
+        <span>JavaScript development (MERN STACK)</span> mostly on{' '}
+        <span>react or next js</span> as the frontend framework,{' '}
+        <span>typescript</span> to make the code more predictable, use{' '}
+        <span>mysql or mongodb</span> as the database,
+        <span>express</span> js for the backend framework
       </Paragraph>
     </Container>
   );
