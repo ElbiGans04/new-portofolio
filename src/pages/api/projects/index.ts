@@ -21,22 +21,19 @@ export default async function Projects(
   try {
     await dbConnect();
 
-    if (method === 'GET') await Controller.getProjects(req, res);
-    else {
-      // Lakukan operasi bedasarkan dari jenis http method
-      switch (method) {
-        case 'POST': {
-          await Controller.postProjects(req, res);
-          break;
-        }
-        default:
-          throw new HttpError(
-            'request not support',
-            406,
-            'The requested HTTP method could not be fulfilled by the server',
-          );
-          break;
-      }
+    switch (method) {
+      case 'GET':
+        await Controller.getProjects(req, res);
+        break;
+      case 'POST':
+        await Controller.postProjects(req, res);
+        break;
+      default:
+        throw new HttpError(
+          'request not support',
+          406,
+          'The requested HTTP method could not be fulfilled by the server',
+        );
     }
   } catch (err) {
     routerErrorHandling(res, err);

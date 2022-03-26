@@ -23,24 +23,22 @@ export default async function Project(
 
     await dbConnect();
 
-    if (method === 'GET') await Controller.getProject(req, res);
-    else {
-      switch (method) {
-        case 'PATCH': {
-          await Controller.patchProject(req, res);
-          break;
-        }
-        case 'DELETE': {
-          await Controller.deleteProject(req, res);
-          break;
-        }
-        default:
-          throw new HttpError(
-            'request not support',
-            406,
-            'The requested HTTP method could not be fulfilled by the server',
-          );
-      }
+    switch (method) {
+      case 'GET':
+        await Controller.getProject(req, res);
+        break;
+      case 'PATCH':
+        await Controller.patchProject(req, res);
+        break;
+      case 'DELETE':
+        await Controller.deleteProject(req, res);
+        break;
+      default:
+        throw new HttpError(
+          'request not support',
+          406,
+          'The requested HTTP method could not be fulfilled by the server',
+        );
     }
   } catch (err) {
     routerErrorHandling(res, err);

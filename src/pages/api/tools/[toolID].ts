@@ -21,25 +21,22 @@ export default async function Tool(
     const { method } = req;
     await dbConnect();
 
-    if (method === 'GET') await Controller.getTool(req, res);
-    else {
-      switch (method) {
-        case 'PATCH': {
-          await Controller.patchTool(req, res);
-          break;
-        }
-        case 'DELETE': {
-          await Controller.deleteTool(req, res);
-          break;
-        }
-
-        default:
-          throw new HttpError(
-            'request not support',
-            406,
-            'The requested HTTP method could not be fulfilled by the server',
-          );
-      }
+    switch (method) {
+      case 'GET':
+        await Controller.getTool(req, res);
+        break;
+      case 'PATCH':
+        await Controller.patchTool(req, res);
+        break;
+      case 'DELETE':
+        await Controller.deleteTool(req, res);
+        break;
+      default:
+        throw new HttpError(
+          'request not support',
+          406,
+          'The requested HTTP method could not be fulfilled by the server',
+        );
     }
   } catch (err) {
     routerErrorHandling(res, err);

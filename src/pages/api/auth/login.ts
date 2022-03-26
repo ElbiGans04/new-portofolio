@@ -17,16 +17,17 @@ export default async function Login(
   res: RespondControllerRouter,
 ) {
   try {
-    if (req.method === 'POST') {
-      await Controller.postLogin(req, res);
-      return;
+    switch (req.method) {
+      case 'GET':
+        await Controller.postLogin(req, res);
+        break;
+      default:
+        throw new HttpError(
+          'request not support',
+          406,
+          'The requested HTTP method could not be fulfilled by the server',
+        );
     }
-
-    throw new HttpError(
-      'request not support',
-      406,
-      'The requested HTTP method could not be fulfilled by the server',
-    );
   } catch (err) {
     routerErrorHandling(res, err);
   }

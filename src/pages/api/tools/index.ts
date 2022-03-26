@@ -22,21 +22,19 @@ export default async function Tools(
 
     await dbConnect();
 
-    if (method === 'GET') await Controller.getTools(req, res);
-    else {
-      switch (method) {
-        case 'POST': {
-          await Controller.postTools(req, res);
-          break;
-        }
-
-        default:
-          throw new HttpError(
-            'request not support',
-            406,
-            'The requested HTTP method could not be fulfilled by the server',
-          );
-      }
+    switch (method) {
+      case 'GET':
+        await Controller.getTools(req, res);
+        break;
+      case 'POST':
+        await Controller.postTools(req, res);
+        break;
+      default:
+        throw new HttpError(
+          'request not support',
+          406,
+          'The requested HTTP method could not be fulfilled by the server',
+        );
     }
   } catch (err) {
     routerErrorHandling(res, err);
