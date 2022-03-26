@@ -18,7 +18,7 @@ export default async function Login(
 ) {
   try {
     switch (req.method) {
-      case 'GET':
+      case 'POST':
         await Controller.postLogin(req, res);
         break;
       default:
