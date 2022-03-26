@@ -44,7 +44,7 @@ type ModalDataValidation = {
 };
 
 export default function Tools() {
-  const { data, user, error, ref } = useAdmin('/api/tools');
+  const { data, error, ref } = useAdmin('/api/tools');
   const [state, dispatch] = useReducer(reducer, {
     status: 'iddle',
     modal: null,
@@ -53,7 +53,7 @@ export default function Tools() {
   });
 
   if (error) return <AdminError />;
-  if (!data || !user) return <AdminLoading />;
+  if (!data) return <AdminLoading />;
 
   return (
     <React.Fragment>

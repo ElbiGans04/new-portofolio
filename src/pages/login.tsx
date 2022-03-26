@@ -11,7 +11,7 @@ import { AiOutlineClose } from 'react-icons/ai';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
-import useUser from '../hooks/useUser';
+import { useRouter } from 'next/router';
 import upperFirstWord from '@src/utils/upperFirstWord';
 
 interface DataForm {
@@ -25,12 +25,9 @@ export default function Login() {
     handleSubmit,
     formState: { errors },
   } = useForm<DataForm>();
-  const { mutateUser } = useUser({
-    redirectTo: '/admin/projects',
-    redirectIfFound: true,
-  });
   const ref = useRef<HTMLDivElement>(null);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
+  const router = useRouter();
 
   const onSubmit = (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
@@ -42,8 +39,8 @@ export default function Login() {
           'Content-Type': 'application/vnd.api+json',
         },
       })
-        .then((res) => {
-          mutateUser(res).catch((err) => console.error(err));
+        .then(() => {
+          router.push('/admin/projects').catch((err) => console.log(err));
         })
         .catch((err) => {
           const message =

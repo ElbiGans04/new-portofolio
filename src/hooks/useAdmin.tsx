@@ -1,4 +1,3 @@
-import useUser from '@src/hooks/useUser';
 import { DocDataDiscriminated, DocErrors } from '@src/types/jsonApi/index';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import { useRef } from 'react';
@@ -11,11 +10,9 @@ export default function useAdmin(url: string) {
     fetcherGeneric,
   );
   const ref = useRef<HTMLDivElement>(null);
-  const user = useUser({ redirectTo: '/login', redirectIfFound: false });
 
   return {
     ref,
-    user,
     data,
     error,
   };
