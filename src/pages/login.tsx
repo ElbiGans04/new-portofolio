@@ -4,27 +4,24 @@ import Label from '@src/components/Label';
 import { DocMeta } from '@src/types/jsonApi';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import HttpError from '@src/utils/httpError';
+import upperFirstWord from '@src/utils/upperFirstWord';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import React, { useRef, useState } from 'react';
-import { useForm, FieldError, UseFormRegister } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { AiOutlineClose } from 'react-icons/ai';
-import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
-import { useRouter } from 'next/router';
-import upperFirstWord from '@src/utils/upperFirstWord';
-
-interface DataForm {
-  email: string;
-  password: string;
-}
 
 export default function Login() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<DataForm>();
+  } = useForm<{
+    email: string;
+    password: string;
+  }>();
   const ref = useRef<HTMLDivElement>(null);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const router = useRouter();
@@ -128,7 +125,16 @@ export default function Login() {
           <Label size={1} minSize={1} htmlFor="password">
             Password :
           </Label>
-          <InputToggleComponent register={register} errors={errors} />
+          <Input
+            placeholder="Enter your password"
+            type="password"
+            id="password"
+            borderColor={errors.password && 'var(--red2)'}
+            borderColor2={errors.password && 'var(--red)'}
+            {...register('password', {
+              required: { value: true, message: 'Pleas insert your password' },
+            })}
+          />
           {errors.password?.message && (
             <p
               style={{
@@ -147,56 +153,6 @@ export default function Login() {
     </Container>
   );
 }
-
-function InputToggleComponent({
-  register,
-  errors,
-}: {
-  errors: { [Property in keyof DataForm]?: FieldError };
-  register: UseFormRegister<DataForm>;
-}) {
-  const [show, setShow] = useState(false);
-
-  return (
-    <InputTogglePassword>
-      <Input
-        placeholder="Enter your password"
-        type={show ? 'text' : 'password'}
-        id="password"
-        borderColor={errors.password && 'var(--red2)'}
-        borderColor2={errors.password && 'var(--red)'}
-        {...register('password', {
-          required: { value: true, message: 'Pleas insert your password' },
-        })}
-      />
-      {show ? (
-        <IoEyeOffOutline
-          onClick={() => setShow(false)}
-          size="1em"
-          color="white"
-        />
-      ) : (
-        <IoEyeOutline onClick={() => setShow(true)} size="1em" color="white" />
-      )}
-    </InputTogglePassword>
-  );
-}
-const InputTogglePassword = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: end;
-
-  & input {
-    width: 100%;
-    padding-right: 2.5rem;
-  }
-
-  & svg {
-    margin-right: 0.8rem;
-    position: absolute;
-    cursor: pointer;
-  }
-`;
 
 const BoxCollapse = styled.div<{ maxHeight: number }>`
   overflow: hidden;
