@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AiOutlineClose } from 'react-icons/ai';
-import { CSSTransition } from 'react-transition-group';
+import { Transition } from 'react-transition-group';
 import styled from 'styled-components';
 
 export default function Login() {
@@ -49,10 +49,6 @@ export default function Login() {
     callback().catch((err) => console.error(err));
   };
 
-  const maxHeightMessage =
-    ref.current &&
-    parseInt(getComputedStyle(ref.current).maxHeight.split('px')[0]);
-
   return (
     <Container>
       <Head>
@@ -60,35 +56,32 @@ export default function Login() {
       </Head>
 
       {/* Transition */}
-      <CSSTransition
+      <Transition
         in={errorMessage === null ? false : true}
         timeout={500}
-        classNames="message-login"
         nodeRef={ref}
       >
-        <BoxCollapse
-          maxHeight={
-            ref.current && errorMessage !== null && maxHeightMessage !== null
-              ? maxHeightMessage <= 0
+        {() => (
+          <BoxCollapse
+            maxHeight={
+              ref.current && errorMessage !== null
                 ? ref.current.scrollHeight
-                : maxHeightMessage <= ref.current.scrollHeight
-                ? ref.current.scrollHeight
-                : maxHeightMessage
-              : 0
-          }
-          ref={ref}
-        >
-          <MessageParent>
-            {errorMessage && <p>{upperFirstWord(errorMessage)}</p>}
-            <AiOutlineClose
-              title="close message"
-              style={{ cursor: 'pointer' }}
-              onClick={() => setErrorMessage(null)}
-              size="1.3em"
-            />
-          </MessageParent>
-        </BoxCollapse>
-      </CSSTransition>
+                : 0
+            }
+            ref={ref}
+          >
+            <MessageParent>
+              <p>{errorMessage && upperFirstWord(errorMessage)}</p>
+              <AiOutlineClose
+                title="close message"
+                style={{ cursor: 'pointer' }}
+                onClick={() => setErrorMessage(null)}
+                size="1.3em"
+              />
+            </MessageParent>
+          </BoxCollapse>
+        )}
+      </Transition>
       <Form onSubmit={onSubmit}>
         <FormRow>
           <Label size={1} minSize={1} htmlFor="email">

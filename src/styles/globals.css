@@ -72,38 +72,6 @@ a {
   z-index: -9999 !important;
 }
 
-
-/* 
-  message login page
-  max-height: 0;
-padding: 0;
-*/
-
-/* .message-login-enter-active,
-.message-login-enter-done {
-  max-height: 100%!important;
-  padding: 0.5rem!important;
-}
-
-.message-login-exit-active,
-.message-login-exit-done {
-  max-height: 0%;
-  padding: 0rem;
-} */
-
-.message-login-enter-active,
-.message-login-enter-done {
-  height: 40px!important;
-  padding: 0.3rem!important;
-}
-
-.message-login-exit-active,
-.message-login-exit-done {
-  height: 0!important;
-  /* padding: 0.3rem; */
-}
-
-
 /* Loader */
 /* https://projects.lukehaas.me/css-loaders/ , Loader #3 */
 .loader {
