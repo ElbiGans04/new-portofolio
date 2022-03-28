@@ -11,10 +11,11 @@ import upperFirstWord from '@src/utils/upperFirstWord';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import React, { MouseEvent, useRef, useReducer } from 'react';
+import React, { MouseEvent, useRef, useState, useEffect } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
+import { useRouter } from 'next/router';
 
 export const getStaticProps: GetStaticProps = async function () {
   await dbConnection();
@@ -29,49 +30,39 @@ export const getStaticProps: GetStaticProps = async function () {
   };
 };
 
-type stateProjects =
-  | {
-      open: true;
-      index: number;
-      modal: {
-        imageIndex: number;
-        imageTransition: number;
-      };
-    }
-  | { open: false; index: number; modal: null };
-
-type actionProjects =
-  | {
-      type: 'open-modal';
-      payload: {
-        index: number;
-      };
-    }
-  | {
-      type: 'close-modal';
-    }
-  | {
-      type: 'change-image';
-      payload: {
-        imageTransform: number;
-        imageIndex: number;
-      };
-    };
 function Projects({ projects }: { projects: string }) {
   const projectsResult = JSON.parse(projects) as ProjectInterface[];
   // React hooks
-  const [state, dispatch] = useReducer(reducer, {
-    modal: null,
-    open: false,
-    index: 0,
-  });
+  const router = useRouter();
   const nodeRef = useRef<HTMLDivElement>(null);
-  const project = projectsResult[state.index];
+  const [modal, setModal] = useState<boolean | null>(null);
+  const matchProject = projectsResult.find((project) => {
+    if (
+      typeof project._id === 'string' &&
+      typeof router.query.projectID === 'string'
+    )
+      return project._id === router.query.projectID;
+    else return false;
+  });
+
+  useEffect(() => {
+    if (router.asPath !== '/projects' && modal === false) {
+      router
+        .push('/projects', undefined, { shallow: true })
+        .catch((err) => console.error(err));
+    }
+  }, [router, modal]);
+
+  useEffect(() => {
+    if (nodeRef.current && router.asPath !== '/projects' && modal === null) {
+      setModal(true);
+    }
+  }, [nodeRef, router, setModal, modal]);
 
   return (
     <>
       {/* Saat modal terlihat matikan overflow untuk body */}
-      {state.open && <GlobalStyle />}
+      {modal === true && <GlobalStyle />}
 
       <Container>
         <Head>
@@ -87,7 +78,18 @@ function Projects({ projects }: { projects: string }) {
           {projectsResult.map((value, index) => (
             <Project
               onClick={() => {
-                dispatch({ type: 'open-modal', payload: { index } });
+                setModal(true);
+                router
+                  .push(
+                    `/projects?projectID=${
+                      typeof value._id == 'string'
+                        ? value._id
+                        : value._id.toString()
+                    }`,
+                    undefined,
+                    { shallow: true },
+                  )
+                  .catch((err) => console.error(err));
               }}
               key={index}
             >
@@ -125,69 +127,77 @@ function Projects({ projects }: { projects: string }) {
         <CSSTransition
           nodeRef={nodeRef}
           classNames="modal"
-          in={state.open}
+          in={modal === true}
           timeout={500}
         >
           <Modal
-            width="100%"
+            width={matchProject ? '100%' : '50%'}
             height=""
             ref={nodeRef}
-            updateState={dispatch}
-            defaultState={{ type: 'close-modal' }}
+            updateState={setModal}
+            defaultState={false}
           >
-            <ImageSlider
-              modal={state.modal}
-              dispatch={dispatch}
-              project={project}
-            />
-            <ModalContentContent>
-              <Heading minSize={1.5} size={2}>
-                <span>{upperFirstWord(project.title)}</span>
-              </Heading>
-              <ModalContentContentList>
-                <ModalContentContentListTitle>
-                  <Heading minSize={1} size={1}>
-                    Development Date Process
+            {matchProject ? (
+              <React.Fragment>
+                <ImageSlider images={matchProject.images} />
+                <ModalContentContent>
+                  <Heading minSize={1.5} size={2}>
+                    <span>{upperFirstWord(matchProject.title)}</span>
                   </Heading>
-                  <Heading minSize={1} size={1}>
-                    Tools
-                  </Heading>
-                  <Heading minSize={1} size={1}>
-                    Project Type
-                  </Heading>
-                </ModalContentContentListTitle>
-                <ModalContentContentListValue>
-                  <Heading minSize={1} size={1}>
-                    :&nbsp;
-                    {parseDate(project.startDate)}
-                    {' - '}
-                    {parseDate(project.endDate)}
-                  </Heading>
-                  <Heading minSize={1} size={1}>
-                    :&nbsp; {getStringOfTools(project.tools)}
-                  </Heading>
-                  <Heading minSize={1} size={1}>
-                    :&nbsp;
-                    {upperFirstWord(
-                      typeof project.typeProject !== 'string'
-                        ? project.typeProject.name
-                        : 'Unkown',
+                  <ModalContentContentList>
+                    <ModalContentContentListTitle>
+                      <Heading minSize={1} size={1}>
+                        Development Date Process
+                      </Heading>
+                      <Heading minSize={1} size={1}>
+                        Tools
+                      </Heading>
+                      <Heading minSize={1} size={1}>
+                        Project Type
+                      </Heading>
+                    </ModalContentContentListTitle>
+                    <ModalContentContentListValue>
+                      <Heading minSize={1} size={1}>
+                        :&nbsp;
+                        {parseDate(matchProject.startDate)}
+                        {' - '}
+                        {parseDate(matchProject.endDate)}
+                      </Heading>
+                      <Heading minSize={1} size={1}>
+                        :&nbsp; {getStringOfTools(matchProject.tools)}
+                      </Heading>
+                      <Heading minSize={1} size={1}>
+                        :&nbsp;
+                        {upperFirstWord(
+                          typeof matchProject.typeProject !== 'string'
+                            ? matchProject.typeProject.name
+                            : 'Unkown',
+                        )}
+                      </Heading>
+                    </ModalContentContentListValue>
+                  </ModalContentContentList>
+                  <Paragraph
+                    minSize={1}
+                    size={1}
+                    align="start"
+                    textIndent="2rem"
+                    fontWeight="normal"
+                    lineHeight="1.5rem"
+                  >
+                    {matchProject.description}.{' '}
+                    {matchProject.url && (
+                      <GoTo href={matchProject.url}>{matchProject.url}</GoTo>
                     )}
-                  </Heading>
-                </ModalContentContentListValue>
-              </ModalContentContentList>
-              <Paragraph
-                minSize={1}
-                size={1}
-                align="start"
-                textIndent="2rem"
-                fontWeight="normal"
-                lineHeight="1.5rem"
-              >
-                {project.description}.{' '}
-                {project.url && <GoTo href={project.url}>{project.url}</GoTo>}
-              </Paragraph>
-            </ModalContentContent>
+                  </Paragraph>
+                </ModalContentContent>
+              </React.Fragment>
+            ) : (
+              <ModalContentText>
+                <Paragraph size={1.5} minSize={1.3}>
+                  Project <span>with such id</span> not found
+                </Paragraph>
+              </ModalContentText>
+            )}
           </Modal>
         </CSSTransition>
         {/* end of Modal */}
@@ -198,23 +208,15 @@ function Projects({ projects }: { projects: string }) {
 
 export default Projects;
 
-function ImageSlider({
-  project,
-  dispatch,
-  modal,
-}: {
-  modal: stateProjects['modal'];
-  project: ProjectInterface;
-  dispatch: React.Dispatch<actionProjects>;
-}) {
+function ImageSlider({ images }: { images: ProjectInterface['images'] }) {
   const nodeRef = useRef<HTMLDivElement>(null);
+  const [imageState, setImageState] = useState({ slide: 0, translateX: 0 });
 
   function changeImageAction(event: MouseEvent, action: number): void {
     if (
-      project.images.length > 1 &&
+      images.length > 1 &&
       event.currentTarget.parentElement !== null &&
-      event.currentTarget.parentElement.parentElement !== null &&
-      modal !== null
+      event.currentTarget.parentElement.parentElement !== null
     ) {
       const modalElement = event.currentTarget.parentElement.parentElement;
       const { width: modalWidth } = modalElement.getBoundingClientRect();
@@ -224,26 +226,21 @@ function ImageSlider({
       let result = 0;
       if (action === 0) {
         // // Jika hasil Operasi berikutnya kurang dari 0 maka setel ke jumlah gambar dikurangi 1
-        if (modal.imageIndex - 1 < 0) result = project.images.length - 1;
-        else result = modal.imageIndex - 1;
+        if (imageState.slide - 1 < 0) result = images.length - 1;
+        else result = imageState.slide - 1;
       } else {
         // Jika hasil Operasi berikutnya melebihi panjang gambar
-        if (modal.imageIndex + 1 > project.images.length - 1) result = 0;
-        else result = modal.imageIndex + 1;
+        if (imageState.slide + 1 > images.length - 1) result = 0;
+        else result = imageState.slide + 1;
       }
 
-      // setSlide({ slide: result, translateX: result * -modalWidth });
-      dispatch({
-        type: 'change-image',
-        payload: { imageIndex: result, imageTransform: result * -modalWidth },
-      });
+      setImageState({ slide: result, translateX: result * -modalWidth });
     }
   }
 
-  if (!modal) return <ModalImage ref={nodeRef} />;
   return (
     <ModalImage ref={nodeRef}>
-      {project.images.length > 1 && (
+      {images.length > 1 && (
         <ModalImageActions>
           <ModalImageAction
             onClick={(event) => changeImageAction(event, 0)}
@@ -263,8 +260,8 @@ function ImageSlider({
       )}
 
       {/* Content Images */}
-      <ModalImageContent translateX={modal.imageTransition}>
-        {project.images.map((value, index) => (
+      <ModalImageContent translateX={imageState.translateX}>
+        {images.map((value, index) => (
           <ModalImageContentContent key={getRandom(index)}>
             <Image
               loader={myLoader}
@@ -280,43 +277,15 @@ function ImageSlider({
 
       {/* Content Count */}
       <ModalImageCount>
-        {project.images.map((value, index) => (
+        {images.map((value, index) => (
           <ModalImageCountCount
             key={getRandom(index)}
-            opacity={modal.imageIndex === index ? '1' : '0.5'}
+            opacity={imageState.slide === index ? '1' : '0.5'}
           />
         ))}
       </ModalImageCount>
     </ModalImage>
   );
-}
-
-function reducer(state: stateProjects, action: actionProjects): stateProjects {
-  switch (action.type) {
-    case 'open-modal': {
-      return {
-        open: true,
-        index: action.payload.index,
-        modal: { imageTransition: 0, imageIndex: 0 },
-      };
-    }
-    case 'close-modal': {
-      return { ...state, open: false, modal: null };
-    }
-    case 'change-image': {
-      return {
-        ...state,
-        open: true,
-        modal: {
-          imageTransition: action.payload.imageTransform,
-          imageIndex: action.payload.imageIndex,
-        },
-      };
-    }
-    default: {
-      throw new Error('action.type not match anything');
-    }
-  }
 }
 
 function myLoader({ src }: { src: string }) {
@@ -584,5 +553,12 @@ const ModalContentContentListValue = styled.div`
   display: grid;
   grid-template-rows: 1fr 1fr 1fr;
   justify-items: start;
+  align-items: center;
+`;
+
+const ModalContentText = styled.div`
+  display: flex;
+  min-height: 150px;
+  justify-content: center;
   align-items: center;
 `;
