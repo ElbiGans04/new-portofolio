@@ -55,7 +55,7 @@ import {
   uploadBytes,
 } from 'firebase/storage';
 import Head from 'next/head';
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState, useMemo } from 'react';
 import {
   Controller,
   FormProvider,
@@ -63,6 +63,8 @@ import {
   useFormContext,
   useFieldArray,
   useFormState,
+  useController,
+  Control,
 } from 'react-hook-form';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
@@ -75,7 +77,7 @@ type ModalDataValidation = {
   endDate: string;
   tools: { value: string }[];
   typeProject: string;
-  images: FileList;
+  images: FileList | null;
   description: string;
   url: string;
 };
@@ -267,6 +269,7 @@ function SwitchModal({
           description: '',
           typeProject: '',
           tools: [{ value: data && data.data[0] ? data.data[0].id : '' }],
+          images: null,
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
@@ -306,6 +309,7 @@ function SwitchModal({
           typeProject:
             typeof typeProject == 'string' ? typeProject : typeProject._id,
           tools: fixTools as { value: string }[],
+          images: null,
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
@@ -372,7 +376,7 @@ function SwitchModal({
       // Logic
       dispatch({ type: 'modal/request/start' });
       Doc.attributes.images = await uploadImages(
-        data.images,
+        data.images as FileList,
         firebaseRootStroage,
       );
 
@@ -396,7 +400,7 @@ function SwitchModal({
         maka berarti gambar yang dipilih telah diupload kedalam database maka kita harus 
         menghapus gambar yang sudah terupload tersebut
       */
-      if (err instanceof HttpErrror)
+      if (err instanceof HttpErrror && Doc.attributes.images !== null)
         imageErrorHandling(Doc.attributes.images, firebaseRootStroage);
 
       clientHandlerError(err, dispatch, mutate, '/api/projects').catch((err) =>
@@ -436,7 +440,7 @@ function SwitchModal({
         // Logic
         dispatch({ type: 'modal/request/start' });
 
-        if (data.images.length > 0) {
+        if (data.images && data.images.length > 0) {
           Doc.attributes.images = await uploadImages(
             data.images,
             firebaseRootStroage,
@@ -454,7 +458,7 @@ function SwitchModal({
           },
         );
 
-        if (data.images.length > 0)
+        if (data.images && data.images.length > 0)
           await deleteImages(state.row.attributes.images, firebaseRootStroage);
 
         await clientHandlerSuccess(
@@ -470,7 +474,12 @@ function SwitchModal({
             menghapus gambar yang sudah terupload tersebut
         */
 
-        if (data.images.length > 0 && err instanceof HttpErrror)
+        if (
+          data.images &&
+          Doc.attributes.images &&
+          data.images.length > 0 &&
+          err instanceof HttpErrror
+        )
           imageErrorHandling(Doc.attributes.images, firebaseRootStroage);
 
         clientHandlerError(err, dispatch, mutate, '/api/projects').catch(
@@ -537,6 +546,12 @@ function SwitchModal({
             data={data}
             defaultValues={state.row.attributes.tools}
             modal="UPDATE"
+            defaultValueImages={state.row.attributes.images
+              .map(
+                (image) =>
+                  image.ref.split('/')[image.ref.split('/').length - 1],
+              )
+              .join(', ')}
           />
         </FormProvider>
       );
@@ -551,10 +566,12 @@ function ModalAddUpdate({
   defaultValues,
   modal,
   handler,
+  defaultValueImages,
 }: {
   handler: (e: React.BaseSyntheticEvent) => Promise<void>;
   data: DocDataDiscriminated<ResourceToolInterface[]>;
   defaultValues?: projectSchema['tools'];
+  defaultValueImages?: string;
   modal: 'ADD' | 'UPDATE';
 }) {
   const { register, control } = useFormContext<ModalDataValidation>();
@@ -679,42 +696,13 @@ function ModalAddUpdate({
         </ModalFormContentRow>
 
         <ModalFormContentRow>
-          <Label size={1} minSize={1} htmlFor="file">
+          <Label size={1} minSize={1}>
             Images:
           </Label>
-          <Input
-            borderColor={errors.images && 'var(--red2)'}
-            borderColor2={errors.images && 'var(--red)'}
-            {...register('images', {
-              required: {
-                value: modal === 'ADD' ? true : false,
-                message: 'Please insert image',
-              },
-              validate: (files) => {
-                if (files instanceof FileList === false) return 'INVALID VALUE';
-
-                for (let i = 0; i < files.length; i++) {
-                  const file = files[i];
-                  const fileFormat = file.name
-                    .split('.')
-                    [file.name.split('.').length - 1].toLowerCase();
-                  if (
-                    fileFormat !== 'png' &&
-                    fileFormat !== 'jpg' &&
-                    fileFormat !== 'jpeg' &&
-                    fileFormat !== 'webp'
-                  )
-                    return 'ONLY SUPPORT IMAGE WITH FORMAT png, jpeg, jpg, webp';
-                  if (file.size > 2000000) return 'MAX IMAGE SIZE IS 2MB';
-                }
-
-                return true;
-              },
-            })}
-            type="file"
-            id="file"
-            multiple
-            accept=".jpg, .png, .jpeg, .webp"
+          <InputImage
+            defaultValue={modal && defaultValueImages && defaultValueImages}
+            control={control}
+            modal={modal}
           />
           {errors.images?.message && (
             <p
@@ -880,6 +868,91 @@ function ModalAddUpdate({
         <Button type="submit">SUBMIT</Button>
       </ModalFormFooter>
     </ModalForm>
+  );
+}
+
+function InputImage({
+  modal,
+  control,
+  defaultValue,
+}: {
+  modal: 'ADD' | 'UPDATE';
+  control: Control<ModalDataValidation>;
+  defaultValue?: string;
+}) {
+  const {
+    field: { onBlur, onChange, value, name, ref },
+  } = useController({
+    name: 'images',
+    defaultValue: undefined,
+    control,
+    rules: {
+      required: {
+        value: modal === 'ADD' ? true : false,
+        message: 'Please insert image',
+      },
+      validate: (files) => {
+        if (files === null && modal === 'UPDATE') return true;
+
+        if (files) {
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileFormat = file.name
+              .split('.')
+              [file.name.split('.').length - 1].toLowerCase();
+            if (
+              fileFormat !== 'png' &&
+              fileFormat !== 'jpg' &&
+              fileFormat !== 'jpeg' &&
+              fileFormat !== 'webp'
+            )
+              return 'ONLY SUPPORT IMAGE WITH FORMAT png, jpeg, jpg, webp';
+            if (file.size > 2000000) return 'MAX IMAGE SIZE IS 2MB';
+          }
+
+          return true;
+        } else return 'Invalid value';
+      },
+    },
+  });
+
+  const val = useMemo(() => {
+    if (value) {
+      let str = '';
+      for (let i = 0; i < value.length; i++) {
+        str += `${value[i].name}`;
+        if (i !== value.length - 1) str += ', ';
+      }
+
+      return str;
+    }
+  }, [value]);
+
+  const valShow = val ? val : defaultValue ? defaultValue : null;
+
+  return (
+    <InputImageContainer>
+      <Input
+        type="file"
+        id="file"
+        multiple
+        accept=".jpg, .png, .jpeg, .webp"
+        ref={ref}
+        name={name}
+        onBlur={onBlur}
+        onChange={(e) =>
+          e.currentTarget.files ? onChange(e.currentTarget.files) : ''
+        }
+      />
+      <label title="Select images" htmlFor="file">
+        Select images
+      </label>
+      {valShow && (
+        <div>
+          <p>{valShow}</p>
+        </div>
+      )}
+    </InputImageContainer>
   );
 }
 
@@ -1108,6 +1181,60 @@ const ContainerInput = styled.div`
 
   & > select {
     width: 100%;
+  }
+`;
+
+const InputImageContainer = styled.div`
+  margin: 0.5rem 0;
+  & > label {
+    margin-top: 1rem;
+  }
+  & > input[type='file'] {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute !important;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  & > input[type='file']:before {
+    content: 'Hello';
+  }
+
+  & > input[type='file'] + label {
+    background-color: var(--pink);
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 0.2rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+    transition: var(--transition);
+  }
+
+  & > input[type='file']:focus + label,
+  & > input[type='file'] + label:hover {
+    opacity: 0.8;
+  }
+  & > input[type='file']:focus + label {
+    opacity: 0.7;
+  }
+
+  // Div
+  & > div {
+    margin: 1.5rem 0 0.5rem 0;
+    color: var(--pink);
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    & > input[type='file'] + label {
+      padding: 0.3rem;
+    }
   }
 `;
 // // // Styled Component
