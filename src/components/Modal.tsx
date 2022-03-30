@@ -107,6 +107,9 @@ const Modal = styled.div`
     background: var(--pink);
     border-radius: 10px;
   }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--pink2);
+  }
 `;
 const ModalMain = styled.div<{ width: string; height: string }>`
   margin: 0px auto;

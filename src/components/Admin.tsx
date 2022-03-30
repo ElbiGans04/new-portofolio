@@ -208,6 +208,10 @@ const ContainerTable = styled.div`
     background: var(--pink);
     border-radius: 10px;
   }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--pink2);
+  }
 `;
 
 const Table = styled.table`

@@ -36,6 +36,10 @@ body::-webkit-scrollbar-thumb {
   border-radius: 10px;
 }
 
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--pink2);
+}
+
 a {
   color: inherit;
   text-decoration: none;
