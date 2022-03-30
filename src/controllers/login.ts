@@ -49,7 +49,11 @@ class Login {
       .setProtectedHeader({ alg: 'RS256' })
       .sign(privateKey);
 
-    cookies.set('token', token);
+    cookies.set('token', token, {
+      overwrite: true,
+      httpOnly: true,
+      sameSite: 'lax',
+    });
 
     return res.status(200).json({
       meta: { title: 'success to login', code: 200, isLoggedIn: true },
