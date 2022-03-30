@@ -44,6 +44,7 @@ import parseDate from '@src/utils/getStringDate';
 import getStringOfTools from '@src/utils/getStringOfTools';
 import HttpErrror from '@src/utils/httpError';
 import getRandom from '@src/utils/randomNumber';
+import upperFirstWord from '@src/utils/upperFirstWord';
 import { isTool } from '@src/utils/typescript/narrowing';
 import { initializeApp } from 'firebase/app';
 import {
@@ -57,25 +58,25 @@ import {
 import Head from 'next/head';
 import React, { useEffect, useReducer, useRef, useState, useMemo } from 'react';
 import {
-  Controller,
   FormProvider,
   useForm,
   useFormContext,
-  useFieldArray,
   useFormState,
   useController,
   Control,
+  FieldError,
 } from 'react-hook-form';
 import { IoAddOutline } from 'react-icons/io5';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
+import Select from 'react-select';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
   title: string;
   startDate: string;
   endDate: string;
-  tools: { value: string }[];
+  tools: { value: string; label: string }[];
   typeProject: string;
   images: FileList | null;
   description: string;
@@ -260,6 +261,7 @@ function SwitchModal({
 
   useEffect(() => {
     if (state.modal == 'add') {
+      const firstRow = data?.data[0];
       reactForm.reset(
         {
           title: '',
@@ -268,7 +270,17 @@ function SwitchModal({
           url: '',
           description: '',
           typeProject: '',
-          tools: [{ value: data && data.data[0] ? data.data[0].id : '' }],
+          tools: [
+            data && firstRow
+              ? {
+                  value: firstRow.id,
+                  label:
+                    firstRow.attributes && firstRow.attributes.name
+                      ? firstRow.attributes.name
+                      : 'unkown',
+                }
+              : { value: '', label: 'unkown' },
+          ],
           images: null,
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
@@ -292,13 +304,20 @@ function SwitchModal({
       const fixTools = Array.isArray(tools)
         ? tools.map(
             (tool) =>
-              ({ value: isTool(tool) ? tool._id : tool.toString() } as {
+              ({
+                value: isTool(tool) ? tool._id : tool.toString(),
+                label: isTool(tool) ? tool.name : 'Unkown',
+              } as {
                 value: string;
+                label: string;
               }),
           )
         : isTool(tools)
-        ? [{ value: tools._id }]
-        : ([{ value: tools.toString() }] as { value: string }[]);
+        ? [{ value: tools._id, label: tools.name }]
+        : ([{ value: tools.toString(), label: 'Unkown' }] as {
+            value: string;
+            label: string;
+          }[]);
       reactForm.reset(
         {
           title,
@@ -308,7 +327,7 @@ function SwitchModal({
           description,
           typeProject:
             typeof typeProject == 'string' ? typeProject : typeProject._id,
-          tools: fixTools as { value: string }[],
+          tools: fixTools as { value: string; label: string }[],
           images: null,
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
@@ -395,9 +414,9 @@ function SwitchModal({
         '/api/projects',
       );
     } catch (err) {
-      /* 
+      /*
         Jika fetchGeneric melemparkan error (yang dikembalikan oleh /api kita)
-        maka berarti gambar yang dipilih telah diupload kedalam database maka kita harus 
+        maka berarti gambar yang dipilih telah diupload kedalam database maka kita harus
         menghapus gambar yang sudah terupload tersebut
       */
       if (err instanceof HttpErrror && Doc.attributes.images !== null)
@@ -544,7 +563,6 @@ function SwitchModal({
           <ModalAddUpdate
             handler={onSubmitModalUpdate}
             data={data}
-            defaultValues={state.row.attributes.tools}
             modal="UPDATE"
             defaultValueImages={state.row.attributes.images
               .map(
@@ -563,14 +581,12 @@ function SwitchModal({
 
 function ModalAddUpdate({
   data,
-  defaultValues,
   modal,
   handler,
   defaultValueImages,
 }: {
   handler: (e: React.BaseSyntheticEvent) => Promise<void>;
   data: DocDataDiscriminated<ResourceToolInterface[]>;
-  defaultValues?: projectSchema['tools'];
   defaultValueImages?: string;
   modal: 'ADD' | 'UPDATE';
 }) {
@@ -579,6 +595,26 @@ function ModalAddUpdate({
   const Handler = (e: React.BaseSyntheticEvent) => {
     handler(e).catch((err) => console.error(err));
   };
+  const result: {
+    label: string;
+    options: { label: string; value: string }[];
+  }[] = [];
+  data.data.filter((data) => {
+    if (data.attributes) {
+      const attribute = data.attributes;
+      const hasGroup = result.findIndex(
+        (data) => data.label.toLowerCase() === attribute.as.toLowerCase(),
+      );
+      const value = { label: upperFirstWord(attribute.name), value: data.id };
+      if (hasGroup >= 0) {
+        result[hasGroup].options.push(value);
+      } else {
+        result.push({ label: attribute.as, options: [value] });
+      }
+    } else return false;
+  });
+
+  const errorTools = errors.tools as FieldError | undefined;
 
   return (
     <ModalForm onSubmit={Handler}>
@@ -857,10 +893,17 @@ function ModalAddUpdate({
           <Label size={1} minSize={1} htmlFor="tools">
             Tool :
           </Label>
-          {defaultValues ? (
-            <InputCollections data={data} defaultValues={defaultValues} />
-          ) : (
-            <InputCollections data={data} />
+          <ReactSelect options={result} control={control} />
+          {errorTools?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errorTools.message}
+            </p>
           )}
         </ModalFormContentRow>
       </ModalFormContent>
@@ -868,6 +911,149 @@ function ModalAddUpdate({
         <Button type="submit">SUBMIT</Button>
       </ModalFormFooter>
     </ModalForm>
+  );
+}
+
+function ReactSelect({
+  options,
+  control,
+}: {
+  options: {
+    label: string;
+    options: { label: string; value: string }[];
+  }[];
+  control: Control<ModalDataValidation>;
+}) {
+  const {
+    field: { ref, value, onBlur, onChange, name },
+  } = useController({
+    name: 'tools',
+    control,
+    rules: {
+      required: {
+        value: true,
+        message: 'PLEASE SELECT TOOL AT LEAST ONE',
+      },
+    },
+    defaultValue: undefined,
+  });
+  return (
+    <Select
+      name={name}
+      onBlur={onBlur}
+      ref={ref}
+      onChange={onChange}
+      value={value}
+      options={options}
+      isMulti
+      captureMenuScroll={true}
+      placeholder="Select the tools used in the project"
+      styles={{
+        option: (provided, { isFocused }) => ({
+          ...provided,
+          backgroundColor: isFocused ? 'var(--pink2)' : 'var(--dark2)',
+          color: isFocused ? 'black' : 'var(--pink)',
+          ':active': {
+            ...provided[':active'],
+            backgroundColor: '#e07d9e',
+          },
+          ':hover': {
+            backgroundColor: 'var(--pink2)',
+            cursor: 'pointer',
+            color: 'black',
+          },
+        }),
+
+        control: (provided) => ({
+          ...provided,
+          boxShadow: '1px solid var(--pink)',
+          borderColor: 'var(--pink2)',
+          backgroundColor: 'var(--dark)',
+          '&:hover': {
+            boxShadow: '1px solid var(--pink)',
+            borderColor: 'var(--pink)',
+          },
+          color: 'var(--pink)',
+        }),
+
+        placeholder: (styled) => ({ ...styled, color: 'var(--pink)' }),
+        dropdownIndicator: (styled, { isFocused }) => ({
+          ...styled,
+          color: 'var(--pink)',
+          transition: '.3s',
+          transform: isFocused ? 'rotate(0deg)' : 'rotate(180deg)',
+          cursor: 'pointer',
+          '&:hover': {
+            color: 'var(--pink2)',
+          },
+        }),
+        groupHeading: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--pink)',
+          color: 'black',
+          padding: '.5rem',
+          fontWeight: 'bold',
+        }),
+        clearIndicator: (styled) => ({
+          ...styled,
+          color: 'var(--pink)',
+          cursor: 'pointer',
+          '&:hover': {
+            color: 'var(--pink2)',
+          },
+        }),
+        indicatorSeparator: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--pink)',
+        }),
+
+        menuList: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--dark2)',
+          '&::-webkit-scrollbar': {
+            width: '7px',
+          },
+
+          '&::-webkit-scrollbar-track': {
+            background: 'var(--dark)',
+          },
+
+          /* Handle */
+          '&::-webkit-scrollbar-thumb': {
+            background: 'var(--pink)',
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'var(--pink2)',
+          },
+        }),
+
+        multiValue: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--pink)',
+        }),
+
+        multiValueRemove: (styled) => ({
+          ...styled,
+          color: 'var(--dark2)',
+          cursor: 'pointer',
+          '&:hover': {
+            color: 'red',
+          },
+        }),
+
+        input: (styled) => ({
+          ...styled,
+          color: 'white',
+        }),
+
+        noOptionsMessage: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--dark2)',
+          color: 'var(--pink)',
+        }),
+      }}
+    />
   );
 }
 
@@ -956,118 +1142,6 @@ function InputImage({
   );
 }
 
-function InputCollections({
-  data,
-  defaultValues,
-}: {
-  data: DocDataDiscriminated<ResourceToolInterface[]>;
-  defaultValues?: projectSchema['tools'];
-}) {
-  const { control, unregister } = useFormContext<ModalDataValidation>();
-  const { fields, append, replace } = useFieldArray({ control, name: 'tools' });
-  const [inputState, setInputState] = useState<string[]>(() => {
-    if (defaultValues) {
-      if (Array.isArray(defaultValues)) {
-        return defaultValues.map((value) => {
-          const realValue = isTool(value) ? value._id : value.toString();
-          return realValue as string;
-        });
-      }
-
-      const realValue = isTool(defaultValues)
-        ? defaultValues._id
-        : defaultValues.toString();
-      return [realValue as string];
-    }
-
-    // Jika tidak ada nilai dafault
-    const realValue = data.data[0].id;
-    return [realValue];
-  });
-
-  // callback
-  function onChangeItem(
-    event: React.ChangeEvent<HTMLSelectElement>,
-    index: number,
-  ) {
-    const arrayBaru = [...inputState];
-    arrayBaru[index] = event.currentTarget.value;
-    setInputState(arrayBaru);
-  }
-
-  function onRemoveItem(
-    event: React.MouseEvent<HTMLButtonElement>,
-    index: number,
-  ) {
-    const newInputState = [...inputState].filter((value, idx) => index !== idx);
-    if (newInputState.length > 0) {
-      setInputState(newInputState);
-      unregister(`tools.${index}.value`);
-      replace(newInputState.map((value) => ({ value })));
-    }
-  }
-
-  function onAddItem() {
-    const newInputState = [...inputState];
-    const value = data.data[0].id;
-    newInputState.push(value);
-    setInputState(newInputState);
-    append({ value });
-  }
-
-  return (
-    <ContainerInputs>
-      <Button className="add" type="button" onClick={() => onAddItem()}>
-        <IoAddOutline />
-      </Button>
-      {fields.map((field, index) => {
-        return (
-          <Controller
-            name={`tools.${index}.value`}
-            control={control}
-            key={getRandom(index)}
-            defaultValue={field.value}
-            render={({ field: { onBlur, onChange, ref, name, value } }) => {
-              return (
-                <ContainerInput>
-                  <select
-                    name={name}
-                    onChange={(event) => {
-                      onChangeItem(event, index);
-                      onChange(event.currentTarget.value);
-                    }}
-                    onBlur={onBlur}
-                    value={value}
-                    key={getRandom(index)}
-                    ref={ref}
-                  >
-                    {data.data.map((value) => {
-                      const textOption = value.attributes
-                        ? value.attributes.name
-                        : 'undefined';
-                      return (
-                        <option key={value.id} value={value.id}>
-                          {textOption}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <Button
-                    type="button"
-                    onClick={(event) => onRemoveItem(event, index)}
-                  >
-                    X
-                  </Button>
-                </ContainerInput>
-              );
-            }}
-          />
-        );
-      })}
-    </ContainerInputs>
-  );
-}
-
 async function deleteImages(
   images: projectSchema['images'],
   stroage: FirebaseStorage,
@@ -1140,47 +1214,6 @@ const Checkbox = styled.div`
 
   & input[type='radio'] {
     margin: 0 0.3rem;
-  }
-`;
-
-const ContainerInputs = styled.div`
-  width: 100%;
-  position: relative;
-  display: grid;
-  gap: 0.5rem;
-
-  & button.add {
-    transition: var(--transition);
-    opacity: 0;
-    position: absolute;
-    left: -40px;
-    width: 30px;
-    height: 30px;
-    top: 50%;
-    margin-top: -15px;
-  }
-
-
-  &:hover button {
-    opacity: 1;
-  }
-  }
-`;
-
-const ContainerInput = styled.div`
-  position: relative;
-
-  & > button {
-    position: absolute;
-    right: -35px;
-    width: 30px;
-    height: 30px;
-    top: 50%;
-    margin-top: -15px;
-  }
-
-  & > select {
-    width: 100%;
   }
 `;
 
