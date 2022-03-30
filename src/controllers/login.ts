@@ -9,6 +9,7 @@ import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
 import Cookies from 'cookies';
 import * as jose from 'jose';
+import moment from 'moment';
 
 const LoginSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -49,10 +50,11 @@ class Login {
       .setProtectedHeader({ alg: 'RS256' })
       .sign(privateKey);
 
-    cookies.set('token', token, {
+    cookies.set('refreshToken', token, {
       overwrite: true,
       httpOnly: true,
       sameSite: 'lax',
+      expires: moment().add('1', 'days').toDate(),
     });
 
     return res.status(200).json({

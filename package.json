@@ -18,6 +18,7 @@
     "formidable": "^2.0.1",
     "joi": "^17.4.2",
     "jose": "^4.6.0",
+    "moment": "^2.29.1",
     "mongoose": "^5.13.8",
     "next": "^12.1.0",
     "nextjs-progressbar": "^0.0.14",
