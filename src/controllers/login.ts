@@ -8,8 +8,8 @@ import HttpError from '@src/utils/httpError';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
 import Cookies from 'cookies';
-import * as jose from 'jose';
 import moment from 'moment';
+import { signJwt } from '@src/utils/jwt';
 
 const LoginSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -37,19 +37,9 @@ class Login {
       );
     }
 
-    if (!process.env.PRIVATE_KEY) throw new Error('PRIVATE KEY NOT FOUND');
+    const token = await signJwt();
 
     const cookies = new Cookies(req, res);
-
-    const privateKey = await jose.importPKCS8(
-      process.env.PRIVATE_KEY,
-      'RS2567',
-    );
-    const token = await new jose.SignJWT({ isLoggedIn: true })
-      .setIssuedAt()
-      .setProtectedHeader({ alg: 'RS256' })
-      .sign(privateKey);
-
     cookies.set('refreshToken', token, {
       overwrite: true,
       httpOnly: true,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as jose from 'jose';
 import moment from 'moment';
+import { signJwt, verifyJwt } from '@src/utils/jwt';
 
 export default async function middleware(req: NextRequest) {
   const origin = req.nextUrl.origin;
@@ -48,17 +48,7 @@ export default async function middleware(req: NextRequest) {
       }
 
     if (refreshToken && !token) {
-      if (!process.env.PRIVATE_KEY) throw new Error('Public key not found');
-
-      const privateKey = await jose.importPKCS8(
-        process.env.PRIVATE_KEY,
-        'RS256',
-      );
-
-      const token = await new jose.SignJWT({ isLoggedIn: true })
-        .setIssuedAt()
-        .setProtectedHeader({ alg: 'RS256' })
-        .sign(privateKey);
+      const token = await signJwt();
 
       return NextResponse.redirect(`${origin}${pathName}/`).cookie(
         'token',
@@ -71,18 +61,12 @@ export default async function middleware(req: NextRequest) {
       );
     }
 
-    if (!process.env.PUBLIC_KEY) throw new Error('Public key not found');
-    const publicKey = await jose.importSPKI(process.env.PUBLIC_KEY, 'RS256');
-    await jose.jwtVerify(token, publicKey);
+    await verifyJwt(token);
 
     return splitPath[1] === 'admin' || splitPath[1] === 'api'
       ? NextResponse.next()
       : NextResponse.redirect(`${origin}/admin/projects`);
   } catch (err) {
-    if (err instanceof jose.errors.JWTInvalid) {
-      return NextResponse.redirect(`${origin}/login`);
-    }
-
     console.log(`\n\n\nerror: `);
     console.log(err);
     return new Response(
