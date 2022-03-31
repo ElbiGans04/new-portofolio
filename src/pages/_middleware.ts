@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import moment from 'moment';
 import { signJwt, verifyJwt } from '@src/utils/jwt';
+import dayjs from 'dayjs';
 
 export default async function middleware(req: NextRequest) {
   const origin = req.nextUrl.origin;
@@ -56,7 +56,7 @@ export default async function middleware(req: NextRequest) {
         {
           httpOnly: true,
           sameSite: 'lax',
-          expires: moment().add(5, 'minutes').toDate(),
+          expires: dayjs().add(5, 'm').toDate(),
         },
       );
     }

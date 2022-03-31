@@ -8,7 +8,7 @@ import HttpError from '@src/utils/httpError';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
 import Cookies from 'cookies';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { signJwt } from '@src/utils/jwt';
 
 const LoginSchemaValidation = Joi.object({
@@ -44,7 +44,7 @@ class Login {
       overwrite: true,
       httpOnly: true,
       sameSite: 'lax',
-      expires: moment().add('1', 'days').toDate(),
+      expires: dayjs().add(1, 'd').toDate(),
     });
 
     return res.status(200).json({
