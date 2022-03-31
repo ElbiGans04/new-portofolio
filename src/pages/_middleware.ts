@@ -11,14 +11,41 @@ export default async function middleware(req: NextRequest) {
 
   try {
     // Khusus halaman bukan /admin/* atau /login
-    if (splitPath[1] !== 'admin' && pathName !== '/login')
+    if (
+      (splitPath[1] !== 'admin' &&
+        pathName !== '/login' &&
+        splitPath[1] !== 'api') ||
+      (splitPath[1] === 'api' && req.method === 'GET') ||
+      (pathName === '/api/auth/login' && req.method === 'POST')
+    )
       return NextResponse.next();
 
     // Jika tidak ada token dan refresh token
     if (!token && !refreshToken)
-      return splitPath[1] === 'admin'
-        ? NextResponse.redirect(`${origin}/login`)
-        : NextResponse.next();
+      switch (splitPath[1]) {
+        case 'admin':
+          return NextResponse.redirect(`${origin}/login`);
+        case 'api':
+          return new Response(
+            JSON.stringify({
+              errors: [
+                {
+                  title: 'token not found',
+                  detail: 'token not found',
+                  status: '401',
+                },
+              ],
+            }),
+            {
+              status: 401,
+              headers: {
+                'content-type': 'application/vnd.api+json',
+              },
+            },
+          );
+        default:
+          return NextResponse.next();
+      }
 
     if (refreshToken && !token) {
       if (!process.env.PRIVATE_KEY) throw new Error('Public key not found');
@@ -32,8 +59,6 @@ export default async function middleware(req: NextRequest) {
         .setIssuedAt()
         .setProtectedHeader({ alg: 'RS256' })
         .sign(privateKey);
-
-      console.log(token);
 
       return NextResponse.redirect(`${origin}${pathName}/`).cookie(
         'token',
@@ -50,7 +75,7 @@ export default async function middleware(req: NextRequest) {
     const publicKey = await jose.importSPKI(process.env.PUBLIC_KEY, 'RS256');
     await jose.jwtVerify(token, publicKey);
 
-    return splitPath[1] === 'admin'
+    return splitPath[1] === 'admin' || splitPath[1] === 'api'
       ? NextResponse.next()
       : NextResponse.redirect(`${origin}/admin/projects`);
   } catch (err) {
