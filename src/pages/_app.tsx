@@ -92,12 +92,15 @@ const urlComponents = [
 ];
 
 function NavBar({ active }: { active: string }) {
+  const { pathname } = useRouter();
+  const splitPathName = pathname.split('/');
   const [navbarOpen, setNavbarOpen] = useState(false);
+
   return (
     <Navbar>
       {navbarOpen && <GlobalStyle />}
       <NavbarHead>
-        <Link passHref href="/">
+        <Link passHref href={splitPathName[1] === 'admin' ? '/admin' : '/'}>
           <NavbarHeadItem>Elbi</NavbarHeadItem>
         </Link>
       </NavbarHead>

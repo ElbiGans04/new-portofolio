@@ -65,7 +65,7 @@ export default async function middleware(req: NextRequest) {
 
     return splitPath[1] === 'admin' || splitPath[1] === 'api'
       ? NextResponse.next()
-      : NextResponse.redirect(`${origin}/admin/projects`);
+      : NextResponse.redirect(`${origin}/admin`);
   } catch (err) {
     console.log(`\n\n\nerror: `);
     console.log(err);
