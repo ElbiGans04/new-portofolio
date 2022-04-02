@@ -21,12 +21,18 @@ interface ResourceIdentifierObject {
   meta?: MetaObject;
 }
 
-export interface ResourceObject<T = { [index: string]: OObject }, T2 = string> {
+export interface ResourceObject<
+  T = { [index: string]: OObject },
+  T2 = string,
+  T3 = Record<string, unknown>,
+> {
   type: T2;
   id: string;
-  attributes?: T;
+  attributes?: {
+    [Property in keyof T as Exclude<Property, '__v' | '_id'>]: T[Property];
+  };
   relationships?: {
-    [index: string]: {
+    [Property in keyof T3]: {
       links: {
         self: link;
         related?: link;
@@ -76,13 +82,7 @@ export interface DocData<T = { [index: string]: OObject }, T2 = string>
     | ResourceIdentifierObject
     | ResourceIdentifierObject[];
   meta?: MetaObject;
-  included?: Array<{
-    type: string;
-    id?: string;
-    attributes: {
-      [index: string]: OObject;
-    };
-  }>;
+  included?: Array<ResourceObject>;
 }
 
 /* 
@@ -105,17 +105,13 @@ export interface DocData<T = { [index: string]: OObject }, T2 = string>
     }]
   }
 */
-export interface DocDataDiscriminated<T = { [index: string]: OObject }>
-  extends DocBase {
+export interface DocDataDiscriminated<
+  T = { [index: string]: OObject },
+  T2 = { [index: string]: OObject },
+> extends DocBase {
   data: T;
   meta?: MetaObject;
-  included?: Array<{
-    type: string;
-    id?: string;
-    attributes: {
-      [index: string]: OObject;
-    };
-  }>;
+  included?: Array<T2>;
 }
 
 export interface DocMeta extends DocBase {
