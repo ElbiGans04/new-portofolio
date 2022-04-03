@@ -31,24 +31,25 @@ export default function Login() {
   const onSubmit = (e: React.BaseSyntheticEvent) => {
     if (state.status === 'iddle') {
       e.preventDefault();
-      const callback = handleSubmit((data) => {
-        setState({ status: 'loading' });
-        fetcherGeneric<DocMeta>('/api/auth/login', {
-          method: 'post',
-          body: JSON.stringify({ type: 'Admin', attributes: data }),
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
-          },
-        })
-          .then((res) => {
-            console.log(res);
-            router.push('/admin/projects').catch((err) => console.log(err));
-          })
-          .catch((err) => {
-            const message =
-              err instanceof HttpError ? err.message : 'Error when request';
-            setState({ status: 'iddle', message });
+      const callback = handleSubmit(async (data) => {
+        try {
+          setState({ status: 'loading' });
+
+          await fetcherGeneric<DocMeta>('/api/auth/login', {
+            method: 'post',
+            body: JSON.stringify({ type: 'Admin', attributes: data }),
+            headers: {
+              'Content-Type': 'application/vnd.api+json',
+            },
           });
+
+          setState({ status: 'iddle' });
+          await router.push('/admin');
+        } catch (err) {
+          const message =
+            err instanceof HttpError ? err.message : 'Error when request';
+          setState({ status: 'iddle', message });
+        }
       });
 
       callback().catch((err) => console.error(err));

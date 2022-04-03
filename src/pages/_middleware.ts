@@ -50,15 +50,11 @@ export default async function middleware(req: NextRequest) {
     if (refreshToken && !token) {
       const token = await signJwt();
 
-      return NextResponse.redirect(`${origin}${pathName}/`).cookie(
-        'token',
-        token,
-        {
-          httpOnly: true,
-          sameSite: 'lax',
-          expires: dayjs().add(5, 'm').toDate(),
-        },
-      );
+      return NextResponse.next().cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        expires: dayjs().add(5, 'm').toDate(),
+      });
     }
 
     await verifyJwt(token);
