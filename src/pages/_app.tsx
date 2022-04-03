@@ -190,9 +190,13 @@ const Navbar = styled.nav`
 
 const Items = styled.a`
   text-decoration: none;
-  color: white;
+  color: #bfbfbf;
   cursor: pointer;
   font-weight: bold;
+
+  & :hover {
+    color: white;
+  }
 `;
 
 const NavbarHead = styled.div`
