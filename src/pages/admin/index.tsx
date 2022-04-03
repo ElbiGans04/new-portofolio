@@ -110,5 +110,9 @@ const Text = styled.a`
     & span:first-child {
       font-size: 1rem;
     }
+
+    & > span:last-child {
+      display: none;
+    }
   }
 `;
