@@ -24,15 +24,15 @@ interface ResourceIdentifierObject {
 export interface ResourceObject<
   T = { [index: string]: OObject },
   T2 = string,
-  T3 = Record<string, unknown>,
+  T3 = '',
 > {
   type: T2;
   id: string;
   attributes?: {
-    [Property in keyof T as Exclude<Property, '__v' | '_id'>]: T[Property];
+    [Property in keyof T as Exclude<Property, '_id'>]: T[Property];
   };
   relationships?: {
-    [Property in keyof T3]: {
+    [Property in keyof T as Exclude<Property, T3>]: {
       links: {
         self: link;
         related?: link;
@@ -50,7 +50,6 @@ export interface ResourceObject<
   };
   meta?: MetaObject;
 }
-
 /* 
     TOP LEVEL MEMBER
 */
