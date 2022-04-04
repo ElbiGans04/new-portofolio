@@ -24,16 +24,17 @@ interface ResourceIdentifierObject {
 export interface ResourceObject<
   T = { [index: string]: OObject },
   T2 = string,
-  T3 = '',
+  T3 = string,
 > {
   type: T2;
   id: string;
   attributes?: {
-    [Property in keyof T as Exclude<Property, '_id'>]: T[Property];
+    [Property in keyof T as Exclude<Property, '_id' | T3>]: T[Property];
   };
-  relationships?: {
-    [Property in keyof T as Exclude<Property, T3>]: {
-      links: {
+  relationships?: Record<
+    T3 extends string ? T3 : string,
+    {
+      links?: {
         self: link;
         related?: link;
       };
@@ -43,13 +44,14 @@ export interface ResourceObject<
         | ResourceIdentifierObject[]
         | never[];
       meta?: MetaObject;
-    };
-  };
+    }
+  >;
   links?: {
     self?: link;
   };
   meta?: MetaObject;
 }
+
 /* 
     TOP LEVEL MEMBER
 */
