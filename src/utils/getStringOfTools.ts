@@ -6,26 +6,18 @@ import upperFirstWord from '@src/utils/upperFirstWord';
 
 export default function getStringOfTools(data: ProjectInterface['tools']) {
   let result = '';
-  if (Array.isArray(data)) {
-    data.forEach(function (
-      value: Types.ObjectId | ToolInterface,
-      index: number,
-    ) {
-      if (isTool(value)) {
-        result += `${upperFirstWord(value.name)}`;
-        if (value.as) result += ` as ${value.as}`;
-        if (index !== data.length - 1) result += ', ';
-        return;
-      }
-
-      result += `${value.toString()}`;
-
-      // tambahkan koma
+  data.forEach(function (value: Types.ObjectId | ToolInterface, index: number) {
+    if (isTool(value)) {
+      result += `${upperFirstWord(value.name)}`;
+      if (value.as) result += ` as ${value.as}`;
       if (index !== data.length - 1) result += ', ';
-    });
-    return result;
-  }
+      return;
+    }
 
-  if (isTool(data)) return (result = `${data.name} as ${data.as}`);
-  return (result = `${data.toString()}`);
+    result += `${value.toString()}`;
+
+    // tambahkan koma
+    if (index !== data.length - 1) result += ', ';
+  });
+  return result;
 }

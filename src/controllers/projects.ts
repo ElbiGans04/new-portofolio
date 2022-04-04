@@ -15,7 +15,6 @@ import { OObject } from '@src/types/jsonApi/object';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
 import Joi from 'joi';
-import { Types } from 'mongoose';
 
 const ProjectSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -182,12 +181,6 @@ class Projects {
       body,
       ProjectSchemaValidation,
     ) as TransformToDoc<ProjectSchemaInterface>;
-
-    // Jika hanya mengirim satu data tools
-    if (!Array.isArray(validReqBody.attributes.tools)) {
-      const tools = validReqBody.attributes.tools;
-      validReqBody.attributes.tools = [tools] as Types.Array<Types.ObjectId>;
-    }
 
     // Check Apakah typeProject dengan id tertentu ada
     if (

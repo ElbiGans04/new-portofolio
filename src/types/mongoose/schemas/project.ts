@@ -8,11 +8,7 @@ export default interface project {
   title: string;
   startDate: string;
   endDate: string;
-  tools:
-    | Types.Array<Types.ObjectId>
-    | Types.ObjectId
-    | tool
-    | Types.Array<tool>;
+  tools: Types.Array<Types.ObjectId> | Types.Array<tool>;
   typeProject: string | typeProject;
   images: images[];
   description: string;

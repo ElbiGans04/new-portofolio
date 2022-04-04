@@ -301,23 +301,16 @@ function SwitchModal({
         tools,
       } = state.row.attributes;
 
-      const fixTools = Array.isArray(tools)
-        ? tools.map(
-            (tool) =>
-              ({
-                value: isTool(tool) ? tool._id : tool.toString(),
-                label: isTool(tool) ? tool.name : 'Unkown',
-              } as {
-                value: string;
-                label: string;
-              }),
-          )
-        : isTool(tools)
-        ? [{ value: tools._id, label: tools.name }]
-        : ([{ value: tools.toString(), label: 'Unkown' }] as {
+      const fixTools = tools.map(
+        (tool) =>
+          ({
+            value: isTool(tool) ? tool._id : tool.toString(),
+            label: isTool(tool) ? tool.name : 'Unkown',
+          } as {
             value: string;
             label: string;
-          }[]);
+          }),
+      );
       reactForm.reset(
         {
           title,
