@@ -6,7 +6,6 @@ import {
   RequestControllerRouter,
   RespondControllerRouter,
 } from '@src/types/controllersRoutersApi';
-import formatResource from '@src/utils/formatResource';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
 import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
@@ -25,7 +24,7 @@ class Tools {
   async getTool(req: RequestControllerRouter, res: RespondControllerRouter) {
     const { toolID } = req.query;
 
-    const result = await toolSchema.findById(toolID);
+    const result = await toolSchema.findById(toolID).lean();
 
     // Jika tidak ada
     if (!result)
@@ -35,19 +34,36 @@ class Tools {
     res.statusCode = 200;
     return res.end(
       JSON.stringify({
-        data: formatResource(result, toolSchema.modelName),
-        code: 200,
+        data: {
+          type: 'tool',
+          id: toolID,
+          attibutes: {
+            name: result.name,
+            as: result.as,
+          },
+        },
       }),
     );
   }
 
   async getTools(req: RequestControllerRouter, res: RespondControllerRouter) {
-    const results = await toolSchema.find();
+    const results = await toolSchema.find().lean();
 
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
     return res.end(
-      JSON.stringify({ data: formatResource(results, toolSchema.modelName) }),
+      JSON.stringify({
+        data: results.map((result) => {
+          return {
+            type: 'tool',
+            id: result._id,
+            attibutes: {
+              name: result.name,
+              as: result.as,
+            },
+          };
+        }),
+      }),
     );
   }
 
@@ -65,7 +81,14 @@ class Tools {
     return res.end(
       JSON.stringify({
         meta: { title: 'tool has created' },
-        data: formatResource(tool, toolSchema.modelName),
+        data: {
+          type: 'tool',
+          id: tool._id as string,
+          attibutes: {
+            name: tool.name,
+            as: tool.as,
+          },
+        },
       }),
     );
   }

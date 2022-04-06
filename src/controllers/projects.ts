@@ -18,7 +18,6 @@ import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
 import Joi from 'joi';
 import { DocDataDiscriminated, ResourceObject } from '@src/types/jsonApi';
 import { isTool } from '@src/utils/typescript/narrowing';
-import formatResource from '@src/utils/formatResource';
 
 const ProjectSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -227,6 +226,8 @@ class Projects {
 
     await res.unstable_revalidate('/projects');
 
+    const typeProject = project.typeProject as TypeProjectSchemaInterface;
+
     // atur headers
     res.setHeader('Location', `/api/projects/${project._id as string}`);
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -235,7 +236,55 @@ class Projects {
     return res.end(
       JSON.stringify({
         meta: { code: 201, title: 'The project has created' },
-        data: formatResource(project, project.modelName),
+        data: {
+          type: 'Project',
+          id: project._id as string,
+          attributes: {
+            title: project.title,
+            startDate: project.startDate,
+            endDate: project.endDate,
+            images: project.images,
+            description: project.description,
+            url: project.url,
+          },
+          relationships: {
+            tools: {
+              data: project.tools.map((tool) => ({
+                type: 'tool',
+                id: isTool(tool) ? tool._id.toString() : tool.toString(),
+              })),
+            },
+            typeProject: {
+              data: {
+                id:
+                  typeof project.typeProject === 'string'
+                    ? project.typeProject
+                    : project.typeProject._id,
+                type: 'toolProject',
+              },
+            },
+          },
+        },
+        included: [
+          ...project.tools.map((tool) => {
+            const Tool = tool as ToolSchemaInterface;
+            return {
+              type: 'tool' as const,
+              id: Tool._id.toString(),
+              attributes: {
+                name: Tool.name,
+                as: Tool.as,
+              },
+            };
+          }),
+          {
+            type: 'typeProject' as const,
+            id: typeProject._id,
+            attributes: {
+              name: typeProject.name,
+            },
+          },
+        ],
       }),
     );
   }
