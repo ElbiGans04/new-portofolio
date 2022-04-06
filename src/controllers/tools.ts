@@ -60,6 +60,7 @@ class Tools {
     await tool.save();
 
     res.setHeader('content-type', 'application/vnd.api+json');
+    res.setHeader('Location', `/api/tools/${tool._id as string}`);
     res.statusCode = 201;
     return res.end(
       JSON.stringify({
@@ -93,9 +94,9 @@ class Tools {
     if (!result) throw new HttpError('tool not found', 404, 'tool not found');
 
     res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 200;
+    res.statusCode = 204;
     return res.end(
-      JSON.stringify({ meta: { title: 'success updated', code: 200 } }),
+      JSON.stringify({ meta: { title: 'success updated', code: 204 } }),
     );
   }
 
@@ -106,7 +107,7 @@ class Tools {
     if (!result) throw new HttpError('tool not found', 404, 'tool not found');
 
     res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 200;
+    res.statusCode = 204;
     return res.end(JSON.stringify({ meta: { title: 'success deleted' } }));
   }
 
