@@ -137,7 +137,6 @@ class Projects {
       .populate('typeProject')
       .populate('tools')
       .lean();
-    // const included : Array<relationship> = []
 
     const included = results
       .map((result) => {
@@ -166,11 +165,11 @@ class Projects {
       .flat();
 
     // remove dupplicate
-    const includedFinal: typeof included = [];
-    included.forEach((tool) => {
-      if (includedFinal.findIndex((tool2) => tool2.id === tool.id) === -1)
-        includedFinal.push(tool);
-    });
+    const includedFinal: typeof included = included.reduce((prevVal, val) => {
+      if (prevVal.findIndex((prevVal2) => prevVal2.id === val.id) === -1)
+        prevVal.push(val);
+      return prevVal;
+    }, [] as typeof included);
 
     const Doc: DocDataDiscriminated<Array<data>, relationship> = {
       data: results.map((result) => {
