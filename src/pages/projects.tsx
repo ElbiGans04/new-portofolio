@@ -5,7 +5,6 @@ import { projectsSchema } from '@src/database';
 import dbConnection from '@src/database/connection';
 import ProjectInterface from '@src/types/mongoose/schemas/project';
 import parseDate from '@src/utils/getStringDate';
-import getStringOfTools from '@src/utils/getStringOfTools';
 import getRandom from '@src/utils/randomNumber';
 import upperFirstWord from '@src/utils/upperFirstWord';
 import { GetStaticProps } from 'next';
@@ -16,6 +15,7 @@ import { CSSTransition } from 'react-transition-group';
 import styled, { createGlobalStyle } from 'styled-components';
 import projectsStyled from '../styles/projects.module.css';
 import { useRouter } from 'next/router';
+import { isTool } from '@src/utils/typescript/narrowing';
 
 export const getStaticProps: GetStaticProps = async function () {
   await dbConnection();
@@ -164,7 +164,14 @@ function Projects({ projects }: { projects: string }) {
                         {parseDate(matchProject.endDate)}
                       </Heading>
                       <Heading minSize={1} size={1}>
-                        :&nbsp; {getStringOfTools(matchProject.tools)}
+                        :&nbsp;{' '}
+                        {matchProject.tools
+                          .map((tool) => {
+                            return isTool(tool)
+                              ? `${tool.name} as ${tool.as}`
+                              : tool.toString();
+                          })
+                          .join(', ')}
                       </Heading>
                       <Heading minSize={1} size={1}>
                         :&nbsp;
