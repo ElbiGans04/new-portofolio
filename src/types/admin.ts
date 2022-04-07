@@ -8,7 +8,8 @@ import { Dispatch as ReactDispact } from 'react';
 export type ResourceProjectInterface = ResourceObject<
   ProjectSchemaInterface,
   'Project',
-  'tools' | 'typeProject'
+  'tools' | 'typeProject',
+  'tool' | 'typeProject'
 >;
 
 export type RelationshipProjectInterface =
@@ -28,7 +29,8 @@ export type DocProjects = DocDataDiscriminated<
 export type ResourceToolInterface = ResourceObject<
   ToolSchemaInterface,
   'Tool',
-  ''
+  '',
+  'tool'
 >;
 
 export type DocTool = DocDataDiscriminated<ResourceToolInterface>;

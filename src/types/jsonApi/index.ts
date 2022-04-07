@@ -15,8 +15,8 @@ type link =
       meta: MetaObject;
     };
 
-interface ResourceIdentifierObject {
-  type: string;
+interface ResourceIdentifierObject<T = string> {
+  type: T;
   id: string;
   meta?: MetaObject;
 }
@@ -25,6 +25,7 @@ export interface ResourceObject<
   T = { [index: string]: OObject },
   T2 = string,
   T3 = string,
+  T4 = string,
 > {
   type: T2;
   id: string;
@@ -39,9 +40,9 @@ export interface ResourceObject<
         related?: link;
       };
       data:
-        | ResourceIdentifierObject
+        | ResourceIdentifierObject<T4>
         | null
-        | ResourceIdentifierObject[]
+        | ResourceIdentifierObject<T4>[]
         | never[];
       meta?: MetaObject;
     }
