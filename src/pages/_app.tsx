@@ -206,6 +206,9 @@ const NavbarHead = styled.div`
 const NavbarHeadItem = styled(Items)`
   color: var(--pink);
   font-size: 2rem;
+  &:hover {
+    color: var(--pink);
+  }
 `;
 
 const NavbarButton = styled.div`
@@ -275,5 +278,8 @@ const NavbarMain = styled.div`
 `;
 
 const ItemsActive = styled(Items)`
-  color: var(--pink);
+  color: var(--pink2);
+  &:hover {
+    color: var(--pink);
+  }
 `;
