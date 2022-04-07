@@ -48,7 +48,7 @@ function Projects({ projects }: { projects: string }) {
   useEffect(() => {
     if (router.asPath !== '/projects' && modal === false) {
       router
-        .push('/projects', undefined, { shallow: true })
+        .replace('/projects', undefined, { shallow: true })
         .catch((err) => console.error(err));
     }
   }, [router, modal]);
@@ -80,7 +80,7 @@ function Projects({ projects }: { projects: string }) {
               onClick={() => {
                 setModal(true);
                 router
-                  .push(
+                  .replace(
                     `/projects?projectID=${
                       typeof value._id == 'string'
                         ? value._id
