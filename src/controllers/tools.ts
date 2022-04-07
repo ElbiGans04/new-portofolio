@@ -117,7 +117,7 @@ class Tools {
     if (!result) throw new HttpError('tool not found', 404, 'tool not found');
 
     res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 204;
+    res.statusCode = 200;
     return res.end(
       JSON.stringify({ meta: { title: 'success updated', code: 204 } }),
     );
@@ -130,7 +130,7 @@ class Tools {
     if (!result) throw new HttpError('tool not found', 404, 'tool not found');
 
     res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 204;
+    res.statusCode = 200;
     return res.end(JSON.stringify({ meta: { title: 'success deleted' } }));
   }
 

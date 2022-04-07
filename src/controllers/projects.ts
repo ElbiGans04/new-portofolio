@@ -327,7 +327,7 @@ class Projects {
     await res.unstable_revalidate('/projects');
 
     res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 204;
+    res.statusCode = 200;
     return res.end(
       JSON.stringify({ meta: { title: 'success update data', code: 204 } }),
     );
@@ -345,7 +345,7 @@ class Projects {
 
     await res.unstable_revalidate('/projects');
     res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 204;
+    res.statusCode = 200;
     return res.end(
       JSON.stringify({ meta: { title: 'success deleted', code: 204 } }),
     );
