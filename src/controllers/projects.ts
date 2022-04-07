@@ -13,9 +13,10 @@ import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
 import TypeProjectSchemaInterface from '@src/types/mongoose/schemas/typeProject';
 import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
 import Joi from 'joi';
-import { DocDataDiscriminated, ResourceObject } from '@src/types/jsonApi';
 import { isTool } from '@src/utils/typescript/narrowing';
 import { NextApiResponse } from 'next';
+import { DocProjects, DocProject } from '@src/types/admin';
+import { DocMeta } from '@src/types/jsonApi';
 
 const ProjectSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -42,15 +43,6 @@ const ProjectSchemaValidation = Joi.object({
     .required(),
 }).required();
 
-type data = ResourceObject<
-  ProjectSchemaInterface,
-  'Project',
-  'tools' | 'typeProject'
->;
-type relationship =
-  | ResourceObject<ToolSchemaInterface, 'tool'>
-  | ResourceObject<TypeProjectSchemaInterface, 'typeProject'>;
-
 class Projects {
   async getProject(req: RequestControllerRouter, res: NextApiResponse) {
     const { projectID } = req.query as { projectID: string };
@@ -67,62 +59,61 @@ class Projects {
     const typeProject =
       resultProjects.typeProject as TypeProjectSchemaInterface;
 
-    res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 200;
-    return res.end(
-      JSON.stringify({
-        data: {
-          type: 'Project',
-          id: resultProjects._id.toString(),
-          attributes: {
-            title: resultProjects.title,
-            startDate: resultProjects.startDate,
-            endDate: resultProjects.endDate,
-            images: resultProjects.images,
-            description: resultProjects.description,
-            url: resultProjects.url,
+    const Doc: DocProject = {
+      data: {
+        type: 'Project',
+        id: resultProjects._id.toString(),
+        attributes: {
+          title: resultProjects.title,
+          startDate: resultProjects.startDate,
+          endDate: resultProjects.endDate,
+          images: resultProjects.images,
+          description: resultProjects.description,
+          url: resultProjects.url,
+        },
+        relationships: {
+          tools: {
+            data: resultProjects.tools.map((tool) => ({
+              type: 'tool',
+              id: isTool(tool) ? tool._id.toString() : tool.toString(),
+            })),
           },
-          relationships: {
-            tools: {
-              data: resultProjects.tools.map((tool) => ({
-                type: 'tool',
-                id: isTool(tool) ? tool._id.toString() : tool.toString(),
-              })),
-            },
-            typeProject: {
-              data: {
-                id:
-                  typeof resultProjects.typeProject === 'string'
-                    ? resultProjects.typeProject
-                    : resultProjects.typeProject._id,
-                type: 'toolProject',
-              },
+          typeProject: {
+            data: {
+              id:
+                typeof resultProjects.typeProject === 'string'
+                  ? resultProjects.typeProject
+                  : resultProjects.typeProject._id,
+              type: 'typeProject',
             },
           },
         },
-        included: [
-          ...resultProjects.tools.map((tool) => {
-            const Tool = tool as ToolSchemaInterface;
-            return {
-              type: 'tool' as const,
-              id: Tool._id.toString(),
-              attributes: {
-                name: Tool.name,
-                as: Tool.as,
-              },
-            };
-          }),
-          {
-            type: 'typeProject' as const,
-            id: typeProject._id,
+      },
+      included: [
+        ...resultProjects.tools.map((tool) => {
+          const Tool = tool as ToolSchemaInterface;
+          return {
+            type: 'tool' as const,
+            id: Tool._id.toString(),
             attributes: {
-              name: typeProject.name,
+              name: Tool.name,
+              as: Tool.as,
             },
+          };
+        }),
+        {
+          type: 'typeProject' as const,
+          id: typeProject._id,
+          attributes: {
+            name: typeProject.name,
           },
-        ],
-        code: 200,
-      }),
-    );
+        },
+      ],
+    };
+
+    res.setHeader('content-type', 'application/vnd.api+json');
+    res.statusCode = 200;
+    return res.end(JSON.stringify(Doc));
   }
 
   async getProjects(req: RequestControllerRouter, res: NextApiResponse) {
@@ -166,7 +157,7 @@ class Projects {
       return prevVal;
     }, [] as typeof included);
 
-    const Doc: DocDataDiscriminated<Array<data>, relationship> = {
+    const Doc: DocProjects = {
       data: results.map((result) => {
         return {
           type: 'Project',
@@ -192,7 +183,7 @@ class Projects {
                   typeof result.typeProject === 'string'
                     ? result.typeProject
                     : result.typeProject._id,
-                type: 'toolProject',
+                type: 'typeProject',
               },
             },
           },
@@ -219,65 +210,65 @@ class Projects {
 
     const typeProject = project.typeProject as TypeProjectSchemaInterface;
 
+    const Doc: DocProject = {
+      meta: { code: 201, title: 'The project has created' },
+      data: {
+        type: 'Project',
+        id: project._id as string,
+        attributes: {
+          title: project.title,
+          startDate: project.startDate,
+          endDate: project.endDate,
+          images: project.images,
+          description: project.description,
+          url: project.url,
+        },
+        relationships: {
+          tools: {
+            data: project.tools.map((tool) => ({
+              type: 'tool',
+              id: isTool(tool) ? tool._id.toString() : tool.toString(),
+            })),
+          },
+          typeProject: {
+            data: {
+              id:
+                typeof project.typeProject === 'string'
+                  ? project.typeProject
+                  : project.typeProject._id,
+              type: 'typeProject',
+            },
+          },
+        },
+      },
+      included: [
+        ...project.tools.map((tool) => {
+          const Tool = tool as ToolSchemaInterface;
+          return {
+            type: 'tool' as const,
+            id: Tool._id.toString(),
+            attributes: {
+              name: Tool.name,
+              as: Tool.as,
+            },
+          };
+        }),
+        {
+          type: 'typeProject' as const,
+          id: typeProject._id,
+          attributes: {
+            name: typeProject.name,
+          },
+        },
+      ],
+    };
+
     // atur headers
     res.setHeader('Location', `/api/projects/${project._id as string}`);
     res.setHeader('content-type', 'application/vnd.api+json');
 
     res.statusCode = 201;
-    return res.end(
-      JSON.stringify({
-        meta: { code: 201, title: 'The project has created' },
-        data: {
-          type: 'Project',
-          id: project._id as string,
-          attributes: {
-            title: project.title,
-            startDate: project.startDate,
-            endDate: project.endDate,
-            images: project.images,
-            description: project.description,
-            url: project.url,
-          },
-          relationships: {
-            tools: {
-              data: project.tools.map((tool) => ({
-                type: 'tool',
-                id: isTool(tool) ? tool._id.toString() : tool.toString(),
-              })),
-            },
-            typeProject: {
-              data: {
-                id:
-                  typeof project.typeProject === 'string'
-                    ? project.typeProject
-                    : project.typeProject._id,
-                type: 'toolProject',
-              },
-            },
-          },
-        },
-        included: [
-          ...project.tools.map((tool) => {
-            const Tool = tool as ToolSchemaInterface;
-            return {
-              type: 'tool' as const,
-              id: Tool._id.toString(),
-              attributes: {
-                name: Tool.name,
-                as: Tool.as,
-              },
-            };
-          }),
-          {
-            type: 'typeProject' as const,
-            id: typeProject._id,
-            attributes: {
-              name: typeProject.name,
-            },
-          },
-        ],
-      }),
-    );
+    return res.end(JSON.stringify(Doc));
   }
 
   async patchProject(req: RequestControllerRouter, res: NextApiResponse) {
@@ -315,11 +306,11 @@ class Projects {
     }
     await res.unstable_revalidate('/projects');
 
+    const Doc: DocMeta = { meta: { title: 'success update data', code: 204 } };
+
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
-    return res.end(
-      JSON.stringify({ meta: { title: 'success update data', code: 204 } }),
-    );
+    return res.end(JSON.stringify(Doc));
   }
 
   async deleteProject(req: RequestControllerRouter, res: NextApiResponse) {
@@ -330,11 +321,11 @@ class Projects {
       throw new HttpError('Project not found', 404, 'Project not found in db');
 
     await res.unstable_revalidate('/projects');
+
+    const Doc: DocMeta = { meta: { title: 'success Delete', code: 204 } };
     res.setHeader('content-type', 'application/vnd.api+json');
     res.statusCode = 200;
-    return res.end(
-      JSON.stringify({ meta: { title: 'success deleted', code: 204 } }),
-    );
+    return res.end(JSON.stringify(Doc));
   }
 
   async validation(body: { [index: string]: OObject }) {
