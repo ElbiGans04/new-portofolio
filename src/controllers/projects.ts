@@ -6,10 +6,7 @@ import {
 import { formidableHandler } from '@src/middleware/formidable';
 import runMiddleware from '@src/middleware/runMiddleware';
 import HttpError from '@src/utils/httpError';
-import {
-  RequestControllerRouter,
-  RespondControllerRouter,
-} from '@src/types/controllersRoutersApi';
+import { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import { OObject } from '@src/types/jsonApi/object';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
@@ -18,6 +15,7 @@ import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
 import Joi from 'joi';
 import { DocDataDiscriminated, ResourceObject } from '@src/types/jsonApi';
 import { isTool } from '@src/utils/typescript/narrowing';
+import { NextApiResponse } from 'next';
 
 const ProjectSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -54,7 +52,7 @@ type relationship =
   | ResourceObject<TypeProjectSchemaInterface, 'typeProject'>;
 
 class Projects {
-  async getProject(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async getProject(req: RequestControllerRouter, res: NextApiResponse) {
     const { projectID } = req.query as { projectID: string };
     const resultProjects = await projectsSchema
       .findById(projectID, { __v: 0 })
@@ -127,10 +125,7 @@ class Projects {
     );
   }
 
-  async getProjects(
-    req: RequestControllerRouter,
-    res: RespondControllerRouter,
-  ) {
+  async getProjects(req: RequestControllerRouter, res: NextApiResponse) {
     const results = await projectsSchema
       .find({}, { __v: 0 })
       .sort({ title: 1 })
@@ -210,10 +205,7 @@ class Projects {
     return res.end(JSON.stringify(Doc));
   }
 
-  async postProjects(
-    req: RequestControllerRouter,
-    res: RespondControllerRouter,
-  ) {
+  async postProjects(req: RequestControllerRouter, res: NextApiResponse) {
     await runMiddleware(req, res, formidableHandler);
 
     const validReqBody = await this.validation(req.body);
@@ -288,10 +280,7 @@ class Projects {
     );
   }
 
-  async patchProject(
-    req: RequestControllerRouter,
-    res: RespondControllerRouter,
-  ) {
+  async patchProject(req: RequestControllerRouter, res: NextApiResponse) {
     await runMiddleware(req, res, formidableHandler);
 
     const { projectID } = req.query;
@@ -333,10 +322,7 @@ class Projects {
     );
   }
 
-  async deleteProject(
-    req: RequestControllerRouter,
-    res: RespondControllerRouter,
-  ) {
+  async deleteProject(req: RequestControllerRouter, res: NextApiResponse) {
     const { projectID } = req.query;
     const result = await projectsSchema.findByIdAndDelete(projectID);
 

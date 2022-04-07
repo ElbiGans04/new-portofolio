@@ -1,11 +1,9 @@
 import Controller from '@src/controllers/tools';
 import dbConnect from '@src/database/connection';
 import routerErrorHandling from '@src/utils/routerErrorHandling';
-import type {
-  RequestControllerRouter,
-  RespondControllerRouter,
-} from '@src/types/controllersRoutersApi';
+import type { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import HttpError from '@src/utils/httpError';
+import { NextApiResponse } from 'next';
 
 export const config = {
   api: {
@@ -15,7 +13,7 @@ export const config = {
 
 export default async function Tools(
   req: RequestControllerRouter,
-  res: RespondControllerRouter,
+  res: NextApiResponse,
 ) {
   try {
     const { method } = req;

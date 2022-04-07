@@ -1,7 +1,4 @@
-import {
-  RequestControllerRouter,
-  RespondControllerRouter,
-} from '@src/types/controllersRoutersApi';
+import { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import runMiddleware from '@src/middleware/runMiddleware';
 import { formidableHandler } from '@src/middleware/formidable';
 import HttpError from '@src/utils/httpError';
@@ -10,6 +7,7 @@ import { OObject } from '@src/types/jsonApi/object';
 import Cookies from 'cookies';
 import dayjs from 'dayjs';
 import { signJwt } from '@src/utils/jwt';
+import { NextApiResponse } from 'next';
 
 const LoginSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -21,7 +19,7 @@ const LoginSchemaValidation = Joi.object({
 }).required();
 
 class Login {
-  async postLogin(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async postLogin(req: RequestControllerRouter, res: NextApiResponse) {
     await runMiddleware(req, res, formidableHandler);
 
     const { attributes } = this.validation(req.body);

@@ -2,14 +2,12 @@ import { toolSchema } from '@src/database';
 import { formidableHandler } from '@src/middleware/formidable';
 import runMiddleware from '@src/middleware/runMiddleware';
 import HttpError from '@src/utils/httpError';
-import {
-  RequestControllerRouter,
-  RespondControllerRouter,
-} from '@src/types/controllersRoutersApi';
+import { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
 import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
+import { NextApiResponse } from 'next';
 
 const ToolsSchemaValidation = Joi.object({
   type: Joi.string().max(50).required(),
@@ -21,7 +19,7 @@ const ToolsSchemaValidation = Joi.object({
 }).required();
 
 class Tools {
-  async getTool(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async getTool(req: RequestControllerRouter, res: NextApiResponse) {
     const { toolID } = req.query;
 
     const result = await toolSchema.findById(toolID).lean();
@@ -46,7 +44,7 @@ class Tools {
     );
   }
 
-  async getTools(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async getTools(req: RequestControllerRouter, res: NextApiResponse) {
     const results = await toolSchema.find().lean();
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -67,7 +65,7 @@ class Tools {
     );
   }
 
-  async postTools(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async postTools(req: RequestControllerRouter, res: NextApiResponse) {
     await runMiddleware(req, res, formidableHandler);
 
     const valid = this.validation(req.body);
@@ -93,7 +91,7 @@ class Tools {
     );
   }
 
-  async patchTool(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async patchTool(req: RequestControllerRouter, res: NextApiResponse) {
     await runMiddleware(req, res, formidableHandler);
 
     const { toolID } = req.query;
@@ -123,7 +121,7 @@ class Tools {
     );
   }
 
-  async deleteTool(req: RequestControllerRouter, res: RespondControllerRouter) {
+  async deleteTool(req: RequestControllerRouter, res: NextApiResponse) {
     const { toolID } = req.query;
     const result = await toolSchema.findByIdAndDelete(toolID);
 
