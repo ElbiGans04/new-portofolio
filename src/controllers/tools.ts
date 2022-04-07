@@ -35,9 +35,9 @@ class Tools {
     return res.end(
       JSON.stringify({
         data: {
-          type: 'tool',
+          type: 'Tool',
           id: toolID,
-          attibutes: {
+          attributes: {
             name: result.name,
             as: result.as,
           },
@@ -55,9 +55,9 @@ class Tools {
       JSON.stringify({
         data: results.map((result) => {
           return {
-            type: 'tool',
+            type: 'Tool',
             id: result._id,
-            attibutes: {
+            attributes: {
               name: result.name,
               as: result.as,
             },

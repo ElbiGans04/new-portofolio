@@ -24,9 +24,10 @@ import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
 import type {
   admin,
-  DATA,
   Dispatch,
-  DocAdminData,
+  RelationshipProjectInterface,
+  DocAdminDataPlural,
+  DocProject,
   ResourceToolInterface,
 } from '@src/types/admin';
 import type {
@@ -41,11 +42,10 @@ import {
 } from '@src/utils/clientHandler';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import parseDate from '@src/utils/getStringDate';
-import getStringOfTools from '@src/utils/getStringOfTools';
 import HttpErrror from '@src/utils/httpError';
 import getRandom from '@src/utils/randomNumber';
 import upperFirstWord from '@src/utils/upperFirstWord';
-import { isTool } from '@src/utils/typescript/narrowing';
+import { isDocTool } from '@src/utils/typescript/narrowing';
 import { initializeApp } from 'firebase/app';
 import {
   deleteObject,
@@ -124,10 +124,11 @@ function TableHeadBody({
   data,
   dispatch,
 }: {
-  data: DocAdminData;
+  data: DocAdminDataPlural;
   dispatch: Dispatch;
 }) {
   const projects = data.data;
+  const included = data.included as Array<RelationshipProjectInterface>;
 
   return (
     <React.Fragment>
@@ -141,13 +142,45 @@ function TableHeadBody({
       </thead>
       <tbody>
         {projects.map((project, index) => {
-          return (
-            <TableBodyRow
-              key={project.id || getRandom(index)}
-              dispatch={dispatch}
-              project={project}
-            />
-          );
+          if (!isDocTool(project) && data.included && project.relationships) {
+            const includedFinal = included.reduce((prev, val) => {
+              if (project.relationships) {
+                const relationshipTools = project.relationships.tools;
+                const relationshipType = project.relationships.typeProject;
+
+                if (Array.isArray(relationshipTools.data)) {
+                  const match =
+                    relationshipTools.data.findIndex(
+                      (tool) => tool.id === val.id,
+                    ) > -1
+                      ? true
+                      : false;
+                  if (match) prev.push(val);
+                }
+
+                if (
+                  !Array.isArray(relationshipType.data) &&
+                  typeof relationshipType.data === 'object' &&
+                  typeof relationshipType.data !== 'undefined' &&
+                  relationshipType.data !== null
+                ) {
+                  const match = relationshipType.data.id === val.id;
+                  if (match) prev.push(val);
+                }
+              }
+              return prev;
+            }, [] as Array<RelationshipProjectInterface>);
+
+            return (
+              <TableBodyRow
+                key={project.id || getRandom(index)}
+                dispatch={dispatch}
+                project={{ data: project, included: includedFinal }}
+              />
+            );
+          }
+
+          return <></>;
         })}
       </tbody>
     </React.Fragment>
@@ -158,83 +191,96 @@ function TableBodyRow({
   project,
   dispatch,
 }: {
-  project: DATA;
+  project: DocProject;
   dispatch: Dispatch;
 }) {
   const [detail, setDetail] = useState(false);
   const ref = useRef<HTMLTableRowElement>(null);
 
-  if (project.type == 'Tools' || project.attributes === undefined)
+  if (!isDocTool(project.data) && project.data.attributes && project.included) {
+    const { startDate, endDate, images, url, title, description } =
+      project.data.attributes;
+
+    const typeProject = project.included
+      .filter((projectCandidate) => {
+        return projectCandidate.type === 'typeProject' ? true : false;
+      })
+      .map((candidate) => {
+        return candidate.attributes && candidate.type === 'typeProject'
+          ? candidate.attributes.name
+          : 'unknown';
+      })
+      .join(', ');
+
+    const tools = project.included
+      .filter((projectCandidate) => {
+        return projectCandidate.type === 'tool' ? true : false;
+      })
+      .map((candidate) => {
+        return candidate.attributes && candidate.type === 'tool'
+          ? `${candidate.attributes.name} as ${candidate.attributes.as}`
+          : 'unknown';
+      })
+      .join(', ');
+
     return (
       <React.Fragment>
-        <tr />
-        <tr />
+        {/* Row Main */}
+        <tr>
+          <td>
+            <Button
+              title="see details of row"
+              onClick={() => setDetail((state) => !state)}
+            >
+              <IoAddOutline />
+            </Button>
+          </td>
+          <td>{title}</td>
+          <td>{description}</td>
+          <TdButton dispatch={dispatch} payload={project} />
+        </tr>
+        {/* Row Details */}
+        <RowDetail
+          ref={ref}
+          open={detail}
+          colSpan={4}
+          height={detail && ref.current ? ref.current.scrollHeight : 0}
+        >
+          <React.Fragment>
+            <RowDetailsContentContentContent>
+              <p>Development start date</p>
+              <p>{parseDate(startDate)}</p>
+            </RowDetailsContentContentContent>
+            <RowDetailsContentContentContent>
+              <p>Development completion date</p>
+              <p>{parseDate(endDate)}</p>
+            </RowDetailsContentContentContent>
+            <RowDetailsContentContentContent>
+              <p>Images</p>
+              <p>{images.map((image) => image.ref).join(', ')}</p>
+            </RowDetailsContentContentContent>
+            <RowDetailsContentContentContent>
+              <p>Tools</p>
+              <p>{tools}</p>
+            </RowDetailsContentContentContent>
+            <RowDetailsContentContentContent>
+              <p>Website type</p>
+              <p>{typeProject}</p>
+            </RowDetailsContentContentContent>
+            <RowDetailsContentContentContent>
+              <p>Website url</p>
+              <p>{url}</p>
+            </RowDetailsContentContentContent>
+          </React.Fragment>
+        </RowDetail>
       </React.Fragment>
     );
-
-  const {
-    startDate,
-    endDate,
-    typeProject,
-    tools,
-    images,
-    url,
-    title,
-    description,
-  } = project.attributes;
+  }
 
   return (
     <React.Fragment>
-      {/* Row Main */}
-      <tr>
-        <td>
-          <Button
-            title="see details of row"
-            onClick={() => setDetail((state) => !state)}
-          >
-            <IoAddOutline />
-          </Button>
-        </td>
-        <td>{title}</td>
-        <td>{description}</td>
-        <TdButton dispatch={dispatch} payload={project} />
-      </tr>
-      {/* Row Details */}
-      <RowDetail
-        ref={ref}
-        open={detail}
-        colSpan={4}
-        height={detail && ref.current ? ref.current.scrollHeight : 0}
-      >
-        <React.Fragment>
-          <RowDetailsContentContentContent>
-            <p>Development start date</p>
-            <p>{parseDate(startDate)}</p>
-          </RowDetailsContentContentContent>
-          <RowDetailsContentContentContent>
-            <p>Development completion date</p>
-            <p>{parseDate(endDate)}</p>
-          </RowDetailsContentContentContent>
-          <RowDetailsContentContentContent>
-            <p>Images</p>
-            <p>{images.map((image) => image.ref).join(', ')}</p>
-          </RowDetailsContentContentContent>
-          <RowDetailsContentContentContent>
-            <p>Tools</p>
-            <p>{getStringOfTools(tools)}</p>
-          </RowDetailsContentContentContent>
-          <RowDetailsContentContentContent>
-            <p>Website type</p>
-            <p>
-              {typeof typeProject == 'string' ? typeProject : typeProject.name}
-            </p>
-          </RowDetailsContentContentContent>
-          <RowDetailsContentContentContent>
-            <p>Website url</p>
-            <p>{url}</p>
-          </RowDetailsContentContentContent>
-        </React.Fragment>
-      </RowDetail>
+      <tr />
+      <tr />
     </React.Fragment>
   );
 }
@@ -288,29 +334,38 @@ function SwitchModal({
     } else if (
       state.modal === 'update' &&
       state.row &&
-      state.row.attributes &&
-      state.row.type === 'Projects'
+      state.row.data.attributes &&
+      state.row.included &&
+      state.row.data.type === 'Project'
     ) {
-      const {
-        title,
-        startDate,
-        endDate,
-        url,
-        description,
-        typeProject,
-        tools,
-      } = state.row.attributes;
+      const row = state.row as DocProject;
 
-      const fixTools = tools.map(
-        (tool) =>
-          ({
-            value: isTool(tool) ? tool._id : tool.toString(),
-            label: isTool(tool) ? tool.name : 'Unkown',
-          } as {
-            value: string;
-            label: string;
-          }),
-      );
+      if (!row.included) throw new Error('row.included is undefined');
+      if (!row.data.attributes) throw new Error('row.attributes is undefined');
+
+      const { title, startDate, endDate, url, description } =
+        row.data.attributes;
+
+      const tools = row.included
+        .filter((candidate) => {
+          return candidate.type === 'tool' ? true : false;
+        })
+        .map((candidate) => {
+          return {
+            value: candidate.id,
+            label:
+              candidate.type === 'tool' && candidate.attributes
+                ? candidate.attributes.name
+                : 'unknown',
+          };
+        });
+
+      const typeProject = row.included
+        .filter((projectCandidate) => {
+          return projectCandidate.type === 'typeProject' ? true : false;
+        })
+        .map((candidate) => candidate.id)
+        .join(', ');
       reactForm.reset(
         {
           title,
@@ -318,9 +373,8 @@ function SwitchModal({
           endDate: parseDate(endDate),
           url,
           description,
-          typeProject:
-            typeof typeProject == 'string' ? typeProject : typeProject._id,
-          tools: fixTools as { value: string; label: string }[],
+          typeProject,
+          tools,
           images: null,
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
@@ -336,20 +390,23 @@ function SwitchModal({
       try {
         if (
           state.row &&
-          state.row.attributes &&
-          state.row.type == 'Projects' &&
-          state.row.id
+          state.row.data.attributes &&
+          state.row.data.type == 'Project' &&
+          state.row.data.id
         ) {
           dispatch({ type: 'modal/request/start' });
 
           const request = await fetcherGeneric<DocMeta>(
-            `/api/projects/${state.row.id}`,
+            `/api/projects/${state.row.data.id}`,
             {
               method: 'delete',
             },
           );
 
-          await deleteImages(state.row.attributes.images, firebaseRootStroage);
+          await deleteImages(
+            state.row.data.attributes.images,
+            firebaseRootStroage,
+          );
 
           await clientHandlerSuccess(
             request.meta.title as string,
@@ -434,17 +491,17 @@ function SwitchModal({
       } & { tools: string[] };
     } = {
       type: 'project',
-      id: state.row?.id || '',
+      id: state.row?.data?.id || '',
       attributes: { ...data, tools: data.tools.map((tool) => tool.value) },
     };
     if (
       state.row &&
-      state.row.attributes &&
-      state.row.type == 'Projects' &&
-      state.row.id
+      state.row.data.attributes &&
+      state.row.data.type == 'Project' &&
+      state.row.data.id
     ) {
       try {
-        const imagesOld = state.row.attributes.images.map((image) => ({
+        const imagesOld = state.row.data.attributes.images.map((image) => ({
           src: image.src,
           ref: image.ref,
         }));
@@ -460,7 +517,7 @@ function SwitchModal({
         } else Doc.attributes.images = imagesOld;
 
         const request = await fetcherGeneric<DocMeta>(
-          `/api/projects/${state.row.id}`,
+          `/api/projects/${state.row.data.id}`,
           {
             method: 'PATCH',
             body: JSON.stringify(Doc),
@@ -471,7 +528,10 @@ function SwitchModal({
         );
 
         if (data.images && data.images.length > 0)
-          await deleteImages(state.row.attributes.images, firebaseRootStroage);
+          await deleteImages(
+            state.row.data.attributes.images,
+            firebaseRootStroage,
+          );
 
         await clientHandlerSuccess(
           request.meta.title as string,
@@ -548,8 +608,10 @@ function SwitchModal({
     }
 
     case 'update': {
-      if (!state.row.attributes) throw new Error('row.attribues is not found');
-      if (state.row.type === 'Tools') throw new Error('type of row is wrong');
+      if (!state.row.data.attributes)
+        throw new Error('row.attribues is not found');
+      if (state.row.data.type === 'Tool')
+        throw new Error('type of row is wrong');
 
       return (
         <FormProvider {...reactForm}>
@@ -557,7 +619,7 @@ function SwitchModal({
             handler={onSubmitModalUpdate}
             data={data}
             modal="UPDATE"
-            defaultValueImages={state.row.attributes.images
+            defaultValueImages={state.row.data.attributes.images
               .map(
                 (image) =>
                   image.ref.split('/')[image.ref.split('/').length - 1],

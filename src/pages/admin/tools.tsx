@@ -20,7 +20,7 @@ import {
 import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
 import type { admin } from '@src/types/admin';
-import { Dispatch, DocAdminData } from '@src/types/admin';
+import { Dispatch, DocAdminDataPlural } from '@src/types/admin';
 import type { DocMeta } from '@src/types/jsonApi/index';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import Head from 'next/head';
@@ -36,6 +36,8 @@ import {
   clientHandlerSuccess,
   clientHandlerError,
 } from '@src/utils/clientHandler';
+import { isDocTool } from '@src/utils/typescript/narrowing';
+import getRandom from '@src/utils/randomNumber';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
@@ -82,11 +84,10 @@ function TableHeadBody({
   data,
   dispatch,
 }: {
-  data: DocAdminData;
+  data: DocAdminDataPlural;
   dispatch: Dispatch;
 }) {
   const tools = data.data;
-
   return (
     <React.Fragment>
       <thead>
@@ -98,20 +99,19 @@ function TableHeadBody({
       </thead>
       <tbody>
         {tools.map((tool) => {
-          if (tool.type == 'Projects' || tool.attributes === undefined)
+          if (isDocTool(tool) && tool.attributes !== undefined)
             return (
-              <React.Fragment>
-                <tr />
-                <tr />
-              </React.Fragment>
-            );
-          return (
-            <React.Fragment key={tool.id}>
-              <tr>
+              <tr key={tool.id}>
                 <td>{tool.attributes.name}</td>
                 <td>{tool.attributes.as}</td>
-                <TdButton dispatch={dispatch} payload={tool} />
+                <TdButton dispatch={dispatch} payload={{ data: tool }} />
               </tr>
+            );
+
+          return (
+            <React.Fragment key={getRandom(1)}>
+              <tr />
+              <tr />
             </React.Fragment>
           );
         })}
@@ -139,11 +139,14 @@ function SwitchModal({
     } else if (
       state.modal === 'update' &&
       state.row &&
-      state.row.attributes &&
-      state.row.type === 'Tools'
+      state.row.data.attributes &&
+      state.row.data.type === 'Tool'
     ) {
       reactForm.reset(
-        { name: state.row.attributes.name, as: state.row.attributes.as },
+        {
+          name: state.row.data.attributes.name,
+          as: state.row.data.attributes.as,
+        },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
     }
@@ -185,12 +188,12 @@ function SwitchModal({
 
   function onSubmitModalDelete() {
     const callback = async () => {
-      if (state.row && state.row.id) {
+      if (state.row && state.row.data.id) {
         try {
           dispatch({ type: 'modal/request/start' });
 
           const result = await fetcherGeneric<DocMeta>(
-            `/api/tools/${state.row.id}`,
+            `/api/tools/${state.row.data.id}`,
             {
               method: 'DELETE',
             },
@@ -214,17 +217,17 @@ function SwitchModal({
   }
 
   const onSubmitModalUpdate = reactForm.handleSubmit(async (data) => {
-    if (state.row && state.row.id) {
+    if (state.row && state.row.data.id) {
       try {
         dispatch({ type: 'modal/request/start' });
 
         const result = await fetcherGeneric<DocMeta>(
-          `/api/tools/${state.row.id}`,
+          `/api/tools/${state.row.data.id}`,
           {
             method: 'PATCH',
             body: JSON.stringify({
               type: 'Tool',
-              id: state.row.id,
+              id: state.row.data.id,
               attributes: data,
             }),
             headers: {

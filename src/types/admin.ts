@@ -2,20 +2,44 @@ import type { ResourceObject } from '@src/types/jsonApi/index';
 import { DocDataDiscriminated } from '@src/types/jsonApi/index';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
+import TypeProjectSchemaInterface from '@src/types/mongoose/schemas/typeProject';
 import { Dispatch as ReactDispact } from 'react';
 
 export type ResourceProjectInterface = ResourceObject<
   ProjectSchemaInterface,
-  'Projects'
+  'Project',
+  'tools' | 'typeProject'
 >;
+
+export type RelationshipProjectInterface =
+  | ResourceObject<ToolSchemaInterface, 'tool', ''>
+  | ResourceObject<TypeProjectSchemaInterface, 'typeProject', ''>;
+
+export type DocProject = DocDataDiscriminated<
+  ResourceProjectInterface,
+  RelationshipProjectInterface
+>;
+
+export type DocProjects = DocDataDiscriminated<
+  ResourceProjectInterface[],
+  RelationshipProjectInterface
+>;
+
 export type ResourceToolInterface = ResourceObject<
   ToolSchemaInterface,
-  'Tools'
+  'Tool',
+  ''
 >;
 
-export type DATA = ResourceProjectInterface | ResourceToolInterface;
+export type DocTool = DocDataDiscriminated<ResourceToolInterface>;
 
-export type DocAdminData = DocDataDiscriminated<DATA[]>;
+export type DocTools = DocDataDiscriminated<ResourceToolInterface[]>;
+
+export type DocAdminDataSingular = DocTool | DocProject;
+
+export type DocAdminDataPlural = DocTools | DocProjects;
+
+export type DocAdminDataMix = DocProject | DocTool | DocProjects | DocTools;
 
 type baseAdmin = {
   status: 'iddle' | 'loading' | 'error';
@@ -33,22 +57,22 @@ export type admin =
     })
   | (baseAdmin & {
       modal: 'update';
-      row: DATA;
+      row: DocAdminDataSingular;
     })
   | (baseAdmin & {
       modal: 'delete';
-      row: DATA;
+      row: DocAdminDataSingular;
     });
 
 export type action =
   | { type: 'modal/open/add' }
   | {
       type: 'modal/open/update';
-      payload: DATA;
+      payload: DocAdminDataSingular;
     }
   | {
       type: 'modal/open/delete';
-      payload: DATA;
+      payload: DocAdminDataSingular;
     }
   | { type: 'modal/request/start' }
   | {

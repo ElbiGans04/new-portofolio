@@ -1,6 +1,6 @@
 import Button from '@src/components/Button';
 import ModalComponent, { GlobalStyle, ModalAdmin } from '@src/components/Modal';
-import { action, DATA } from '@src/types/admin';
+import { action, DocAdminDataSingular } from '@src/types/admin';
 import React, { Dispatch } from 'react';
 import {
   IoAddOutline,
@@ -103,7 +103,7 @@ export function TdButton({
   payload,
 }: {
   dispatch: React.Dispatch<action>;
-  payload: DATA;
+  payload: DocAdminDataSingular;
 }) {
   return (
     <td>

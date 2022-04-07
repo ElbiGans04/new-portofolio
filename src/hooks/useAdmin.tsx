@@ -1,11 +1,11 @@
-import { DocDataDiscriminated, DocErrors } from '@src/types/jsonApi/index';
+import { DocAdminDataPlural } from '@src/types/admin';
+import { DocErrors } from '@src/types/jsonApi/index';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import { useRef } from 'react';
 import useSWR from 'swr';
-import { DATA } from '@src/types/admin';
 
 export default function useAdmin(url: string) {
-  const { data, error } = useSWR<DocDataDiscriminated<DATA[]>, DocErrors>(
+  const { data, error } = useSWR<DocAdminDataPlural, DocErrors>(
     url,
     fetcherGeneric,
   );

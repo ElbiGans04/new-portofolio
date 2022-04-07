@@ -7,6 +7,7 @@ export async function fetcherGeneric<T>(url: string, options = {}) {
   // DENGAN FORMAT jsonapi.org
 
   // parse
+  console.log(request);
   const request2 = (await request.json()) as T;
   if (!request.ok) {
     const docErrors = request2 as any as DocErrors;
