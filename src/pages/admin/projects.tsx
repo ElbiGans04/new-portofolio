@@ -1200,7 +1200,7 @@ function InputImage({
               fileFormat !== 'webp'
             )
               return 'ONLY SUPPORT IMAGE WITH FORMAT png, jpeg, jpg, webp';
-            if (file.size > 2000000) return 'MAX IMAGE SIZE IS 2MB';
+            if (file.size > 1000000) return 'MAX IMAGE SIZE IS 1MB';
           }
 
           return true;
