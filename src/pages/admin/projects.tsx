@@ -431,14 +431,40 @@ function SwitchModal({
       attributes: {
         [Property in keyof typeof data as Exclude<
           Property,
-          'tools'
+          'tools' | 'typeProject'
         >]: Property extends 'images'
           ? typeof data['images'] | { src: string; ref: string }[]
           : typeof data[Property];
-      } & { tools: string[] };
+      };
+      relationships: {
+        tools: {
+          data: { type: string; id: string }[];
+        };
+        typeProject: {
+          data: { type: string; id: string };
+        };
+      };
     } = {
       type: 'project',
-      attributes: { ...data, tools: data.tools.map((tool) => tool.value) },
+      attributes: {
+        title: data.title,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        images: data.images,
+        description: data.description,
+        url: data.url,
+      },
+      relationships: {
+        typeProject: {
+          data: {
+            type: 'typeProject',
+            id: data.typeProject,
+          },
+        },
+        tools: {
+          data: data.tools.map((tool) => ({ id: tool.value, type: 'tool' })),
+        },
+      },
     };
 
     try {
@@ -451,7 +477,7 @@ function SwitchModal({
 
       const request = await fetcherGeneric<DocMeta>('/api/projects', {
         method: 'post',
-        body: JSON.stringify(Doc),
+        body: JSON.stringify({ data: Doc }),
         headers: {
           'content-type': 'application/vnd.api+json',
         },
@@ -484,15 +510,41 @@ function SwitchModal({
       attributes: {
         [Property in keyof typeof data as Exclude<
           Property,
-          'tools'
+          'tools' | 'typeProject'
         >]: Property extends 'images'
           ? typeof data['images'] | { src: string; ref: string }[]
           : typeof data[Property];
-      } & { tools: string[] };
+      };
+      relationships: {
+        tools: {
+          data: { type: string; id: string }[];
+        };
+        typeProject: {
+          data: { type: string; id: string };
+        };
+      };
     } = {
       type: 'project',
       id: state.row?.data?.id || '',
-      attributes: { ...data, tools: data.tools.map((tool) => tool.value) },
+      attributes: {
+        title: data.title,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        images: data.images,
+        description: data.description,
+        url: data.url,
+      },
+      relationships: {
+        typeProject: {
+          data: {
+            type: 'typeProject',
+            id: data.typeProject,
+          },
+        },
+        tools: {
+          data: data.tools.map((tool) => ({ id: tool.value, type: 'tool' })),
+        },
+      },
     };
     if (
       state.row &&
@@ -520,7 +572,7 @@ function SwitchModal({
           `/api/projects/${state.row.data.id}`,
           {
             method: 'PATCH',
-            body: JSON.stringify(Doc),
+            body: JSON.stringify({ data: Doc }),
             headers: {
               'content-type': 'application/vnd.api+json',
             },

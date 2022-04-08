@@ -165,8 +165,10 @@ function SwitchModal({
       const request = await fetcherGeneric<DocMeta>('/api/tools', {
         method: 'post',
         body: JSON.stringify({
-          type: 'Tool',
-          attributes: data,
+          data: {
+            type: 'Tool',
+            attributes: data,
+          },
         }),
         headers: {
           'Content-Type': 'application/vnd.api+json',
@@ -226,9 +228,11 @@ function SwitchModal({
           {
             method: 'PATCH',
             body: JSON.stringify({
-              type: 'Tool',
-              id: state.row.data.id,
-              attributes: data,
+              data: {
+                type: 'Tool',
+                id: state.row.data.id,
+                attributes: data,
+              },
             }),
             headers: {
               'Content-Type': 'application/vnd.api+json',

@@ -8,39 +8,59 @@ import runMiddleware from '@src/middleware/runMiddleware';
 import HttpError from '@src/utils/httpError';
 import { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import { OObject } from '@src/types/jsonApi/object';
-import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
 import TypeProjectSchemaInterface from '@src/types/mongoose/schemas/typeProject';
-import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
 import Joi from 'joi';
 import { isTool } from '@src/utils/typescript/narrowing';
 import { NextApiResponse } from 'next';
 import { DocProjects, DocProject } from '@src/types/admin';
 import { DocMeta } from '@src/types/jsonApi';
+import { Types } from 'mongoose';
 
 const ProjectSchemaValidation = Joi.object({
-  type: Joi.string().max(50).required(),
-  id: Joi.string().max(100),
-  attributes: Joi.object({
-    title: Joi.string().max(50).required(),
-    startDate: Joi.date().required(),
-    endDate: Joi.date().required(),
-    tools: Joi.array().items(Joi.string().required()).unique().min(1),
-    typeProject: Joi.string().alphanum().max(50).required(),
-    description: Joi.string().max(500).required(),
-    url: Joi.string().max(50).required(),
-    images: Joi.array()
-      .items(
-        Joi.object({
-          src: Joi.string().max(300).required(),
-          ref: Joi.string().max(100).required(),
-        }),
-      )
-      .min(1)
-      .required(),
-  })
-    .required()
-    .required(),
+  data: Joi.object({
+    type: Joi.string().max(50).required(),
+    id: Joi.string().max(100),
+    attributes: Joi.object({
+      title: Joi.string().max(50).required(),
+      startDate: Joi.date().required(),
+      endDate: Joi.date().required(),
+      description: Joi.string().max(500).required(),
+      url: Joi.string().max(50).required(),
+      images: Joi.array()
+        .items(
+          Joi.object({
+            src: Joi.string().max(300).required(),
+            ref: Joi.string().max(100).required(),
+          }),
+        )
+        .min(1)
+        .required(),
+    }).required(),
+    relationships: Joi.object({
+      tools: Joi.object({
+        data: Joi.array()
+          .items(
+            Joi.object({
+              type: Joi.string().max(100).required(),
+              id: Joi.string().max(100).required(),
+            }).required(),
+          )
+          .unique((a, b) => {
+            const aa = a as { id: string };
+            const bb = b as { id: string };
+            return aa.id === bb.id;
+          })
+          .min(1),
+      }).required(),
+      typeProject: Joi.object({
+        data: Joi.object({
+          type: Joi.string().alphanum().max(50).required(),
+          id: Joi.string().alphanum().max(100).required(),
+        }).required(),
+      }).required(),
+    }).required(),
+  }).required(),
 }).required();
 
 class Projects {
@@ -202,7 +222,11 @@ class Projects {
     const validReqBody = await this.validation(req.body);
 
     // Simpan Ke database
-    const project = new projectsSchema(validReqBody.attributes);
+    const project = new projectsSchema({
+      ...validReqBody.data.attributes,
+      tools: validReqBody.data.relationships.tools.data.map((tool) => tool.id),
+      typeProject: validReqBody.data.relationships.typeProject.data.id,
+    });
 
     await project.save();
 
@@ -280,7 +304,7 @@ class Projects {
     const validReqBody = await this.validation(req.body);
 
     // Jika tidak memasukan field id
-    if (validReqBody.id === undefined)
+    if (validReqBody.data.id === undefined)
       throw new HttpError(
         'missing id in req.body',
         404,
@@ -290,7 +314,13 @@ class Projects {
     // Lakukan Perubahan
     const result = await projectsSchema.findByIdAndUpdate(
       projectID,
-      validReqBody.attributes,
+      {
+        ...validReqBody.data.attributes,
+        tools: validReqBody.data.relationships.tools.data.map(
+          (tool) => tool.id,
+        ),
+        typeProject: validReqBody.data.relationships.typeProject.data.id,
+      },
       {
         new: true,
       },
@@ -330,16 +360,34 @@ class Projects {
 
   async validation(body: { [index: string]: OObject }) {
     // Validasi
-    const validReqBody = Joi.attempt(
-      body,
-      ProjectSchemaValidation,
-    ) as TransformToDoc<ProjectSchemaInterface>;
+    const validReqBody = Joi.attempt(body, ProjectSchemaValidation) as {
+      data: {
+        id?: string;
+        type: string;
+        attributes: DocProject['data']['attributes'];
+        relationships: {
+          tools: {
+            data: {
+              type: string;
+              id: Types.ObjectId;
+            }[];
+          };
+          typeProject: {
+            data: {
+              type: string;
+              id: string;
+            };
+          };
+        };
+      };
+    };
 
     // Check Apakah typeProject dengan id tertentu ada
+    const relationships = validReqBody.data.relationships;
     if (
-      (await typeProjectSchema.findById(
-        validReqBody.attributes.typeProject,
-      )) === null
+      (await typeProjectSchema.findById(relationships.typeProject.data.id, {
+        _id: 1,
+      })) === null
     ) {
       throw new HttpError(
         'Invalid type project id',
@@ -349,9 +397,9 @@ class Projects {
     }
 
     // Cek apakah tools yang dimasukan terdaftar
-    for (const tool of validReqBody.attributes.tools) {
+    for (const tool of relationships.tools.data) {
       // cek jika tool
-      if ((await toolSchema.findById(tool)) === null) {
+      if ((await toolSchema.findById(tool.id)) === null) {
         throw new HttpError('Invalid tool id', 404, 'Invalid tool id');
       }
     }

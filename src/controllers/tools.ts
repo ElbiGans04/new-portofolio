@@ -5,16 +5,17 @@ import HttpError from '@src/utils/httpError';
 import { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
-import { TransformToDoc } from '@src/utils/typescript/transformSchemeToDoc';
-import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
 import { NextApiResponse } from 'next';
+import { DocTool } from '@src/types/admin';
 
 const ToolsSchemaValidation = Joi.object({
-  type: Joi.string().max(50).required(),
-  id: Joi.string().max(100),
-  attributes: Joi.object({
-    name: Joi.string().max(50).required(),
-    as: Joi.string().max(100).required(),
+  data: Joi.object({
+    type: Joi.string().max(50).required(),
+    id: Joi.string().max(100),
+    attributes: Joi.object({
+      name: Joi.string().max(50).required(),
+      as: Joi.string().max(100).required(),
+    }).required(),
   }).required(),
 }).required();
 
@@ -70,7 +71,7 @@ class Tools {
 
     const valid = this.validation(req.body);
 
-    const tool = new toolSchema(valid.attributes);
+    const tool = new toolSchema(valid.data.attributes);
     await tool.save();
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -99,7 +100,7 @@ class Tools {
     const valid = this.validation(req.body);
 
     // Check karena di joi validation attribute id merupakan optional
-    if (!valid.id)
+    if (!valid.data.id)
       throw new HttpError(
         'missing id in req.body',
         404,
@@ -107,7 +108,7 @@ class Tools {
       );
 
     const result = await toolSchema
-      .findByIdAndUpdate(toolID, valid.attributes)
+      .findByIdAndUpdate(toolID, valid.data.attributes)
       .setOptions({
         new: true,
       });
@@ -133,10 +134,7 @@ class Tools {
   }
 
   validation(body: { [index: string]: OObject }) {
-    const validReqBody = Joi.attempt(
-      body,
-      ToolsSchemaValidation,
-    ) as TransformToDoc<ToolSchemaInterface>;
+    const validReqBody = Joi.attempt(body, ToolsSchemaValidation) as DocTool;
     return validReqBody;
   }
 }
