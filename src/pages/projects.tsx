@@ -46,14 +46,6 @@ function Projects({ projects }: { projects: string }) {
   });
 
   useEffect(() => {
-    if (router.asPath !== '/projects' && modal === false) {
-      router
-        .replace('/projects', undefined, { shallow: true })
-        .catch((err) => console.error(err));
-    }
-  }, [router, modal]);
-
-  useEffect(() => {
     if (nodeRef.current && router.asPath !== '/projects' && modal === null) {
       setModal(true);
     }
@@ -78,7 +70,6 @@ function Projects({ projects }: { projects: string }) {
           {projectsResult.map((value, index) => (
             <Project
               onClick={() => {
-                setModal(true);
                 router
                   .replace(
                     `/projects?projectID=${
@@ -89,6 +80,9 @@ function Projects({ projects }: { projects: string }) {
                     undefined,
                     { shallow: true },
                   )
+                  .then(() => {
+                    setModal(true);
+                  })
                   .catch((err) => console.error(err));
               }}
               key={index}
@@ -133,8 +127,17 @@ function Projects({ projects }: { projects: string }) {
             width={matchProject ? '100%' : '50%'}
             height=""
             ref={nodeRef}
-            updateState={setModal}
-            defaultState={false}
+            updateState={(cb: () => void) => {
+              cb();
+            }}
+            defaultState={() => {
+              router
+                .replace('/projects', undefined, { shallow: true })
+                .then(() => {
+                  setModal(false);
+                })
+                .catch((err) => console.error(err));
+            }}
           >
             {matchProject ? (
               <React.Fragment>
