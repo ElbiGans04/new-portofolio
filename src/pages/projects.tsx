@@ -96,12 +96,11 @@ function Projects({ projects }: { projects: string }) {
               <ProjectImageContainer>
                 {value.images[0] && (
                   <Image
-                    loader={myLoader}
                     alt="project"
                     className={projectsStyled.project}
                     src={`${value.images[0].src}`}
                     layout="fill"
-                    unoptimized
+                    priority
                   />
                 )}
               </ProjectImageContainer>
@@ -271,12 +270,11 @@ function ImageSlider({ images }: { images: ProjectInterface['images'] }) {
         {images.map((value, index) => (
           <ModalImageContentContent key={getRandom(index)}>
             <Image
-              loader={myLoader}
               alt="project"
               className={projectsStyled.project}
               src={`${value.src}`}
               layout="fill"
-              unoptimized
+              priority
             />
           </ModalImageContentContent>
         ))}
@@ -293,10 +291,6 @@ function ImageSlider({ images }: { images: ProjectInterface['images'] }) {
       </ModalImageCount>
     </ModalImage>
   );
-}
-
-function myLoader({ src }: { src: string }) {
-  return src;
 }
 
 const GlobalStyle = createGlobalStyle`
