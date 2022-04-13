@@ -16,8 +16,6 @@ export async function clientHandlerError(
     },
   });
   await mutate(url);
-
-  console.error(err);
 }
 
 export async function clientHandlerSuccess(

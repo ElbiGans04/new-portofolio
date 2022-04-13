@@ -33,4 +33,5 @@ module.exports = {
     '/node_modules/',
     '^.+\\.module\\.(css|sass|scss)$',
   ],
+  setupFiles: ['<rootDir>/__test__/setup.js'],
 };

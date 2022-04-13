@@ -37,9 +37,6 @@ export default function routerErrorHandling(
     });
   }
 
-  // Show
-  console.log(error);
-
   res.status(parseInt(errors[0].status)).json({
     errors,
   });
