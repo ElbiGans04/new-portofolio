@@ -109,10 +109,6 @@ describe('routerErrorHandling', () => {
     expect(obj.json.mock.calls[0].length).toBe(1);
   });
 
-  test('Panggil method json hanya dengan 1 argument', () => {
-    expect(obj.json.mock.calls[0].length).toBe(1);
-  });
-
   test('argument method json adalah object', () => {
     expect(obj.json.mock.calls[0][0]).toEqual({
       errors: [
@@ -157,6 +153,17 @@ describe('ClientHandler', () => {
       );
     });
 
+    test('Argument dispatch hanya 1 buah', () => {
+      const jDispatch = jest.fn();
+      const jMutate = jest.fn();
+
+      return clientHandlerError('Hello World', jDispatch, jMutate, '/a').then(
+        () => {
+          expect(jDispatch.mock.calls[0].length).toBe(1);
+        },
+      );
+    });
+
     test('Argument dispatch adalah object', () => {
       const jDispatch = jest.fn();
       const jMutate = jest.fn();
@@ -173,7 +180,7 @@ describe('ClientHandler', () => {
       );
     });
 
-    test('Argument dispatch adalah object 2', () => {
+    test('Argument dispatch adalah object yang bedasarkan error object', () => {
       const jDispatch = jest.fn();
       const jMutate = jest.fn();
 
@@ -192,16 +199,6 @@ describe('ClientHandler', () => {
       });
     });
 
-    test('Argument dispatch hanya 1 buah', () => {
-      const jDispatch = jest.fn();
-      const jMutate = jest.fn();
-
-      return clientHandlerError('Hello World', jDispatch, jMutate, '/a').then(
-        () => {
-          expect(jDispatch.mock.calls[0].length).toBe(1);
-        },
-      );
-    });
     test('Mutate Hanya dipanggil satu kali', () => {
       const jDispatch = jest.fn();
       const jMutate = jest.fn();
@@ -209,6 +206,17 @@ describe('ClientHandler', () => {
       return clientHandlerError('Hello World', jDispatch, jMutate, '/a').then(
         () => {
           expect(jMutate.mock.calls.length).toBe(1);
+        },
+      );
+    });
+
+    test('Argument mutate hanya 1 buah', () => {
+      const jDispatch = jest.fn();
+      const jMutate = jest.fn();
+
+      return clientHandlerError('Hello World', jDispatch, jMutate, '/a').then(
+        () => {
+          expect(jMutate.mock.calls[0].length).toBe(1);
         },
       );
     });
@@ -224,16 +232,6 @@ describe('ClientHandler', () => {
       );
     });
 
-    test('Argument mutate hanya 1 buah', () => {
-      const jDispatch = jest.fn();
-      const jMutate = jest.fn();
-
-      return clientHandlerError('Hello World', jDispatch, jMutate, '/a').then(
-        () => {
-          expect(jMutate.mock.calls[0].length).toBe(1);
-        },
-      );
-    });
   });
   describe('ClientHandlerSuccess', () => {
     test('Dispatch Hanya dipanggil satu kali', () => {
@@ -243,6 +241,17 @@ describe('ClientHandler', () => {
       return clientHandlerSuccess('Hello World', jDispatch, jMutate, '/a').then(
         () => {
           expect(jDispatch.mock.calls.length).toBe(1);
+        },
+      );
+    });
+
+    test('Argument dispatch hanya 1 buah', () => {
+      const jDispatch = jest.fn();
+      const jMutate = jest.fn();
+
+      return clientHandlerSuccess('Hello World', jDispatch, jMutate, '/a').then(
+        () => {
+          expect(jDispatch.mock.calls[0].length).toBe(1);
         },
       );
     });
@@ -261,17 +270,6 @@ describe('ClientHandler', () => {
       );
     });
 
-    test('Argument dispatch hanya 1 buah', () => {
-      const jDispatch = jest.fn();
-      const jMutate = jest.fn();
-
-      return clientHandlerSuccess('Hello World', jDispatch, jMutate, '/a').then(
-        () => {
-          expect(jDispatch.mock.calls[0].length).toBe(1);
-        },
-      );
-    });
-
     test('Mutate Hanya dipanggil satu kali', () => {
       const jDispatch = jest.fn();
       const jMutate = jest.fn();
@@ -283,17 +281,6 @@ describe('ClientHandler', () => {
       );
     });
 
-    test('Argument mutate adalah /a', () => {
-      const jDispatch = jest.fn();
-      const jMutate = jest.fn();
-
-      return clientHandlerSuccess('Hello World', jDispatch, jMutate, '/a').then(
-        () => {
-          expect(jMutate.mock.calls[0][0]).toBe('/a');
-        },
-      );
-    });
-
     test('Argument mutate hanya 1 buah', () => {
       const jDispatch = jest.fn();
       const jMutate = jest.fn();
@@ -301,6 +288,17 @@ describe('ClientHandler', () => {
       return clientHandlerSuccess('Hello World', jDispatch, jMutate, '/a').then(
         () => {
           expect(jMutate.mock.calls[0].length).toBe(1);
+        },
+      );
+    });
+
+    test('Argument mutate adalah /a', () => {
+      const jDispatch = jest.fn();
+      const jMutate = jest.fn();
+
+      return clientHandlerSuccess('Hello World', jDispatch, jMutate, '/a').then(
+        () => {
+          expect(jMutate.mock.calls[0][0]).toBe('/a');
         },
       );
     });
