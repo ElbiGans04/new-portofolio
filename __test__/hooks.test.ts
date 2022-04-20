@@ -1,7 +1,7 @@
 import type { admin, DocTool } from '@src/types/admin';
 import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
-import React from 'react';
+import { useRef } from 'react';
 import useSWR from 'swr';
 
 jest.mock('react', () => {
@@ -110,9 +110,42 @@ describe('Reducer Test', () => {
 });
 
 describe('useAdmin Hook', () => {
-  expect(useAdmin('/')).toEqual({
-    ref: { current: null },
-    data: { name: 'rhafael' },
-    error: null,
+  const ref = useRef as jest.Mock;
+  const swr = useSWR as jest.Mock;
+
+  test('useAdmin mengembalikan object', () => {
+    expect(useAdmin('/')).toEqual({
+      ref: { current: null },
+      data: { name: 'rhafael' },
+      error: null,
+    });
+  });
+
+  test('useAdmin memanggil ref sebanyak 1 kali', () => {
+    expect(ref.mock.calls.length).toBe(1);
+  });
+
+  test('useAdmin memanggil ref dengan 1 argument', () => {
+    expect(ref.mock.calls[0].length).toBe(1);
+  });
+
+  test('useAdmin memanggil ref dengan argument pertama yang bernilai null', () => {
+    expect(ref.mock.calls[0][0]).toBe(null);
+  });
+
+  test('useAdmin memanggil swr sebanyak 1 kali', () => {
+    expect(swr.mock.calls.length).toBe(1);
+  });
+
+  test('useAdmin memanggil swr dengan 2 argument', () => {
+    expect(swr.mock.calls[0].length).toBe(2);
+  });
+
+  test("useAdmin memanggil swr dengan argument pertama yang bernilai '/' ", () => {
+    expect(swr.mock.calls[0][0]).toBe('/');
+  });
+
+  test('useAdmin memanggil swr dengan argument kedua yang merupakan function ', () => {
+    expect(swr.mock.calls[0][1]).toBeInstanceOf(Function);
   });
 });
