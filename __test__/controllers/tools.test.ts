@@ -90,24 +90,27 @@ jest.mock('@src/database', () => {
   };
 });
 
+const req = {
+  query: {
+    toolID: 1,
+  },
+} as unknown as RequestControllerRouter;
+
+const res = {
+  setHeader: jest.fn(),
+  end: jest.fn(),
+};
+
+afterEach(() => {
+  res.end.mockClear();
+  res.setHeader.mockClear();
+});
+
 describe('GET METHOD SINGULAR', () => {
-  const req = {
-    query: {
-      toolID: 1,
-    },
-  } as unknown as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-  };
-
   const findById = toolSchema.findById as jest.Mock;
   afterEach(() => {
     const lean = findById.mock.results[0].value.lean as jest.Mock;
     lean.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
     findById.mockClear();
   });
 
@@ -177,24 +180,11 @@ describe('GET METHOD SINGULAR', () => {
 });
 
 describe('GET METHOD PLURAL', () => {
-  const req = {
-    query: {
-      toolID: 1,
-    },
-  } as unknown as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-  };
-
   const find = toolSchema.find as jest.Mock;
 
   afterEach(() => {
     const lean = find.mock.results[0].value.lean as jest.Mock;
     lean.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
     find.mockClear();
   });
 
@@ -259,17 +249,6 @@ describe('GET METHOD PLURAL', () => {
 });
 
 describe('METHOD POST', () => {
-  const req = {
-    query: {
-      toolID: 1,
-    },
-  } as unknown as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-  };
-
   const runMiddlewareMock = runMiddleware as any as jest.Mock;
   const schema = toolSchema as any as jest.Mock;
 
@@ -280,8 +259,6 @@ describe('METHOD POST', () => {
   afterEach(() => {
     const save = schema.mock.results[0].value.save as jest.Mock;
     save.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
     schema.mockClear();
   });
 
@@ -391,17 +368,6 @@ describe('METHOD POST', () => {
 });
 
 describe('PATCH METHOD', () => {
-  const req = {
-    query: {
-      toolID: 1,
-    },
-  } as unknown as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-  };
-
   const findByIdAndUpdate = toolSchema.findByIdAndUpdate as any as jest.Mock;
   const runMiddlewareMock = runMiddleware as any as jest.Mock;
 
@@ -413,8 +379,6 @@ describe('PATCH METHOD', () => {
     const setOptions = findByIdAndUpdate.mock.results[0].value
       .setOptions as jest.Mock;
     setOptions.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
     findByIdAndUpdate.mockClear();
   });
 
@@ -528,22 +492,9 @@ describe('PATCH METHOD', () => {
 });
 
 describe('DELETE METHOD', () => {
-  const req = {
-    query: {
-      toolID: 1,
-    },
-  } as unknown as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-  };
-
   const findByIdAndDelete = toolSchema.findByIdAndDelete as jest.Mock;
 
   afterEach(() => {
-    res.setHeader.mockClear();
-    res.end.mockClear();
     findByIdAndDelete.mockClear();
   });
 

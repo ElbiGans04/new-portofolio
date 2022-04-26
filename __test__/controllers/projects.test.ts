@@ -166,18 +166,26 @@ jest.mock('@src/middleware/runMiddleware', () => {
   };
 });
 
+const req = {
+  query: {
+    projectID: 1,
+  },
+} as any as RequestControllerRouter;
+
+const res = {
+  setHeader: jest.fn(),
+  end: jest.fn(),
+  unstable_revalidate: jest.fn(),
+};
+
+afterEach(() => {
+  res.setHeader.mockClear();
+  res.end.mockClear();
+  res.unstable_revalidate.mockClear();
+});
+
 describe('GET', () => {
   const projectFindByIdMock = projectsSchema.findById as any as jest.Mock;
-  const req = {
-    query: {
-      projectID: 1,
-    },
-  } as any as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-  };
 
   afterEach(() => {
     const populate = projectFindByIdMock.mock.results[0].value
@@ -185,8 +193,6 @@ describe('GET', () => {
     const lean = projectFindByIdMock.mock.results[0].value.lean as jest.Mock;
     populate.mockClear();
     lean.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
   });
 
   test('projectFindByIdMock Dipanggil satu kali', async () => {
@@ -296,16 +302,6 @@ describe('GET', () => {
 
 describe('GETS', () => {
   const projectFindMock = projectsSchema.find as any as jest.Mock;
-  const req = {
-    query: {
-      projectID: 1,
-    },
-  } as any as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-  };
 
   afterEach(() => {
     const populate = projectFindMock.mock.results[0].value
@@ -315,8 +311,6 @@ describe('GETS', () => {
     sort.mockClear();
     populate.mockClear();
     lean.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
   });
 
   test('projectFindMock Dipanggil satu kali', async () => {
@@ -443,17 +437,6 @@ describe('GETS', () => {
 });
 
 describe('POST', () => {
-  const req = {
-    query: {
-      projectID: 1,
-    },
-  } as any as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-    unstable_revalidate: jest.fn().mockResolvedValue(undefined),
-  };
   const runMiddlewareMock = runMiddleware as any as jest.Mock;
   const projectsSchemaMock = projectsSchema as any as jest.Mock;
 
@@ -465,9 +448,6 @@ describe('POST', () => {
     const save = projectsSchemaMock.mock.results[0].value.save as jest.Mock;
     projectsSchemaMock.mockClear();
     save.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
-    res.unstable_revalidate.mockClear();
   });
 
   test('memanggil runMiddleware sebanyak 1 kali', async () => {
@@ -674,17 +654,6 @@ describe('POST', () => {
 });
 
 describe('PATCH', () => {
-  const req = {
-    query: {
-      projectID: 1,
-    },
-  } as any as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-    unstable_revalidate: jest.fn().mockResolvedValue(undefined),
-  };
   const runMiddlewareMock = runMiddleware as any as jest.Mock;
   const projectFindByIdAndUpdateMock =
     projectsSchema.findByIdAndUpdate as any as jest.Mock;
@@ -695,9 +664,6 @@ describe('PATCH', () => {
 
   afterEach(() => {
     projectFindByIdAndUpdateMock.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
-    res.unstable_revalidate.mockClear();
   });
 
   test('memanggil runMiddleware sebanyak 1 kali', async () => {
@@ -880,25 +846,11 @@ describe('PATCH', () => {
 });
 
 describe('DELETE', () => {
-  const req = {
-    query: {
-      projectID: 1,
-    },
-  } as any as RequestControllerRouter;
-
-  const res = {
-    setHeader: jest.fn(),
-    end: jest.fn(),
-    unstable_revalidate: jest.fn().mockResolvedValue(undefined),
-  };
   const projectFindByIdAndDeleteMock =
     projectsSchema.findByIdAndDelete as any as jest.Mock;
 
   afterEach(() => {
     projectFindByIdAndDeleteMock.mockClear();
-    res.setHeader.mockClear();
-    res.end.mockClear();
-    res.unstable_revalidate.mockClear();
   });
 
   test('projectFindByIdAndDeleteMock Dipanggil satu kali', async () => {
