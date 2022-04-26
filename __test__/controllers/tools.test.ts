@@ -90,6 +90,17 @@ jest.mock('@src/database', () => {
   };
 });
 
+const validation = jest.spyOn(toolController, 'validation').mockReturnValue({
+  data: {
+    id: '1',
+    type: 'Tool',
+    attributes: {
+      name: 'rhafael',
+      as: 'ok',
+    },
+  },
+});
+
 const req = {
   query: {
     toolID: 1,
@@ -260,6 +271,7 @@ describe('METHOD POST', () => {
     const save = schema.mock.results[0].value.save as jest.Mock;
     save.mockClear();
     schema.mockClear();
+    validation.mockClear();
   });
 
   test('memanggil runMiddleware sebanyak 1 kali', async () => {
@@ -285,6 +297,16 @@ describe('METHOD POST', () => {
   test('memanggil runMiddleware dengan argument ketiga berupa function', async () => {
     await toolController.postTools(req, res as unknown as NextApiResponse);
     expect(runMiddlewareMock.mock.calls[0][2]).toBeInstanceOf(Function);
+  });
+
+  test('memanggil validation sebanyak 1 kali', async () => {
+    await toolController.postTools(req, res as unknown as NextApiResponse);
+    expect(validation.mock.calls.length).toBe(1);
+  });
+
+  test('memanggil validation sebanyak 1 kali dengan 1 argument', async () => {
+    await toolController.postTools(req, res as unknown as NextApiResponse);
+    expect(validation.mock.calls[0].length).toBe(1);
   });
 
   test('memanggil schema sebanyak 1 kali', async () => {
@@ -380,6 +402,7 @@ describe('PATCH METHOD', () => {
       .setOptions as jest.Mock;
     setOptions.mockClear();
     findByIdAndUpdate.mockClear();
+    validation.mockClear();
   });
 
   test('memanggil runMiddleware sebanyak 1 kali', async () => {
@@ -405,6 +428,16 @@ describe('PATCH METHOD', () => {
   test('memanggil runMiddleware dengan argument ketiga berupa function', async () => {
     await toolController.patchTool(req, res as unknown as NextApiResponse);
     expect(runMiddlewareMock.mock.calls[0][2]).toBeInstanceOf(Function);
+  });
+
+  test('memanggil validation sebanyak 1 kali', async () => {
+    await toolController.patchTool(req, res as unknown as NextApiResponse);
+    expect(validation.mock.calls.length).toBe(1);
+  });
+
+  test('memanggil validation sebanyak 1 kali dengan 1 argument', async () => {
+    await toolController.patchTool(req, res as unknown as NextApiResponse);
+    expect(validation.mock.calls[0].length).toBe(1);
   });
 
   test('findByIdAndUpdate dipanggil satu kali', async () => {
@@ -553,7 +586,9 @@ describe('DELETE METHOD', () => {
 
 describe('VALIDATION', () => {
   const attemp = joi.attempt as jest.Mock;
-
+  beforeAll(() => {
+    validation.mockRestore();
+  });
   beforeEach(() => {
     attemp.mockClear();
   });

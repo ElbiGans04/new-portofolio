@@ -1,4 +1,4 @@
-import joi, { required } from 'joi';
+import joi from 'joi';
 import projectController from '@src/controllers/projects';
 import {
   projectsSchema,
@@ -8,6 +8,7 @@ import {
 import { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import { NextApiResponse } from 'next';
 import runMiddleware from '@src/middleware/runMiddleware';
+import { Types } from 'mongoose';
 
 jest.mock('joi', () => {
   const originalModule = jest.requireActual('joi');
@@ -17,7 +18,8 @@ jest.mock('joi', () => {
       ...originalModule,
       attempt: jest.fn().mockReturnValue({
         data: {
-          id: 1,
+          id: '1',
+          type: 'Project',
           attributes: {
             title: 'judul',
             url: 'judul.com',
@@ -26,6 +28,7 @@ jest.mock('joi', () => {
             description: 'DESCRIPTION',
             images: [
               {
+                _id: '1' as any as Types.ObjectId,
                 ref: 'REF',
                 src: 'SRC',
               },
@@ -42,7 +45,7 @@ jest.mock('joi', () => {
               data: [
                 {
                   type: 'tool',
-                  id: 'TOOL-ID',
+                  id: 'TOOL-ID' as any as Types.ObjectId,
                 },
               ],
             },
@@ -165,6 +168,45 @@ jest.mock('@src/middleware/runMiddleware', () => {
     default: jest.fn().mockResolvedValue(undefined),
   };
 });
+
+const validation = jest
+  .spyOn(projectController, 'validation')
+  .mockResolvedValue({
+    data: {
+      id: '1',
+      type: 'Project',
+      attributes: {
+        title: 'judul',
+        url: 'judul.com',
+        startDate: 'AWAL',
+        endDate: 'AKHIR',
+        description: 'DESCRIPTION',
+        images: [
+          {
+            _id: '1' as any as Types.ObjectId,
+            ref: 'REF',
+            src: 'SRC',
+          },
+        ],
+      },
+      relationships: {
+        typeProject: {
+          data: {
+            type: 'typeProject',
+            id: 'A1',
+          },
+        },
+        tools: {
+          data: [
+            {
+              type: 'tool',
+              id: 'TOOL-ID' as any as Types.ObjectId,
+            },
+          ],
+        },
+      },
+    },
+  });
 
 const req = {
   query: {
@@ -448,6 +490,7 @@ describe('POST', () => {
     const save = projectsSchemaMock.mock.results[0].value.save as jest.Mock;
     projectsSchemaMock.mockClear();
     save.mockClear();
+    validation.mockClear();
   });
 
   test('memanggil runMiddleware sebanyak 1 kali', async () => {
@@ -490,6 +533,22 @@ describe('POST', () => {
     expect(runMiddlewareMock.mock.calls[0][2]).toBeInstanceOf(Function);
   });
 
+  test('memanggil validation sebanyak 1 kali', async () => {
+    await projectController.postProjects(
+      req,
+      res as unknown as NextApiResponse,
+    );
+    expect(validation.mock.calls.length).toBe(1);
+  });
+
+  test('memanggil validation sebanyak 1 kali dengan 1 argument', async () => {
+    await projectController.postProjects(
+      req,
+      res as unknown as NextApiResponse,
+    );
+    expect(validation.mock.calls[0].length).toBe(1);
+  });
+
   test('memanggil projectSchema sebanyak 1 kali', async () => {
     await projectController.postProjects(
       req,
@@ -519,6 +578,7 @@ describe('POST', () => {
       description: 'DESCRIPTION',
       images: [
         {
+          _id: '1',
           ref: 'REF',
           src: 'SRC',
         },
@@ -664,6 +724,7 @@ describe('PATCH', () => {
 
   afterEach(() => {
     projectFindByIdAndUpdateMock.mockClear();
+    validation.mockClear();
   });
 
   test('memanggil runMiddleware sebanyak 1 kali', async () => {
@@ -706,6 +767,22 @@ describe('PATCH', () => {
     expect(runMiddlewareMock.mock.calls[0][2]).toBeInstanceOf(Function);
   });
 
+  test('memanggil validation sebanyak 1 kali', async () => {
+    await projectController.patchProject(
+      req,
+      res as unknown as NextApiResponse,
+    );
+    expect(validation.mock.calls.length).toBe(1);
+  });
+
+  test('memanggil validation sebanyak 1 kali dengan 1 argument', async () => {
+    await projectController.patchProject(
+      req,
+      res as unknown as NextApiResponse,
+    );
+    expect(validation.mock.calls[0].length).toBe(1);
+  });
+
   test('projectFindByIdAndUpdateMock Dipanggil satu kali', async () => {
     await projectController.patchProject(
       req,
@@ -743,6 +820,7 @@ describe('PATCH', () => {
       description: 'DESCRIPTION',
       images: [
         {
+          _id: '1',
           ref: 'REF',
           src: 'SRC',
         },
@@ -961,6 +1039,9 @@ describe('DELETE', () => {
 });
 
 describe('VALIDATION', () => {
+  beforeAll(() => {
+    validation.mockRestore();
+  });
   const attemp = joi.attempt as jest.Mock;
   const toolfindByIdMock = toolSchema.findById as jest.Mock;
   const typeProjectfindByIdMock = typeProjectSchema.findById as jest.Mock;
@@ -974,7 +1055,8 @@ describe('VALIDATION', () => {
   test('validation mengembalikan object', async () => {
     expect(await projectController.validation({})).toEqual({
       data: {
-        id: 1,
+        id: '1',
+        type: 'Project',
         attributes: {
           title: 'judul',
           url: 'judul.com',
@@ -983,6 +1065,7 @@ describe('VALIDATION', () => {
           description: 'DESCRIPTION',
           images: [
             {
+              _id: '1',
               ref: 'REF',
               src: 'SRC',
             },
