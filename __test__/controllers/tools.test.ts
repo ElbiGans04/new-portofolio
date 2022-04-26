@@ -47,17 +47,6 @@ jest.mock('@src/middleware/runMiddleware', () => {
   };
 });
 
-declare global {
-  namespace jest {
-    interface Mock {
-      find: jest.Mock;
-      findById: jest.Mock;
-      findByIdAndDelete: jest.Mock;
-      findByIdAndUpdate: jest.Mock;
-    }
-  }
-}
-
 jest.mock('@src/database', () => {
   const originalModule = jest.requireActual('@src/database');
   const toolSchema = jest.fn().mockReturnValue({
