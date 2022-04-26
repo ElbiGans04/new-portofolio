@@ -297,12 +297,12 @@ describe('METHOD POST', () => {
 
   test('memanggil runMiddleware dengan argument pertama berupa object', async () => {
     await toolController.postTools(req, res as unknown as NextApiResponse);
-    expect(runMiddlewareMock.mock.calls[0][0]).toBeInstanceOf(Object);
+    expect(runMiddlewareMock.mock.calls[0][0]).toEqual(req);
   });
 
   test('memanggil runMiddleware dengan argument kedua berupa object', async () => {
     await toolController.postTools(req, res as unknown as NextApiResponse);
-    expect(runMiddlewareMock.mock.calls[0][1]).toBeInstanceOf(Object);
+    expect(runMiddlewareMock.mock.calls[0][1]).toEqual(res);
   });
 
   test('memanggil runMiddleware dengan argument ketiga berupa function', async () => {
@@ -430,12 +430,12 @@ describe('PATCH METHOD', () => {
 
   test('memanggil runMiddleware dengan argument pertama berupa object', async () => {
     await toolController.patchTool(req, res as unknown as NextApiResponse);
-    expect(runMiddlewareMock.mock.calls[0][0]).toBeInstanceOf(Object);
+    expect(runMiddlewareMock.mock.calls[0][0]).toEqual(req);
   });
 
   test('memanggil runMiddleware dengan argument kedua berupa object', async () => {
     await toolController.patchTool(req, res as unknown as NextApiResponse);
-    expect(runMiddlewareMock.mock.calls[0][1]).toBeInstanceOf(Object);
+    expect(runMiddlewareMock.mock.calls[0][1]).toEqual(res);
   });
 
   test('memanggil runMiddleware dengan argument ketiga berupa function', async () => {

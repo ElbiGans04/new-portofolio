@@ -45,12 +45,10 @@ jest.mock('dayjs', () => {
   return {
     __esModule: true,
     ...originalModule,
-    default: jest
-      .fn()
-      .mockReturnValue({
-        add: jest.fn().mockReturnThis(),
-        toDate: jest.fn().mockReturnValue('DATE'),
-      }),
+    default: jest.fn().mockReturnValue({
+      add: jest.fn().mockReturnThis(),
+      toDate: jest.fn().mockReturnValue('DATE'),
+    }),
   };
 });
 
@@ -105,12 +103,12 @@ describe('POST LOGIN', () => {
 
   test('memanggil runMiddleware dengan argument pertama berupa object', async () => {
     await LoginController.postLogin(req, res as unknown as NextApiResponse);
-    expect(runMiddlewareMock.mock.calls[0][0]).toBeInstanceOf(Object);
+    expect(runMiddlewareMock.mock.calls[0][0]).toEqual(req);
   });
 
   test('memanggil runMiddleware dengan argument kedua berupa object', async () => {
     await LoginController.postLogin(req, res as unknown as NextApiResponse);
-    expect(runMiddlewareMock.mock.calls[0][1]).toBeInstanceOf(Object);
+    expect(runMiddlewareMock.mock.calls[0][1]).toEqual(res);
   });
 
   test('memanggil runMiddleware dengan argument ketiga berupa function', async () => {
