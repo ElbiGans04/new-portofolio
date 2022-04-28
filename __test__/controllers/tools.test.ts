@@ -5,22 +5,6 @@ import { NextApiResponse } from 'next';
 import runMiddleware from '@src/middleware/runMiddleware';
 import joi from 'joi';
 
-// // karena error terus saat mock toolsController.validation yasudah kita mock schema joi saja
-// jest.mock("@src/controllers/tools", () => {
-//     const originalModule = jest.requireActual('@src/controllers/tools');
-//     const original = {
-//         __esModule: true,
-//         default: {
-//             ...originalModule.default,
-//             validation: jest.fn().mockReturnValue({name: 'rhafael', as: 'ok'})
-//         }
-//     }
-
-//     return original
-// });
-
-// toolController.validation = jest.spyOn(toolController, "validation").mockReturnValue("fael")
-
 jest.mock('joi', () => {
   const originalModule = jest.requireActual('joi');
   return {
