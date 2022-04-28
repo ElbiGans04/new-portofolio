@@ -232,12 +232,12 @@ describe('POST LOGIN', () => {
     expect(res.status.mock.calls.length).toBe(1);
   });
 
-  test('res.status dipanggil dengan 2 argument', async () => {
+  test('res.status dipanggil dengan 1 argument', async () => {
     await LoginController.postLogin(req, res as unknown as NextApiResponse);
     expect(res.status.mock.calls[0].length).toBe(1);
   });
 
-  test('res.status dipanggil dengan argument pertama bernilai object', async () => {
+  test('res.status dipanggil dengan argument pertama bernilai 200', async () => {
     await LoginController.postLogin(req, res as unknown as NextApiResponse);
     expect(res.status.mock.calls[0][0]).toBe(200);
   });
@@ -247,7 +247,7 @@ describe('POST LOGIN', () => {
     expect(res.json.mock.calls.length).toBe(1);
   });
 
-  test('res.json dipanggil dengan 2 argument', async () => {
+  test('res.json dipanggil dengan 1 argument', async () => {
     await LoginController.postLogin(req, res as unknown as NextApiResponse);
     expect(res.json.mock.calls[0].length).toBe(1);
   });
