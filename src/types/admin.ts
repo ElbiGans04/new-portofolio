@@ -4,6 +4,7 @@ import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
 import TypeProjectSchemaInterface from '@src/types/mongoose/schemas/typeProject';
 import TagsSchemaInterface from '@src/types/mongoose/schemas/tag';
+import TypeToolsSchemaInterface from '@src/types/mongoose/schemas/typeTool';
 import { Dispatch as ReactDispact } from 'react';
 
 export type ResourceProjectInterface = ResourceObject<
@@ -49,9 +50,24 @@ export type DocTag = DocDataDiscriminated<ResourceTagInterface>;
 
 export type DocTags = DocDataDiscriminated<ResourceTagInterface[]>;
 
-export type DocAdminDataSingular = DocTool | DocProject | DocTag;
+export type ResourceTypeToolsInterface = ResourceObject<
+  TypeToolsSchemaInterface,
+  'TypeTool',
+  '',
+  'TypeTool'
+>;
 
-export type DocAdminDataPlural = DocTools | DocProjects | DocTags;
+export type DocTypeTool = DocDataDiscriminated<ResourceTypeToolsInterface>;
+
+export type DocTypeTools = DocDataDiscriminated<ResourceTypeToolsInterface[]>;
+
+export type DocAdminDataSingular = DocTool | DocProject | DocTag | DocTypeTool;
+
+export type DocAdminDataPlural =
+  | DocTools
+  | DocProjects
+  | DocTags
+  | DocTypeTools;
 
 export type DocAdminDataMix =
   | DocProject
