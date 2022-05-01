@@ -45,7 +45,6 @@ import parseDate from '@src/utils/getStringDate';
 import HttpErrror from '@src/utils/httpError';
 import getRandom from '@src/utils/randomNumber';
 import upperFirstWord from '@src/utils/upperFirstWord';
-import { isDocTool } from '@src/utils/typescript/narrowing';
 import { initializeApp } from 'firebase/app';
 import {
   deleteObject,
@@ -201,7 +200,11 @@ function TableBodyRow({
   const [detail, setDetail] = useState(false);
   const ref = useRef<HTMLTableRowElement>(null);
 
-  if (!isDocTool(project.data) && project.data.attributes && project.included) {
+  if (
+    project.data.type === 'Project' &&
+    project.data.attributes &&
+    project.included
+  ) {
     const { startDate, endDate, images, url, title, description } =
       project.data.attributes;
 
