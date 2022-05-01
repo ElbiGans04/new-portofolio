@@ -3,6 +3,7 @@ import { DocDataDiscriminated } from '@src/types/jsonApi/index';
 import ProjectSchemaInterface from '@src/types/mongoose/schemas/project';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
 import TypeProjectSchemaInterface from '@src/types/mongoose/schemas/typeProject';
+import TagsSchemaInterface from '@src/types/mongoose/schemas/tag';
 import { Dispatch as ReactDispact } from 'react';
 
 export type ResourceProjectInterface = ResourceObject<
@@ -37,11 +38,28 @@ export type DocTool = DocDataDiscriminated<ResourceToolInterface>;
 
 export type DocTools = DocDataDiscriminated<ResourceToolInterface[]>;
 
-export type DocAdminDataSingular = DocTool | DocProject;
+export type ResourceTagInterface = ResourceObject<
+  TagsSchemaInterface,
+  'Tag',
+  '',
+  'tag'
+>;
 
-export type DocAdminDataPlural = DocTools | DocProjects;
+export type DocTag = DocDataDiscriminated<ResourceTagInterface>;
 
-export type DocAdminDataMix = DocProject | DocTool | DocProjects | DocTools;
+export type DocTags = DocDataDiscriminated<ResourceTagInterface[]>;
+
+export type DocAdminDataSingular = DocTool | DocProject | DocTag;
+
+export type DocAdminDataPlural = DocTools | DocProjects | DocTags;
+
+export type DocAdminDataMix =
+  | DocProject
+  | DocTool
+  | DocProjects
+  | DocTools
+  | DocTag
+  | DocTags;
 
 type baseAdmin = {
   status: 'iddle' | 'loading' | 'error';
