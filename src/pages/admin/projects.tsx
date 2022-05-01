@@ -142,7 +142,11 @@ function TableHeadBody({
       </thead>
       <tbody>
         {projects.map((project, index) => {
-          if (!isDocTool(project) && data.included && project.relationships) {
+          if (
+            project.type === 'Project' &&
+            data.included &&
+            project.relationships
+          ) {
             const includedFinal = included.reduce((prev, val) => {
               if (project.relationships) {
                 const relationshipTools = project.relationships.tools;
@@ -662,7 +666,7 @@ function SwitchModal({
     case 'update': {
       if (!state.row.data.attributes)
         throw new Error('row.attribues is not found');
-      if (state.row.data.type === 'Tool')
+      if (state.row.data.type !== 'Project')
         throw new Error('type of row is wrong');
 
       return (

@@ -36,7 +36,6 @@ import {
   clientHandlerSuccess,
   clientHandlerError,
 } from '@src/utils/clientHandler';
-import { isDocTool } from '@src/utils/typescript/narrowing';
 import getRandom from '@src/utils/randomNumber';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
@@ -99,7 +98,7 @@ function TableHeadBody({
       </thead>
       <tbody>
         {tools.map((tool) => {
-          if (isDocTool(tool) && tool.attributes !== undefined)
+          if (tool.type === 'Tool' && tool.attributes !== undefined)
             return (
               <tr key={tool.id}>
                 <td>{tool.attributes.name}</td>
