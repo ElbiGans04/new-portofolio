@@ -19,9 +19,13 @@ import {
 } from '@src/components/Modal';
 import { reducer } from '@src/hooks/reducer';
 import useAdmin from '@src/hooks/useAdmin';
-import type { admin } from '@src/types/admin';
-import { Dispatch, DocAdminDataPlural } from '@src/types/admin';
-import type { DocMeta } from '@src/types/jsonApi/index';
+import type { admin, DocTags } from '@src/types/admin';
+import {
+  Dispatch,
+  DocAdminDataPlural,
+  RelationshipToolInterface,
+} from '@src/types/admin';
+import type { DocMeta, DocErrors } from '@src/types/jsonApi/index';
 import { fetcherGeneric } from '@src/utils/fetcher';
 import Head from 'next/head';
 import React, { useEffect, useReducer } from 'react';
@@ -30,18 +34,21 @@ import {
   FormProvider,
   useFormContext,
   useFormState,
+  useController,
+  Control,
 } from 'react-hook-form';
-import { useSWRConfig } from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import {
   clientHandlerSuccess,
   clientHandlerError,
 } from '@src/utils/clientHandler';
 import getRandom from '@src/utils/randomNumber';
+import Select from 'react-select';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
   name: string;
-  as: string;
+  as: { label: string; value: string };
 };
 
 export default function Tools() {
@@ -98,14 +105,35 @@ function TableHeadBody({
       </thead>
       <tbody>
         {tools.map((tool) => {
-          if (tool.type === 'Tool' && tool.attributes !== undefined)
+          if (
+            tool.type === 'Tool' &&
+            tool.attributes !== undefined &&
+            Array.isArray(data.included)
+          ) {
+            const asRelationship = tool.relationships?.as.data;
+            const included =
+              data.included as any as Array<RelationshipToolInterface>;
+
+            if (Array.isArray(asRelationship) || !asRelationship) return <></>;
+
+            const matchIncluded = included.find(
+              (data) => data.id === asRelationship.id,
+            );
+
             return (
               <tr key={tool.id}>
                 <td>{tool.attributes.name}</td>
-                <td>{tool.attributes.as}</td>
-                <TdButton dispatch={dispatch} payload={{ data: tool }} />
+                <td>{matchIncluded?.attributes?.name || 'Unknown'}</td>
+                <TdButton
+                  dispatch={dispatch}
+                  payload={{
+                    data: tool,
+                    included: matchIncluded ? [matchIncluded] : undefined,
+                  }}
+                />
               </tr>
             );
+          }
 
           return (
             <React.Fragment key={getRandom(1)}>
@@ -128,28 +156,46 @@ function SwitchModal({
 }): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
   const reactForm = useForm<ModalDataValidation>();
+  const { data, error } = useSWR<DocTags, DocErrors>(
+    '/api/typeTool',
+    fetcherGeneric,
+  );
 
   useEffect(() => {
-    if (state.modal === 'add') {
+    if (state.modal === 'add' && data) {
       reactForm.reset(
-        { name: '', as: '' },
+        {
+          name: '',
+          as: {
+            label: data.data[0].attributes?.name || 'Unknown',
+            value: data.data[0].id || '',
+          },
+        },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
     } else if (
       state.modal === 'update' &&
       state.row &&
+      state.row.data.type === 'Tool' &&
       state.row.data.attributes &&
-      state.row.data.type === 'Tool'
+      state.row.data.relationships &&
+      !Array.isArray(state.row.data.relationships.as.data) &&
+      state.row.data.relationships.as.data &&
+      state.row.included
     ) {
+      const included = state.row.included as RelationshipToolInterface[];
       reactForm.reset(
         {
           name: state.row.data.attributes.name,
-          as: state.row.data.attributes.as,
+          as: {
+            label: included[0].attributes?.name || 'Unknown',
+            value: state.row.data.relationships.as.data.id,
+          },
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
     }
-  }, [reactForm, state.modal, state.row]);
+  }, [data, reactForm, state.modal, state.row]);
 
   /* 
 
@@ -166,7 +212,17 @@ function SwitchModal({
         body: JSON.stringify({
           data: {
             type: 'Tool',
-            attributes: data,
+            attributes: {
+              name: data.name,
+            },
+            relationships: {
+              as: {
+                data: {
+                  type: 'typeTool',
+                  id: data.as.value,
+                },
+              },
+            },
           },
         }),
         headers: {
@@ -230,7 +286,17 @@ function SwitchModal({
               data: {
                 type: 'Tool',
                 id: state.row.data.id,
-                attributes: data,
+                attributes: {
+                  name: data.name,
+                },
+                relationships: {
+                  as: {
+                    data: {
+                      type: 'typeTool',
+                      id: data.as.value,
+                    },
+                  },
+                },
               },
             }),
             headers: {
@@ -253,11 +319,41 @@ function SwitchModal({
     }
   });
 
+  if (error) {
+    return (
+      <ModalMain2>
+        <ModalContent2>
+          <Heading size={1} minSize={1}>
+            <span>Error </span>
+            when try
+            <span> fetching data</span>
+          </Heading>
+        </ModalContent2>
+      </ModalMain2>
+    );
+  }
+
+  if (!data) {
+    return (
+      <ModalMain2>
+        <ModalContent2>
+          <div className="loader" />
+        </ModalContent2>
+      </ModalMain2>
+    );
+  }
+
   switch (state.modal) {
     case 'add': {
       return (
         <FormProvider {...reactForm}>
-          <ModalAddUpdate handler={onSubmitModalAdd} />
+          <ModalAddUpdate
+            data={data.data.map((type) => ({
+              label: type.attributes?.name || 'unknown',
+              value: type.id,
+            }))}
+            handler={onSubmitModalAdd}
+          />
         </FormProvider>
       );
     }
@@ -279,7 +375,13 @@ function SwitchModal({
     case 'update': {
       return (
         <FormProvider {...reactForm}>
-          <ModalAddUpdate handler={onSubmitModalUpdate} />
+          <ModalAddUpdate
+            data={data.data.map((type) => ({
+              label: type.attributes?.name || 'unknown',
+              value: type.id,
+            }))}
+            handler={onSubmitModalUpdate}
+          />
         </FormProvider>
       );
     }
@@ -290,14 +392,17 @@ function SwitchModal({
 
 function ModalAddUpdate({
   handler,
+  data,
 }: {
   handler: (e: React.BaseSyntheticEvent) => Promise<void>;
+  data: { label: string; value: string }[];
 }) {
   const { register, control } = useFormContext<ModalDataValidation>();
   const { errors } = useFormState({ control });
   const Handler = (e: React.BaseSyntheticEvent) => {
     handler(e).catch((err) => console.error(err));
   };
+
   return (
     <ModalForm onSubmit={Handler}>
       <ModalFormContent>
@@ -334,32 +439,151 @@ function ModalAddUpdate({
           <Label minSize={1} size={1} htmlFor="as">
             As:
           </Label>
-          <Input
-            borderColor={errors.as && 'var(--red2)'}
-            borderColor2={errors.as && 'var(--red)'}
-            {...register('as', {
-              maxLength: { value: 100, message: 'Maximum Length is 100' },
-              required: { value: true, message: 'Please insert as field' },
-            })}
-            id="as"
-            placeholder="Insert as"
-          />
-          {errors.as?.message && (
-            <p
-              style={{
-                fontSize: '.9rem',
-                color: 'var(--red)',
-                margin: '0.5rem 0',
-              }}
-            >
-              {errors.as.message}
-            </p>
-          )}
+          <ReactSelect options={data} control={control} />
         </ModalFormContentRow>
       </ModalFormContent>
       <ModalFormFooter>
         <Button type="submit">SUBMIT</Button>
       </ModalFormFooter>
     </ModalForm>
+  );
+}
+
+function ReactSelect({
+  options,
+  control,
+}: {
+  options: { label: string; value: string }[];
+  control: Control<ModalDataValidation>;
+}) {
+  const {
+    field: { ref, value, onBlur, onChange, name },
+  } = useController({
+    name: 'as',
+    control,
+    rules: {
+      required: {
+        value: true,
+        message: 'PLEASE SELECT TOOL AT LEAST ONE',
+      },
+    },
+    defaultValue: undefined,
+  });
+  return (
+    <Select
+      name={name}
+      onBlur={onBlur}
+      ref={ref}
+      onChange={onChange}
+      value={value}
+      options={options}
+      captureMenuScroll={true}
+      placeholder="Select the type used in the tool"
+      styles={{
+        option: (provided, { isFocused }) => ({
+          ...provided,
+          backgroundColor: isFocused ? 'var(--pink2)' : 'var(--dark2)',
+          color: isFocused ? 'black' : 'var(--pink)',
+          ':active': {
+            ...provided[':active'],
+            backgroundColor: '#e07d9e',
+          },
+          ':hover': {
+            backgroundColor: 'var(--pink2)',
+            cursor: 'pointer',
+            color: 'black',
+          },
+        }),
+
+        control: (provided) => ({
+          ...provided,
+          boxShadow: '1px solid var(--pink)',
+          borderColor: 'var(--pink2)',
+          backgroundColor: 'var(--dark)',
+          '&:hover': {
+            boxShadow: '1px solid var(--pink)',
+            borderColor: 'var(--pink)',
+          },
+          color: 'var(--pink)',
+        }),
+
+        placeholder: (styled) => ({ ...styled, color: 'var(--pink)' }),
+        dropdownIndicator: (styled, { isFocused }) => ({
+          ...styled,
+          color: 'var(--pink)',
+          transition: '.3s',
+          transform: isFocused ? 'rotate(0deg)' : 'rotate(180deg)',
+          cursor: 'pointer',
+          '&:hover': {
+            color: 'var(--pink2)',
+          },
+        }),
+        groupHeading: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--pink)',
+          color: 'black',
+          padding: '.5rem',
+          fontWeight: 'bold',
+        }),
+        clearIndicator: (styled) => ({
+          ...styled,
+          color: 'var(--pink)',
+          cursor: 'pointer',
+          '&:hover': {
+            color: 'var(--pink2)',
+          },
+        }),
+        indicatorSeparator: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--pink)',
+        }),
+
+        menuList: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--dark2)',
+          '&::-webkit-scrollbar': {
+            width: '7px',
+          },
+
+          '&::-webkit-scrollbar-track': {
+            background: 'var(--dark)',
+          },
+
+          /* Handle */
+          '&::-webkit-scrollbar-thumb': {
+            background: 'var(--pink)',
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'var(--pink2)',
+          },
+        }),
+
+        singleValue: (styled) => ({
+          ...styled,
+          color: 'var(--pink)',
+        }),
+
+        multiValueRemove: (styled) => ({
+          ...styled,
+          color: 'var(--dark2)',
+          cursor: 'pointer',
+          '&:hover': {
+            color: 'red',
+          },
+        }),
+
+        input: (styled) => ({
+          ...styled,
+          color: 'white',
+        }),
+
+        noOptionsMessage: (styled) => ({
+          ...styled,
+          backgroundColor: 'var(--dark2)',
+          color: 'var(--pink)',
+        }),
+      }}
+    />
   );
 }

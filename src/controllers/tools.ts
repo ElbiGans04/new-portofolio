@@ -138,6 +138,7 @@ class Tools {
       .execPopulate();
 
     const Doc: DocTool = {
+      meta: { code: 201, title: 'The tool has created' },
       data: {
         type: 'Tool',
         id: resTool._id as string,
