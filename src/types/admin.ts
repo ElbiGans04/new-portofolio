@@ -31,13 +31,25 @@ export type DocProjects = DocDataDiscriminated<
 export type ResourceToolInterface = ResourceObject<
   ToolSchemaInterface,
   'Tool',
-  '',
-  'tool'
+  'as',
+  'typeTool'
 >;
 
-export type DocTool = DocDataDiscriminated<ResourceToolInterface>;
+export type RelationshipToolInterface = ResourceObject<
+  TypeToolsSchemaInterface,
+  'typeTool',
+  ''
+>;
 
-export type DocTools = DocDataDiscriminated<ResourceToolInterface[]>;
+export type DocTool = DocDataDiscriminated<
+  ResourceToolInterface,
+  RelationshipToolInterface
+>;
+
+export type DocTools = DocDataDiscriminated<
+  ResourceToolInterface[],
+  RelationshipToolInterface
+>;
 
 export type ResourceTagInterface = ResourceObject<
   TagsSchemaInterface,

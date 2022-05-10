@@ -6,10 +6,7 @@ const toolSchema = new mongoose.Schema<toolType>({
     type: String,
     required: true,
   },
-  as: {
-    type: String,
-    required: true,
-  },
+  as: { type: String, ref: 'TypeTool', required: true },
 });
 
 export default (mongoose.models.Tools as mongoose.Model<toolType>) ||

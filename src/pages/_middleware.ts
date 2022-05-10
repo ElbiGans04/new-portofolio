@@ -8,7 +8,7 @@ export default async function middleware(req: NextRequest) {
   const splitPath = pathName.split('/');
   const token = req.cookies.token;
   const refreshToken = req.cookies.refreshToken;
-
+  return NextResponse.next();
   try {
     // Khusus halaman bukan /admin/* atau /login
     if (
