@@ -1,5 +1,5 @@
 import toolController from '@src/controllers/tools';
-import { toolSchema } from '@src/database';
+import { toolSchema, typeToolSchema } from '@src/database';
 import { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import { NextApiResponse } from 'next';
 import runMiddleware from '@src/middleware/runMiddleware';
@@ -16,7 +16,14 @@ jest.mock('joi', () => {
           id: 1,
           attributes: {
             name: 'rhafael',
-            as: 'ok',
+          },
+          relationships: {
+            as: {
+              data: {
+                type: 'typeTool',
+                id: '1',
+              },
+            },
           },
         },
       }),
@@ -36,23 +43,43 @@ jest.mock('@src/database', () => {
   const toolSchema = jest.fn().mockReturnValue({
     _id: 1,
     name: 'rhafael',
-    as: 'ok',
+    as: {
+      _id: '1',
+      name: 'ok',
+    },
+    execPopulate: jest.fn().mockResolvedValue({
+      _id: 1,
+      name: 'rhafael',
+      as: {
+        _id: '1',
+        name: 'ok',
+      },
+    }),
+    populate: jest.fn().mockReturnThis(),
     save: jest.fn().mockResolvedValue(undefined),
   });
 
   toolSchema.findById = jest.fn().mockReturnValue({
+    populate: jest.fn().mockReturnThis(),
     lean: jest.fn().mockResolvedValue({
       name: 'rhafael',
-      as: 'ok',
+      as: {
+        _id: '1',
+        name: 'ok',
+      },
     }),
   });
 
   toolSchema.find = jest.fn().mockReturnValue({
+    populate: jest.fn().mockReturnThis(),
     lean: jest.fn().mockResolvedValue([
       {
         _id: 1,
         name: 'rhafael',
-        as: 'ok',
+        as: {
+          _id: '1',
+          name: 'ok',
+        },
       },
     ]),
   });
@@ -60,7 +87,10 @@ jest.mock('@src/database', () => {
   toolSchema.findByIdAndDelete = jest.fn().mockResolvedValue({
     _id: 1,
     name: 'rhafael',
-    as: 'ok',
+    as: {
+      _id: '1',
+      name: 'ok',
+    },
   });
 
   toolSchema.findByIdAndUpdate = jest.fn().mockReturnValue({
@@ -71,16 +101,24 @@ jest.mock('@src/database', () => {
     __esModule: true,
     ...originalModule,
     toolSchema,
+    typeToolSchema: { findById: jest.fn().mockResolvedValue({}) },
   };
 });
 
-const validation = jest.spyOn(toolController, 'validation').mockReturnValue({
+const validation = jest.spyOn(toolController, 'validation').mockResolvedValue({
   data: {
     id: '1',
     type: 'Tool',
     attributes: {
       name: 'rhafael',
-      as: 'ok',
+    },
+    relationships: {
+      as: {
+        data: {
+          type: 'typeTool',
+          id: '1',
+        },
+      },
     },
   },
 });
@@ -106,6 +144,8 @@ describe('GET METHOD SINGULAR', () => {
   afterEach(() => {
     const lean = findById.mock.results[0].value.lean as jest.Mock;
     lean.mockClear();
+    const populate = findById.mock.results[0].value.populate as jest.Mock;
+    populate.mockClear();
     findById.mockClear();
   });
 
@@ -122,6 +162,24 @@ describe('GET METHOD SINGULAR', () => {
   test('toolSchema.findById dipanggil satu kali dengan argument pertama berupa angka 1', async () => {
     await toolController.getTool(req, res as unknown as NextApiResponse);
     expect(findById.mock.calls[0][0]).toBe(1);
+  });
+
+  test('toolSchema.findById.populate dipanggil satu kali', async () => {
+    await toolController.getTool(req, res as unknown as NextApiResponse);
+    const populate = findById.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls.length).toBe(1);
+  });
+
+  test('toolSchema.findById.populate dipanggil satu kali dengan 1 argument', async () => {
+    await toolController.getTool(req, res as unknown as NextApiResponse);
+    const populate = findById.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls[0].length).toBe(1);
+  });
+
+  test('toolSchema.findById.populate dipanggil satu kali dengan argument pertama berupa as', async () => {
+    await toolController.getTool(req, res as unknown as NextApiResponse);
+    const populate = findById.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls[0][0]).toBe('as');
   });
 
   test('toolSchema.findById.lean dipanggil satu kali', async () => {
@@ -169,7 +227,7 @@ describe('GET METHOD SINGULAR', () => {
   test('end Dipanggil satu kali dengan argument pertama bernilai', async () => {
     await toolController.getTool(req, res as unknown as NextApiResponse);
     expect(res.end.mock.calls[0][0]).toBe(
-      `{\"data\":{\"type\":\"Tool\",\"id\":1,\"attributes\":{\"name\":\"rhafael\",\"as\":\"ok\"}}}`,
+      `{\"data\":{\"type\":\"Tool\",\"id\":1,\"attributes\":{\"name\":\"rhafael\"},\"relationships\":{\"as\":{\"data\":{\"type\":\"typeTool\",\"id\":\"1\"}}}},\"included\":[{\"type\":\"typeTool\",\"id\":\"1\",\"attributes\":{\"name\":\"ok\"}}]}`,
     );
   });
 });
@@ -180,6 +238,8 @@ describe('GET METHOD PLURAL', () => {
   afterEach(() => {
     const lean = find.mock.results[0].value.lean as jest.Mock;
     lean.mockClear();
+    const populate = find.mock.results[0].value.populate as jest.Mock;
+    populate.mockClear();
     find.mockClear();
   });
 
@@ -191,6 +251,24 @@ describe('GET METHOD PLURAL', () => {
   test('toolSchema.find dipanggil satu kali dengan 0 argument', async () => {
     await toolController.getTools(req, res as unknown as NextApiResponse);
     expect(find.mock.calls[0].length).toBe(0);
+  });
+
+  test('toolSchema.find.populate dipanggil satu kali', async () => {
+    await toolController.getTools(req, res as unknown as NextApiResponse);
+    const populate = find.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls.length).toBe(1);
+  });
+
+  test('toolSchema.find.populate dipanggil satu kali dengan 1 argument', async () => {
+    await toolController.getTools(req, res as unknown as NextApiResponse);
+    const populate = find.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls[0].length).toBe(1);
+  });
+
+  test('toolSchema.find.populate dipanggil satu kali dengan argument pertama berupa as', async () => {
+    await toolController.getTools(req, res as unknown as NextApiResponse);
+    const populate = find.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls[0][0]).toBe('as');
   });
 
   test('toolSchema.find.lean dipanggil satu kali', async () => {
@@ -238,7 +316,7 @@ describe('GET METHOD PLURAL', () => {
   test('end Dipanggil satu kali dengan argument pertama bernilai', async () => {
     await toolController.getTools(req, res as unknown as NextApiResponse);
     expect(res.end.mock.calls[0][0]).toBe(
-      `{\"data\":[{\"type\":\"Tool\",\"id\":1,\"attributes\":{\"name\":\"rhafael\",\"as\":\"ok\"}}]}`,
+      `{\"data\":[{\"type\":\"Tool\",\"id\":\"1\",\"attributes\":{\"name\":\"rhafael\"},\"relationships\":{\"as\":{\"data\":{\"type\":\"typeTool\",\"id\":\"1\"}}}}],\"included\":[{\"type\":\"typeTool\",\"id\":\"1\",\"attributes\":{\"name\":\"ok\"}}]}`,
     );
   });
 });
@@ -254,6 +332,10 @@ describe('METHOD POST', () => {
   afterEach(() => {
     const save = schema.mock.results[0].value.save as jest.Mock;
     save.mockClear();
+    const populate = schema.mock.results[0].value.populate as jest.Mock;
+    populate.mockClear();
+    const execPopulate = schema.mock.results[0].value.execPopulate as jest.Mock;
+    execPopulate.mockClear();
     schema.mockClear();
     validation.mockClear();
   });
@@ -305,7 +387,7 @@ describe('METHOD POST', () => {
 
   test('memanggil schema sebanyak 1 kali dengan argument pertama berupa', async () => {
     await toolController.postTools(req, res as unknown as NextApiResponse);
-    expect(schema.mock.calls[0][0]).toEqual({ name: 'rhafael', as: 'ok' });
+    expect(schema.mock.calls[0][0]).toEqual({ name: 'rhafael', as: '1' });
   });
 
   test('memanggil schema.save sebanyak 1 kali', async () => {
@@ -318,6 +400,39 @@ describe('METHOD POST', () => {
     await toolController.postTools(req, res as unknown as NextApiResponse);
     const save = schema.mock.results[0].value.save as jest.Mock;
     expect(save.mock.calls[0].length).toBe(0);
+  });
+
+  test('toolSchema.populate dipanggil satu kali', async () => {
+    await toolController.postTools(req, res as unknown as NextApiResponse);
+    const populate = schema.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls.length).toBe(1);
+  });
+
+  test('toolSchema.populate dipanggil satu kali dengan 1 argument', async () => {
+    await toolController.postTools(req, res as unknown as NextApiResponse);
+    const populate = schema.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls[0].length).toBe(1);
+  });
+
+  test('toolSchema.populate dipanggil satu kali dengan argument pertama berupa as', async () => {
+    await toolController.postTools(req, res as unknown as NextApiResponse);
+    const populate = schema.mock.results[0].value.populate as jest.Mock;
+    expect(populate.mock.calls[0][0]).toEqual({
+      path: 'as',
+      model: 'TypeTool',
+    });
+  });
+
+  test('toolSchema.execPopulate dipanggil satu kali', async () => {
+    await toolController.postTools(req, res as unknown as NextApiResponse);
+    const execPopulate = schema.mock.results[0].value.execPopulate as jest.Mock;
+    expect(execPopulate.mock.calls.length).toBe(1);
+  });
+
+  test('toolSchema.execPopulate dipanggil satu kali dengan 0 argument', async () => {
+    await toolController.postTools(req, res as unknown as NextApiResponse);
+    const execPopulate = schema.mock.results[0].value.execPopulate as jest.Mock;
+    expect(execPopulate.mock.calls[0].length).toBe(0);
   });
 
   test('setHeader Dipanggil dua kali', async () => {
@@ -368,7 +483,7 @@ describe('METHOD POST', () => {
   test('end Dipanggil satu kali dengan argument pertama bernilai', async () => {
     await toolController.postTools(req, res as unknown as NextApiResponse);
     expect(res.end.mock.calls[0][0]).toBe(
-      `{\"meta\":{\"title\":\"tool has created\"},\"data\":{\"type\":\"tool\",\"id\":1,\"attibutes\":{\"name\":\"rhafael\",\"as\":\"ok\"}}}`,
+      `{\"meta\":{\"code\":201,\"title\":\"The tool has created\"},\"data\":{\"type\":\"Tool\",\"id\":1,\"attributes\":{\"name\":\"rhafael\"},\"relationships\":{\"as\":{\"data\":{\"type\":\"typeTool\",\"id\":\"1\"}}}},\"included\":[{\"type\":\"typeTool\",\"id\":\"1\",\"attributes\":{\"name\":\"ok\"}}]}`,
     );
   });
 });
@@ -443,7 +558,7 @@ describe('PATCH METHOD', () => {
     await toolController.patchTool(req, res as unknown as NextApiResponse);
     expect(findByIdAndUpdate.mock.calls[0][1]).toEqual({
       name: 'rhafael',
-      as: 'ok',
+      as: '1',
     });
   });
 
@@ -503,7 +618,7 @@ describe('PATCH METHOD', () => {
   test('end Dipanggil satu kali dengan argument pertama bernilai', async () => {
     await toolController.patchTool(req, res as unknown as NextApiResponse);
     expect(res.end.mock.calls[0][0]).toBe(
-      `{"meta":{"title":"success updated","code":204}}`,
+      `{"meta":{"title":"success updated","code":200}}`,
     );
   });
 });
@@ -570,6 +685,8 @@ describe('DELETE METHOD', () => {
 
 describe('VALIDATION', () => {
   const attemp = joi.attempt as jest.Mock;
+  const findById = typeToolSchema.findById as jest.Mock;
+
   beforeAll(() => {
     validation.mockRestore();
   });
@@ -577,35 +694,69 @@ describe('VALIDATION', () => {
     attemp.mockClear();
   });
 
-  test('validation mengembalikan object', () => {
-    expect(toolController.validation({ name: 'rhafael', as: 'ok' })).toEqual({
+  afterEach(() => {
+    findById.mockClear();
+  });
+
+  test('validation mengembalikan object', async () => {
+    const data = await toolController.validation({ name: 'rhafael', as: 'ok' });
+    expect(data).toEqual({
       data: {
         id: 1,
         attributes: {
           name: 'rhafael',
-          as: 'ok',
+        },
+        relationships: {
+          as: {
+            data: {
+              id: '1',
+              type: 'typeTool',
+            },
+          },
         },
       },
     });
   });
 
-  test('joi.attempt dipanggil 1 kali', () => {
-    toolController.validation({ name: 'rhafael', as: 'ok' });
+  test('joi.attempt dipanggil 1 kali', async () => {
+    await toolController.validation({ name: 'rhafael', as: 'ok' });
     expect(attemp.mock.calls.length).toBe(1);
   });
 
-  test('joi.attempt dipanggil dengan 2 argument', () => {
-    toolController.validation({ name: 'rhafael', as: 'ok' });
+  test('joi.attempt dipanggil dengan 2 argument', async () => {
+    await toolController.validation({ name: 'rhafael', as: 'ok' });
     expect(attemp.mock.calls[0].length).toBe(2);
   });
 
-  test('joi.attempt dipanggil dengan argument pertama berupa object', () => {
-    toolController.validation({ name: 'rhafael', as: 'ok' });
+  test('joi.attempt dipanggil dengan argument pertama berupa object', async () => {
+    await toolController.validation({ name: 'rhafael', as: 'ok' });
     expect(attemp.mock.calls[0][0]).toEqual({ name: 'rhafael', as: 'ok' });
   });
 
-  test('joi.attempt dipanggil dengan argument kedua berupa object', () => {
-    toolController.validation({ name: 'rhafael', as: 'ok' });
+  test('joi.attempt dipanggil dengan argument kedua berupa object', async () => {
+    await toolController.validation({ name: 'rhafael', as: 'ok' });
     expect(attemp.mock.calls[0][1]).toBeInstanceOf(Object);
+  });
+
+  test('typeTool.findById dipanggil 1 kali', async () => {
+    await toolController.validation({ name: 'rhafael', as: 'ok' });
+    expect(findById.mock.calls.length).toBe(1);
+  });
+
+  test('typeTool.findById dipanggil dengan 2 argument', async () => {
+    await toolController.validation({ name: 'rhafael', as: 'ok' });
+    expect(findById.mock.calls[0].length).toBe(2);
+  });
+
+  test('typeTool.findById dipanggil dengan argument pertama berupa 1', async () => {
+    await toolController.validation({ name: 'rhafael', as: 'ok' });
+    expect(findById.mock.calls[0][0]).toBe('1');
+  });
+
+  test('typeTool.findById dipanggil dengan argument kedua berupa object', async () => {
+    await toolController.validation({ name: 'rhafael', as: 'ok' });
+    expect(findById.mock.calls[0][1]).toEqual({
+      _id: 1,
+    });
   });
 });
