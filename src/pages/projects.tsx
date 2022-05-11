@@ -170,7 +170,11 @@ function Projects({ projects }: { projects: string }) {
                         {matchProject.tools
                           .map((tool) => {
                             return isTool(tool)
-                              ? `${tool.name} as ${tool.as}`
+                              ? `${tool.name} as ${
+                                  typeof tool.as === 'string'
+                                    ? tool.as
+                                    : tool.as.name
+                                }`
                               : tool.toString();
                           })
                           .join(', ')}

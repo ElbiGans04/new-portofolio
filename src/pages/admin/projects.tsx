@@ -25,16 +25,12 @@ import useAdmin from '@src/hooks/useAdmin';
 import type {
   admin,
   Dispatch,
-  RelationshipProjectInterface,
   DocAdminDataPlural,
   DocProject,
-  ResourceToolInterface,
+  DocTools,
+  RelationshipProjectInterface,
 } from '@src/types/admin';
-import type {
-  DocDataDiscriminated,
-  DocErrors,
-  DocMeta,
-} from '@src/types/jsonApi';
+import type { DocErrors, DocMeta } from '@src/types/jsonApi';
 import projectSchema from '@src/types/mongoose/schemas/project';
 import {
   clientHandlerError,
@@ -55,20 +51,20 @@ import {
   uploadBytes,
 } from 'firebase/storage';
 import Head from 'next/head';
-import React, { useEffect, useReducer, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
+  Control,
+  FieldError,
   FormProvider,
+  useController,
   useForm,
   useFormContext,
   useFormState,
-  useController,
-  Control,
-  FieldError,
 } from 'react-hook-form';
 import { IoAddOutline } from 'react-icons/io5';
+import Select from 'react-select';
 import styled from 'styled-components';
 import useSWR, { useSWRConfig } from 'swr';
-import Select from 'react-select';
 
 type mutateSWRCustom = <T>(key: string) => Promise<T>;
 type ModalDataValidation = {
@@ -225,7 +221,11 @@ function TableBodyRow({
       })
       .map((candidate) => {
         return candidate.attributes && candidate.type === 'tool'
-          ? `${candidate.attributes.name} as ${candidate.attributes.as}`
+          ? `${candidate.attributes.name} as ${
+              typeof candidate.attributes.as === 'string'
+                ? candidate.attributes.as
+                : candidate.attributes.as.name
+            }`
           : 'unknown';
       })
       .join(', ');
@@ -304,10 +304,10 @@ function SwitchModal({
   dispatch: Dispatch;
 }): JSX.Element {
   const { mutate } = useSWRConfig() as { mutate: mutateSWRCustom };
-  const { data, error } = useSWR<
-    DocDataDiscriminated<ResourceToolInterface[]>,
-    DocErrors
-  >('/api/tools', fetcherGeneric);
+  const { data, error } = useSWR<DocTools, DocErrors>(
+    '/api/tools',
+    fetcherGeneric,
+  );
   const firebaseApp = initializeApp(firebaseConfig);
   const firebaseRootStroage = getStorage(firebaseApp);
   const reactForm = useForm<ModalDataValidation>();
@@ -497,6 +497,7 @@ function SwitchModal({
         '/api/projects',
       );
     } catch (err) {
+      console.log(err);
       /*
         Jika fetchGeneric melemparkan error (yang dikembalikan oleh /api kita)
         maka berarti gambar yang dipilih telah diupload kedalam database maka kita harus
@@ -700,7 +701,7 @@ function ModalAddUpdate({
   defaultValueImages,
 }: {
   handler: (e: React.BaseSyntheticEvent) => Promise<void>;
-  data: DocDataDiscriminated<ResourceToolInterface[]>;
+  data: DocTools;
   defaultValueImages?: string;
   modal: 'ADD' | 'UPDATE';
 }) {
@@ -713,17 +714,29 @@ function ModalAddUpdate({
     label: string;
     options: { label: string; value: string }[];
   }[] = [];
-  data.data.filter((data) => {
-    if (data.attributes) {
-      const attribute = data.attributes;
+  data.data.filter((data2) => {
+    const attribute = data2.attributes;
+    const relationships = data2.relationships?.as.data;
+    const included = data.included;
+
+    if (
+      attribute &&
+      relationships &&
+      !Array.isArray(relationships) &&
+      included
+    ) {
+      const matchIncluded = included.find(
+        (candidateVal) => candidateVal.id === relationships.id,
+      )?.attributes?.name;
       const hasGroup = result.findIndex(
-        (data) => data.label.toLowerCase() === attribute.as.toLowerCase(),
+        (data3) =>
+          data3.label.toLowerCase() === (matchIncluded?.toLowerCase() || ''),
       );
-      const value = { label: upperFirstWord(attribute.name), value: data.id };
+      const value = { label: upperFirstWord(attribute.name), value: data2.id };
       if (hasGroup >= 0) {
         result[hasGroup].options.push(value);
       } else {
-        result.push({ label: attribute.as, options: [value] });
+        result.push({ label: matchIncluded || 'unknown', options: [value] });
       }
     } else return false;
   });
