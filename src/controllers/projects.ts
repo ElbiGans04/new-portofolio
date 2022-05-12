@@ -13,7 +13,11 @@ import TypeProjectSchemaInterface from '@src/types/mongoose/schemas/typeProject'
 import Joi from 'joi';
 import { isTool } from '@src/utils/typescript/narrowing';
 import { NextApiResponse } from 'next';
-import { DocProjects, DocProject } from '@src/types/admin';
+import {
+  DocProjects,
+  DocProject,
+  RelationshipProjectInterface,
+} from '@src/types/admin';
 import { DocMeta } from '@src/types/jsonApi';
 import { Types } from 'mongoose';
 
@@ -69,7 +73,10 @@ class Projects {
     const resultProjects = await projectsSchema
       .findById(projectID, { __v: 0 })
       .populate('typeProject')
-      .populate('tools')
+      .populate({
+        path: 'tools',
+        populate: { path: 'as' },
+      })
       .lean();
 
     // jika ga ada
@@ -110,19 +117,40 @@ class Projects {
         },
       },
       included: [
-        ...resultProjects.tools.map((tool) => {
-          const Tool = tool as ToolSchemaInterface;
-          return {
-            type: 'tool' as const,
-            id: Tool._id.toString(),
-            attributes: {
-              name: Tool.name,
-              as: Tool.as,
-            },
-          };
-        }),
+        ...resultProjects.tools
+          .map((tool) => {
+            const Tool = tool as ToolSchemaInterface;
+            const ToolAsId =
+              typeof Tool.as === 'string' ? Tool.as : Tool.as._id;
+
+            return [
+              {
+                type: 'Tool' as const,
+                id: Tool._id.toString(),
+                attributes: {
+                  name: Tool.name,
+                },
+                relationships: {
+                  as: {
+                    data: {
+                      type: 'typeTool' as const,
+                      id: ToolAsId,
+                    },
+                  },
+                },
+              },
+              {
+                type: 'TypeTool' as const,
+                id: ToolAsId,
+                attributes: {
+                  name: typeof Tool.as === 'string' ? Tool.as : Tool.as.name,
+                },
+              },
+            ];
+          })
+          .flat(),
         {
-          type: 'typeProject' as const,
+          type: 'TypeProject' as const,
           id: typeProject._id,
           attributes: {
             name: typeProject.name,
@@ -141,32 +169,50 @@ class Projects {
       .find({}, { __v: 0 })
       .sort({ title: 1 })
       .populate('typeProject')
-      .populate('tools')
+      .populate({ path: 'tools', populate: 'as' })
       .lean();
 
-    const included = results
+    const included: Array<RelationshipProjectInterface> = results
       .map((result) => {
         const typeProject = result.typeProject as TypeProjectSchemaInterface;
         return [
-          ...result.tools.map((tool) => {
-            const Tool = tool as ToolSchemaInterface;
-            return {
-              type: 'tool' as const,
-              id: Tool._id.toString(),
-              attributes: {
-                name: Tool.name,
-                as: Tool.as,
-              },
-            };
-          }),
+          ...result.tools
+            .map((tool) => {
+              const Tool = tool as ToolSchemaInterface;
+              return [
+                {
+                  type: 'Tool' as const,
+                  id: Tool._id.toString(),
+                  attributes: {
+                    name: Tool.name,
+                  },
+                  relationships: {
+                    as: {
+                      data: {
+                        type: 'typeTool' as const,
+                        id: typeof Tool.as === 'string' ? Tool.as : Tool.as._id,
+                      },
+                    },
+                  },
+                },
+                {
+                  type: 'TypeTool' as const,
+                  id: typeof Tool.as === 'string' ? Tool.as : Tool.as._id,
+                  attributes: {
+                    name: typeof Tool.as === 'string' ? Tool.as : Tool.as.name,
+                  },
+                },
+              ];
+            })
+            .flat(),
           {
-            type: 'typeProject' as const,
+            type: 'TypeProject' as const,
             id: typeProject._id,
             attributes: {
               name: typeProject.name,
             },
           },
-        ];
+        ] as Array<RelationshipProjectInterface>;
       })
       .flat();
 
@@ -269,7 +315,7 @@ class Projects {
         ...project.tools.map((tool) => {
           const Tool = tool as ToolSchemaInterface;
           return {
-            type: 'tool' as const,
+            type: 'Tool' as const,
             id: Tool._id.toString(),
             attributes: {
               name: Tool.name,
@@ -278,13 +324,13 @@ class Projects {
           };
         }),
         {
-          type: 'typeProject' as const,
+          type: 'TypeProject' as const,
           id: typeProject._id,
           attributes: {
             name: typeProject.name,
           },
         },
-      ],
+      ] as Array<RelationshipProjectInterface>,
     };
 
     // atur headers

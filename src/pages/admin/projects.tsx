@@ -146,7 +146,7 @@ function TableHeadBody({
               if (project.relationships) {
                 const relationshipTools = project.relationships.tools;
                 const relationshipType = project.relationships.typeProject;
-
+                const results: typeof included = [...prev];
                 if (Array.isArray(relationshipTools.data)) {
                   const match =
                     relationshipTools.data.findIndex(
@@ -154,7 +154,19 @@ function TableHeadBody({
                     ) > -1
                       ? true
                       : false;
-                  if (match) prev.push(val);
+                  if (match) {
+                    const asData =
+                      val.type === 'Tool'
+                        ? val.relationships?.as.data
+                        : undefined;
+                    if (asData && asData && !Array.isArray(asData)) {
+                      const matchAs = included.find(
+                        (candidate) => candidate.id === asData.id,
+                      );
+                      if (matchAs) results.push(matchAs);
+                    }
+                    results.push(val);
+                  }
                 }
 
                 if (
@@ -164,8 +176,10 @@ function TableHeadBody({
                   relationshipType.data !== null
                 ) {
                   const match = relationshipType.data.id === val.id;
-                  if (match) prev.push(val);
+                  if (match) results.push(val);
                 }
+
+                return results;
               }
               return prev;
             }, [] as Array<RelationshipProjectInterface>);
@@ -190,7 +204,7 @@ function TableBodyRow({
   project,
   dispatch,
 }: {
-  project: DocProject;
+  project: DocProject & { included: Array<RelationshipProjectInterface> };
   dispatch: Dispatch;
 }) {
   const [detail, setDetail] = useState(false);
@@ -206,10 +220,10 @@ function TableBodyRow({
 
     const typeProject = project.included
       .filter((projectCandidate) => {
-        return projectCandidate.type === 'typeProject' ? true : false;
+        return projectCandidate.type === 'TypeProject' ? true : false;
       })
       .map((candidate) => {
-        return candidate.attributes && candidate.type === 'typeProject'
+        return candidate.attributes && candidate.type === 'TypeProject'
           ? candidate.attributes.name
           : 'unknown';
       })
@@ -217,14 +231,24 @@ function TableBodyRow({
 
     const tools = project.included
       .filter((projectCandidate) => {
-        return projectCandidate.type === 'tool' ? true : false;
+        return projectCandidate.type === 'Tool' ? true : false;
       })
       .map((candidate) => {
-        return candidate.attributes && candidate.type === 'tool'
+        const matchAs = project.included.find((candidateAs) => {
+          if (candidate.type !== 'Tool') return false;
+          if (
+            !candidate.relationships?.as.data ||
+            Array.isArray(candidate.relationships?.as.data)
+          )
+            return false;
+          return candidateAs.id === candidate.relationships?.as?.data.id;
+        });
+
+        return candidate.attributes && candidate.type === 'Tool'
           ? `${candidate.attributes.name} as ${
-              typeof candidate.attributes.as === 'string'
-                ? candidate.attributes.as
-                : candidate.attributes.as.name
+              matchAs && matchAs.attributes
+                ? matchAs.attributes.name
+                : 'unknown'
             }`
           : 'unknown';
       })
@@ -355,13 +379,13 @@ function SwitchModal({
 
       const tools = row.included
         .filter((candidate) => {
-          return candidate.type === 'tool' ? true : false;
+          return candidate.type === 'Tool' ? true : false;
         })
         .map((candidate) => {
           return {
             value: candidate.id,
             label:
-              candidate.type === 'tool' && candidate.attributes
+              candidate.type === 'Tool' && candidate.attributes
                 ? candidate.attributes.name
                 : 'unknown',
           };
@@ -369,7 +393,7 @@ function SwitchModal({
 
       const typeProject = row.included
         .filter((projectCandidate) => {
-          return projectCandidate.type === 'typeProject' ? true : false;
+          return projectCandidate.type === 'TypeProject' ? true : false;
         })
         .map((candidate) => candidate.id)
         .join(', ');

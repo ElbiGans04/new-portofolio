@@ -15,8 +15,9 @@ export type ResourceProjectInterface = ResourceObject<
 >;
 
 export type RelationshipProjectInterface =
-  | ResourceObject<ToolSchemaInterface, 'tool', ''>
-  | ResourceObject<TypeProjectSchemaInterface, 'typeProject', ''>;
+  | ResourceToolInterface
+  | ResourceObject<TypeProjectSchemaInterface, 'TypeProject', ''>
+  | ResourceTypeToolsInterface;
 
 export type DocProject = DocDataDiscriminated<
   ResourceProjectInterface,
