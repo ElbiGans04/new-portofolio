@@ -20,6 +20,7 @@ import { isTool } from '@src/utils/typescript/narrowing';
 import Joi from 'joi';
 import { Types } from 'mongoose';
 import { NextApiResponse } from 'next';
+import dbConnect from '@src/database/connection';
 
 const ProjectSchemaValidation = Joi.object({
   data: Joi.object({
@@ -71,6 +72,7 @@ class Projects {
   async getProject(req: RequestControllerRouter, res: NextApiResponse) {
     try {
       const { projectID } = req.query as { projectID: string };
+      await dbConnect();
       const resultProjects = await projectsSchema
         .findById(projectID, { __v: 0 })
         .populate('typeProject')
@@ -191,6 +193,7 @@ class Projects {
 
   async getProjects(req: RequestControllerRouter, res: NextApiResponse) {
     try {
+      await dbConnect();
       const results = await projectsSchema
         .find({}, { __v: 0 })
         .sort({ title: 1 })
@@ -326,6 +329,7 @@ class Projects {
 
     const validReqBody = await this.validation(req.body);
 
+    await dbConnect();
     // Simpan Ke database
     const project = new projectsSchema({
       ...validReqBody.data.attributes,
@@ -420,6 +424,7 @@ class Projects {
       );
 
     // Lakukan Perubahan
+    await dbConnect();
     const result = await projectsSchema.findByIdAndUpdate(
       projectID,
       {
@@ -453,6 +458,7 @@ class Projects {
 
   async deleteProject(req: RequestControllerRouter, res: NextApiResponse) {
     const { projectID } = req.query;
+    await dbConnect();
     const result = await projectsSchema.findByIdAndDelete(projectID);
 
     if (!result)

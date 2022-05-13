@@ -7,6 +7,7 @@ import HttpError from '@src/utils/httpError';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
 import { DocTypeTool } from '@src/types/admin';
+import dbConnect from '@src/database/connection';
 
 const TypeToolSchemaValidation = Joi.object({
   data: Joi.object({
@@ -21,7 +22,7 @@ const TypeToolSchemaValidation = Joi.object({
 class typeTools {
   async getTypeTool(req: RequestControllerRouter, res: NextApiResponse) {
     const { typeID } = req.query;
-
+    await dbConnect();
     const result = await typeToolSchema.findById(typeID).lean();
 
     // Jika tidak ada
@@ -47,6 +48,7 @@ class typeTools {
     );
   }
   async getTypeTools(req: RequestControllerRouter, res: NextApiResponse) {
+    await dbConnect();
     const results = await typeToolSchema.find().lean();
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -70,7 +72,7 @@ class typeTools {
     await runMiddleware(req, res, formidableHandler);
 
     const valid = this.validation(req.body);
-
+    await dbConnect();
     const TypeTool = new typeToolSchema(valid.data.attributes);
     await TypeTool.save();
 
@@ -104,7 +106,7 @@ class typeTools {
         404,
         'missing id in req.body',
       );
-
+    await dbConnect();
     const result = await typeToolSchema
       .findByIdAndUpdate(typeID, valid.data.attributes)
       .setOptions({
@@ -122,6 +124,7 @@ class typeTools {
   }
   async deleteTypeTool(req: RequestControllerRouter, res: NextApiResponse) {
     const { typeID } = req.query;
+    await dbConnect();
     const result = await typeToolSchema.findByIdAndDelete(typeID);
 
     if (!result)

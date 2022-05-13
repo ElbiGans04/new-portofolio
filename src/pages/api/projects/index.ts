@@ -1,5 +1,4 @@
 import Controller from '@src/controllers/projects';
-import dbConnect from '@src/database/connection';
 import routerErrorHandling from '@src/utils/routerErrorHandling';
 import type { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import HttpError from '@src/utils/httpError';
@@ -17,8 +16,6 @@ export default async function Projects(
   const { method } = req;
 
   try {
-    await dbConnect();
-
     switch (method) {
       case 'GET':
         await Controller.getProjects(req, res);

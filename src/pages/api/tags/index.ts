@@ -1,7 +1,6 @@
 import type { RequestControllerRouter } from '@src/types/controllersRoutersApi';
 import { NextApiResponse } from 'next';
 import HttpError from '@src/utils/httpError';
-import dbConnect from '@src/database/connection';
 import routerErrorHandling from '@src/utils/routerErrorHandling';
 import Controller from '@src/controllers/tags';
 
@@ -17,8 +16,6 @@ export default async function Tags(
 ) {
   try {
     const { method } = req;
-
-    await dbConnect();
 
     switch (method) {
       case 'GET':

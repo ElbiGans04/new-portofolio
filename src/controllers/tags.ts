@@ -7,6 +7,7 @@ import HttpError from '@src/utils/httpError';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
 import { DocTag } from '@src/types/admin';
+import dbConnect from '@src/database/connection';
 
 const TagsSchemaValidation = Joi.object({
   data: Joi.object({
@@ -22,6 +23,7 @@ class tags {
   async getTag(req: RequestControllerRouter, res: NextApiResponse) {
     const { tagID } = req.query;
 
+    await dbConnect();
     const result = await tagSchema.findById(tagID).lean();
 
     // Jika tidak ada
@@ -43,6 +45,7 @@ class tags {
     );
   }
   async getTags(req: RequestControllerRouter, res: NextApiResponse) {
+    await dbConnect();
     const results = await tagSchema.find().lean();
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -66,7 +69,7 @@ class tags {
     await runMiddleware(req, res, formidableHandler);
 
     const valid = this.validation(req.body);
-
+    await dbConnect();
     const tag = new tagSchema(valid.data.attributes);
     await tag.save();
 
@@ -101,6 +104,8 @@ class tags {
         'missing id in req.body',
       );
 
+    await dbConnect();
+
     const result = await tagSchema
       .findByIdAndUpdate(tagID, valid.data.attributes)
       .setOptions({
@@ -117,6 +122,7 @@ class tags {
   }
   async deleteTag(req: RequestControllerRouter, res: NextApiResponse) {
     const { tagID } = req.query;
+    await dbConnect();
     const result = await tagSchema.findByIdAndDelete(tagID);
 
     if (!result) throw new HttpError('Tag not found', 404, 'Tag not found');

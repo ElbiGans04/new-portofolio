@@ -7,6 +7,7 @@ import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
 import { NextApiResponse } from 'next';
 import { DocTool, DocTools } from '@src/types/admin';
+import dbConnect from '@src/database/connection';
 
 const ToolsSchemaValidation = Joi.object({
   data: Joi.object({
@@ -29,7 +30,7 @@ const ToolsSchemaValidation = Joi.object({
 class Tools {
   async getTool(req: RequestControllerRouter, res: NextApiResponse) {
     const { toolID } = req.query;
-
+    await dbConnect();
     const result = await toolSchema.findById(toolID).populate('as').lean();
 
     // Jika tidak ada
@@ -77,6 +78,7 @@ class Tools {
   }
 
   async getTools(req: RequestControllerRouter, res: NextApiResponse) {
+    await dbConnect();
     const results = await toolSchema.find().populate('as').lean();
 
     const Docs: DocTools = {
@@ -137,7 +139,7 @@ class Tools {
     await runMiddleware(req, res, formidableHandler);
 
     const valid = await this.validation(req.body);
-
+    await dbConnect();
     const tool = new toolSchema({
       name: valid.data.attributes.name,
       as: valid.data.relationships.as.data.id,
@@ -212,7 +214,7 @@ class Tools {
         404,
         'missing id in req.body',
       );
-
+    await dbConnect();
     const result = await toolSchema
       .findByIdAndUpdate(toolID, {
         name: valid.data.attributes.name,
@@ -233,6 +235,7 @@ class Tools {
 
   async deleteTool(req: RequestControllerRouter, res: NextApiResponse) {
     const { toolID } = req.query;
+    await dbConnect();
     const result = await toolSchema.findByIdAndDelete(toolID);
 
     if (!result) throw new HttpError('tool not found', 404, 'tool not found');
