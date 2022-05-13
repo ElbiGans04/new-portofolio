@@ -43,13 +43,7 @@ export function ModalAdmin({
 }): JSX.Element {
   switch (status) {
     case 'loading': {
-      return (
-        <ModalMain2>
-          <ModalContent2>
-            <div className="loader" />
-          </ModalContent2>
-        </ModalMain2>
-      );
+      return <ModalLoading />;
     }
 
     case 'iddle': {
@@ -75,6 +69,30 @@ export function ModalAdmin({
     default:
       return <></>;
   }
+}
+
+export function ModalLoading() {
+  return (
+    <ModalMain2>
+      <ModalContent2>
+        <div className="loader" />
+      </ModalContent2>
+    </ModalMain2>
+  );
+}
+
+export function ModalError() {
+  return (
+    <ModalMain2>
+      <ModalContent2>
+        <Heading size={1} minSize={1}>
+          <span>Error </span>
+          when try
+          <span> fetching data</span>
+        </Heading>
+      </ModalContent2>
+    </ModalMain2>
+  );
 }
 
 const Modal = styled.div`

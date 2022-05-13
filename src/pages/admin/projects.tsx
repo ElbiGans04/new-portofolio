@@ -18,6 +18,8 @@ import {
   ModalFormContentRow,
   ModalFormFooter,
   ModalMain2,
+  ModalLoading,
+  ModalError,
 } from '@src/components/Modal';
 import firebaseConfig from '@src/config/firebase';
 import { reducer } from '@src/hooks/reducer';
@@ -645,29 +647,9 @@ function SwitchModal({
     }
   });
 
-  if (error) {
-    return (
-      <ModalMain2>
-        <ModalContent2>
-          <Heading size={1} minSize={1}>
-            <span>Error </span>
-            when try
-            <span> fetching data</span>
-          </Heading>
-        </ModalContent2>
-      </ModalMain2>
-    );
-  }
+  if (error) return <ModalError />;
 
-  if (!data) {
-    return (
-      <ModalMain2>
-        <ModalContent2>
-          <div className="loader" />
-        </ModalContent2>
-      </ModalMain2>
-    );
-  }
+  if (!data) return <ModalLoading />;
 
   switch (state.modal) {
     case 'add':
