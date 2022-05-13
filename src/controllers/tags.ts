@@ -69,7 +69,7 @@ class tags {
 
     const valid = this.validation(req.body);
     await dbConnect();
-    const tag = new tagSchema(valid.data.attributes);
+    const tag = new tagSchema({ name: valid.data.attributes.name });
     await tag.save();
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -106,7 +106,7 @@ class tags {
     await dbConnect();
 
     const result = await tagSchema
-      .findByIdAndUpdate(tagID, valid.data.attributes)
+      .findByIdAndUpdate(tagID, { name: valid.data.attributes.name })
       .setOptions({
         new: true,
       });

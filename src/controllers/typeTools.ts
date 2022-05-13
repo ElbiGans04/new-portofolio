@@ -72,7 +72,7 @@ class typeTools {
 
     const valid = this.validation(req.body);
     await dbConnect();
-    const TypeTool = new typeToolSchema(valid.data.attributes);
+    const TypeTool = new typeToolSchema({ name: valid.data.attributes.name });
     await TypeTool.save();
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -107,7 +107,9 @@ class typeTools {
       );
     await dbConnect();
     const result = await typeToolSchema
-      .findByIdAndUpdate(typeID, valid.data.attributes)
+      .findByIdAndUpdate(typeID, {
+        name: valid.data.attributes.name,
+      })
       .setOptions({
         new: true,
       });

@@ -332,7 +332,12 @@ class Projects {
     await dbConnect();
     // Simpan Ke database
     const project = new projectsSchema({
-      ...validReqBody.data.attributes,
+      title: validReqBody.data.attributes.title,
+      startDate: validReqBody.data.attributes.startDate,
+      endDate: validReqBody.data.attributes.endDate,
+      images: validReqBody.data.attributes.images,
+      description: validReqBody.data.attributes.description,
+      url: validReqBody.data.attributes.url,
       tools: validReqBody.data.relationships.tools.data.map((tool) => tool.id),
       typeProject: validReqBody.data.relationships.typeProject.data.id,
     });
@@ -428,7 +433,12 @@ class Projects {
     const result = await projectsSchema.findByIdAndUpdate(
       projectID,
       {
-        ...validReqBody.data.attributes,
+        title: validReqBody.data.attributes.title,
+        startDate: validReqBody.data.attributes.startDate,
+        endDate: validReqBody.data.attributes.endDate,
+        images: validReqBody.data.attributes.images,
+        description: validReqBody.data.attributes.description,
+        url: validReqBody.data.attributes.url,
         tools: validReqBody.data.relationships.tools.data.map(
           (tool) => tool.id,
         ),
