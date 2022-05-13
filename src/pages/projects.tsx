@@ -22,7 +22,7 @@ export const getStaticProps: GetStaticProps = async function () {
   const result = await projectsSchema
     .find()
     .populate('typeProject')
-    .populate('tools');
+    .populate({ path: 'tools', populate: 'as' });
   return {
     props: {
       projects: JSON.stringify(result),
