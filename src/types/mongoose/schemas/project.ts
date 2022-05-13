@@ -9,7 +9,7 @@ export default interface project {
   startDate: string;
   endDate: string;
   tools: Types.Array<Types.ObjectId> | Types.Array<tool>;
-  typeProject: string | typeProject;
+  typeProject: string | typeProject | null;
   images: images[];
   description: string;
   url: string;

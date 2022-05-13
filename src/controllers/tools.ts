@@ -43,24 +43,32 @@ class Tools {
         attributes: {
           name: result.name,
         },
-        relationships: {
-          as: {
-            data: {
-              type: 'typeTool',
-              id: typeof result.as === 'string' ? result.as : result.as._id,
-            },
-          },
-        },
+        relationships:
+          result.as !== null
+            ? {
+                as: {
+                  data: {
+                    type: 'typeTool',
+                    id:
+                      typeof result.as === 'string' ? result.as : result.as._id,
+                  },
+                },
+              }
+            : undefined,
       },
-      included: [
-        {
-          type: 'typeTool',
-          id: typeof result.as === 'string' ? result.as : result.as._id,
-          attributes: {
-            name: typeof result.as === 'string' ? result.as : result.as.name,
-          },
-        },
-      ],
+      included:
+        result.as !== null
+          ? [
+              {
+                type: 'typeTool',
+                id: typeof result.as === 'string' ? result.as : result.as._id,
+                attributes: {
+                  name:
+                    typeof result.as === 'string' ? result.as : result.as.name,
+                },
+              },
+            ]
+          : undefined,
     };
 
     res.setHeader('content-type', 'application/vnd.api+json');
@@ -78,18 +86,24 @@ class Tools {
         attributes: {
           name: result.name,
         },
-        relationships: {
-          as: {
-            data: {
-              type: 'typeTool',
-              id: typeof result.as === 'string' ? result.as : result.as._id,
-            },
-          },
-        },
+        relationships:
+          result.as !== null
+            ? {
+                as: {
+                  data: {
+                    type: 'typeTool',
+                    id:
+                      typeof result.as === 'string' ? result.as : result.as._id,
+                  },
+                },
+              }
+            : undefined,
       })),
       included: results.reduce((prevVal, currentVal) => {
+        if (currentVal.as === null) return prevVal;
+
         const udahAda = prevVal.findIndex((valPrev) => {
-          if (typeof currentVal.as === 'string') return true;
+          if (typeof currentVal.as === 'string' || !currentVal.as) return true;
           return valPrev.id === currentVal.as._id;
         });
 
@@ -145,24 +159,37 @@ class Tools {
         attributes: {
           name: resTool.name,
         },
-        relationships: {
-          as: {
-            data: {
-              type: 'typeTool',
-              id: typeof resTool.as === 'string' ? resTool.as : resTool.as._id,
-            },
-          },
-        },
+        relationships:
+          resTool.as !== null
+            ? {
+                as: {
+                  data: {
+                    type: 'typeTool',
+                    id:
+                      typeof resTool.as === 'string'
+                        ? resTool.as
+                        : resTool.as._id,
+                  },
+                },
+              }
+            : undefined,
       },
-      included: [
-        {
-          type: 'typeTool',
-          id: typeof resTool.as === 'string' ? resTool.as : resTool.as._id,
-          attributes: {
-            name: typeof resTool.as === 'string' ? resTool.as : resTool.as.name,
-          },
-        },
-      ],
+      included:
+        resTool.as !== null
+          ? [
+              {
+                type: 'typeTool',
+                id:
+                  typeof resTool.as === 'string' ? resTool.as : resTool.as._id,
+                attributes: {
+                  name:
+                    typeof resTool.as === 'string'
+                      ? resTool.as
+                      : resTool.as.name,
+                },
+              },
+            ]
+          : undefined,
     };
 
     res.setHeader('content-type', 'application/vnd.api+json');

@@ -5,21 +5,21 @@ import {
 } from '@src/database/index';
 import { formidableHandler } from '@src/middleware/formidable';
 import runMiddleware from '@src/middleware/runMiddleware';
-import HttpError from '@src/utils/httpError';
+import {
+  DocProject,
+  DocProjects,
+  RelationshipProjectInterface,
+} from '@src/types/admin';
 import { RequestControllerRouter } from '@src/types/controllersRoutersApi';
+import { DocMeta } from '@src/types/jsonApi';
 import { OObject } from '@src/types/jsonApi/object';
 import ToolSchemaInterface from '@src/types/mongoose/schemas/tool';
 import TypeProjectSchemaInterface from '@src/types/mongoose/schemas/typeProject';
-import Joi from 'joi';
+import HttpError from '@src/utils/httpError';
 import { isTool } from '@src/utils/typescript/narrowing';
-import { NextApiResponse } from 'next';
-import {
-  DocProjects,
-  DocProject,
-  RelationshipProjectInterface,
-} from '@src/types/admin';
-import { DocMeta } from '@src/types/jsonApi';
+import Joi from 'joi';
 import { Types } from 'mongoose';
+import { NextApiResponse } from 'next';
 
 const ProjectSchemaValidation = Joi.object({
   data: Joi.object({
@@ -69,176 +69,43 @@ const ProjectSchemaValidation = Joi.object({
 
 class Projects {
   async getProject(req: RequestControllerRouter, res: NextApiResponse) {
-    const { projectID } = req.query as { projectID: string };
-    const resultProjects = await projectsSchema
-      .findById(projectID, { __v: 0 })
-      .populate('typeProject')
-      .populate({
-        path: 'tools',
-        populate: { path: 'as' },
-      })
-      .lean();
+    try {
+      const { projectID } = req.query as { projectID: string };
+      const resultProjects = await projectsSchema
+        .findById(projectID, { __v: 0 })
+        .populate('typeProject')
+        .populate({
+          path: 'tools',
+          populate: { path: 'as' },
+        })
+        .lean();
 
-    // jika ga ada
-    if (!resultProjects)
-      throw new HttpError('Project not found', 404, 'Project not found in db');
+      // jika ga ada
+      if (!resultProjects)
+        throw new HttpError(
+          'Project not found',
+          404,
+          'Project not found in db',
+        );
 
-    const typeProject =
-      resultProjects.typeProject as TypeProjectSchemaInterface;
+      const typeProject =
+        resultProjects.typeProject as TypeProjectSchemaInterface;
 
-    const Doc: DocProject = {
-      data: {
-        type: 'Project',
-        id: resultProjects._id.toString(),
-        attributes: {
-          title: resultProjects.title,
-          startDate: resultProjects.startDate,
-          endDate: resultProjects.endDate,
-          images: resultProjects.images,
-          description: resultProjects.description,
-          url: resultProjects.url,
-        },
-        relationships: {
-          tools: {
-            data: resultProjects.tools.map((tool) => ({
-              type: 'tool',
-              id: isTool(tool) ? tool._id.toString() : tool.toString(),
-            })),
-          },
-          typeProject: {
-            data: {
-              id:
-                typeof resultProjects.typeProject === 'string'
-                  ? resultProjects.typeProject
-                  : resultProjects.typeProject._id,
-              type: 'typeProject',
-            },
-          },
-        },
-      },
-      included: [
-        ...resultProjects.tools
-          .map((tool) => {
-            const Tool = tool as ToolSchemaInterface;
-            const ToolAsId =
-              typeof Tool.as === 'string' ? Tool.as : Tool.as._id;
-
-            return [
-              {
-                type: 'Tool' as const,
-                id: Tool._id.toString(),
-                attributes: {
-                  name: Tool.name,
-                },
-                relationships: {
-                  as: {
-                    data: {
-                      type: 'typeTool' as const,
-                      id: ToolAsId,
-                    },
-                  },
-                },
-              },
-              {
-                type: 'TypeTool' as const,
-                id: ToolAsId,
-                attributes: {
-                  name: typeof Tool.as === 'string' ? Tool.as : Tool.as.name,
-                },
-              },
-            ];
-          })
-          .flat(),
-        {
-          type: 'TypeProject' as const,
-          id: typeProject._id,
-          attributes: {
-            name: typeProject.name,
-          },
-        },
-      ],
-    };
-
-    res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 200;
-    return res.end(JSON.stringify(Doc));
-  }
-
-  async getProjects(req: RequestControllerRouter, res: NextApiResponse) {
-    const results = await projectsSchema
-      .find({}, { __v: 0 })
-      .sort({ title: 1 })
-      .populate('typeProject')
-      .populate({ path: 'tools', populate: 'as' })
-      .lean();
-
-    const included: Array<RelationshipProjectInterface> = results
-      .map((result) => {
-        const typeProject = result.typeProject as TypeProjectSchemaInterface;
-        return [
-          ...result.tools
-            .map((tool) => {
-              const Tool = tool as ToolSchemaInterface;
-              return [
-                {
-                  type: 'Tool' as const,
-                  id: Tool._id.toString(),
-                  attributes: {
-                    name: Tool.name,
-                  },
-                  relationships: {
-                    as: {
-                      data: {
-                        type: 'typeTool' as const,
-                        id: typeof Tool.as === 'string' ? Tool.as : Tool.as._id,
-                      },
-                    },
-                  },
-                },
-                {
-                  type: 'TypeTool' as const,
-                  id: typeof Tool.as === 'string' ? Tool.as : Tool.as._id,
-                  attributes: {
-                    name: typeof Tool.as === 'string' ? Tool.as : Tool.as.name,
-                  },
-                },
-              ];
-            })
-            .flat(),
-          {
-            type: 'TypeProject' as const,
-            id: typeProject._id,
-            attributes: {
-              name: typeProject.name,
-            },
-          },
-        ] as Array<RelationshipProjectInterface>;
-      })
-      .flat();
-
-    // remove dupplicate
-    const includedFinal: typeof included = included.reduce((prevVal, val) => {
-      if (prevVal.findIndex((prevVal2) => prevVal2.id === val.id) === -1)
-        prevVal.push(val);
-      return prevVal;
-    }, [] as typeof included);
-
-    const Doc: DocProjects = {
-      data: results.map((result) => {
-        return {
+      const Doc: DocProject = {
+        data: {
           type: 'Project',
-          id: result._id.toString(),
+          id: resultProjects._id.toString(),
           attributes: {
-            title: result.title,
-            startDate: result.startDate,
-            endDate: result.endDate,
-            images: result.images,
-            description: result.description,
-            url: result.url,
+            title: resultProjects.title,
+            startDate: resultProjects.startDate,
+            endDate: resultProjects.endDate,
+            images: resultProjects.images,
+            description: resultProjects.description,
+            url: resultProjects.url,
           },
           relationships: {
             tools: {
-              data: result.tools.map((tool) => ({
+              data: resultProjects.tools.map((tool) => ({
                 type: 'tool',
                 id: isTool(tool) ? tool._id.toString() : tool.toString(),
               })),
@@ -246,20 +113,212 @@ class Projects {
             typeProject: {
               data: {
                 id:
-                  typeof result.typeProject === 'string'
-                    ? result.typeProject
-                    : result.typeProject._id,
+                  typeof resultProjects.typeProject === 'object' &&
+                  resultProjects.typeProject !== null
+                    ? resultProjects.typeProject._id
+                    : resultProjects.typeProject
+                    ? resultProjects.typeProject
+                    : 'NULL',
                 type: 'typeProject',
               },
             },
           },
-        };
-      }),
-      included: includedFinal,
-    };
-    res.setHeader('content-type', 'application/vnd.api+json');
-    res.statusCode = 200;
-    return res.end(JSON.stringify(Doc));
+        },
+        included: [
+          ...resultProjects.tools
+            .map((tool) => {
+              const Tool = tool as ToolSchemaInterface;
+              const ToolAsId =
+                typeof Tool.as === 'object' && Tool.as !== null
+                  ? Tool.as._id
+                  : Tool.as;
+
+              const results: Array<RelationshipProjectInterface> = [
+                {
+                  type: 'Tool' as const,
+                  id: Tool._id.toString(),
+                  attributes: {
+                    name: Tool.name,
+                  },
+                  relationships:
+                    ToolAsId !== null
+                      ? {
+                          as: {
+                            data: {
+                              type: 'typeTool' as const,
+                              id: ToolAsId,
+                            },
+                          },
+                        }
+                      : undefined,
+                },
+              ];
+
+              if (ToolAsId && Tool.as !== null && typeof Tool.as === 'object') {
+                results.push({
+                  type: 'TypeTool' as const,
+                  id: ToolAsId,
+                  attributes: {
+                    name: Tool.as.name,
+                  },
+                });
+              }
+              return results;
+            })
+            .flat(),
+          ...(typeProject !== null
+            ? [
+                {
+                  type: 'TypeProject' as const,
+                  id: typeProject._id,
+                  attributes: {
+                    name: typeProject.name,
+                  },
+                },
+              ]
+            : []),
+        ],
+      };
+
+      res.setHeader('content-type', 'application/vnd.api+json');
+      res.statusCode = 200;
+      return res.end(JSON.stringify(Doc));
+    } catch (err) {
+      console.log(err);
+      res.json({ error: true });
+    }
+  }
+
+  async getProjects(req: RequestControllerRouter, res: NextApiResponse) {
+    try {
+      const results = await projectsSchema
+        .find({}, { __v: 0 })
+        .sort({ title: 1 })
+        .populate('typeProject')
+        .populate({ path: 'tools', populate: 'as' })
+        .lean();
+
+      const included: Array<RelationshipProjectInterface> = results
+        .map((result) => {
+          const typeProject = result.typeProject as TypeProjectSchemaInterface;
+          return [
+            ...result.tools
+              .map((tool) => {
+                const Tool = tool as ToolSchemaInterface;
+                return [
+                  {
+                    type: 'Tool' as const,
+                    id: Tool._id.toString(),
+                    attributes: {
+                      name: Tool.name,
+                    },
+                    relationships:
+                      Tool.as !== null
+                        ? {
+                            as: {
+                              data: {
+                                type: 'typeTool' as const,
+                                id:
+                                  typeof Tool.as === 'string'
+                                    ? Tool.as
+                                    : Tool.as._id,
+                              },
+                            },
+                          }
+                        : undefined,
+                  },
+                  {
+                    type: 'TypeTool' as const,
+                    id:
+                      typeof Tool.as === 'object' && Tool.as !== null
+                        ? Tool.as._id
+                        : Tool.as == null
+                        ? 'UNKNOWN'
+                        : Tool.as,
+                    attributes: {
+                      name:
+                        typeof Tool.as === 'object' && Tool.as !== null
+                          ? Tool.as.name
+                          : Tool.as == null
+                          ? 'UNKNOWN'
+                          : Tool.as,
+                    },
+                  },
+                ];
+              })
+              .flat(),
+            {
+              type: 'TypeProject' as const,
+              id:
+                typeof typeProject === 'object' && typeProject !== null
+                  ? typeProject._id
+                  : typeProject
+                  ? typeProject
+                  : 'NULL',
+              attributes: {
+                name:
+                  typeof typeProject === 'object' && typeProject !== null
+                    ? typeProject.name
+                    : typeProject
+                    ? typeProject
+                    : 'NULL',
+              },
+            },
+          ] as Array<RelationshipProjectInterface>;
+        })
+        .flat();
+
+      // remove dupplicate
+      const includedFinal: typeof included = included.reduce((prevVal, val) => {
+        if (prevVal.findIndex((prevVal2) => prevVal2.id === val.id) === -1)
+          prevVal.push(val);
+        return prevVal;
+      }, [] as typeof included);
+
+      const Doc: DocProjects = {
+        data: results.map((result) => {
+          return {
+            type: 'Project',
+            id: result._id.toString(),
+            attributes: {
+              title: result.title,
+              startDate: result.startDate,
+              endDate: result.endDate,
+              images: result.images,
+              description: result.description,
+              url: result.url,
+            },
+            relationships: {
+              tools: {
+                data: result.tools.map((tool) => ({
+                  type: 'tool',
+                  id: isTool(tool) ? tool._id.toString() : tool.toString(),
+                })),
+              },
+              typeProject: {
+                data: {
+                  id:
+                    typeof result.typeProject === 'object' &&
+                    result.typeProject !== null
+                      ? result.typeProject._id
+                      : result.typeProject
+                      ? result.typeProject
+                      : 'UNKNOWN',
+                  type: 'typeProject',
+                },
+              },
+            },
+          };
+        }),
+        included: includedFinal,
+      };
+      res.setHeader('content-type', 'application/vnd.api+json');
+      res.statusCode = 200;
+      return res.end(JSON.stringify(Doc));
+    } catch (err) {
+      console.log(err);
+      res.json({ error: true });
+    }
   }
 
   async postProjects(req: RequestControllerRouter, res: NextApiResponse) {
@@ -303,9 +362,12 @@ class Projects {
           typeProject: {
             data: {
               id:
-                typeof project.typeProject === 'string'
+                typeof project.typeProject === 'object' &&
+                project.typeProject !== null
+                  ? project.typeProject._id
+                  : project.typeProject
                   ? project.typeProject
-                  : project.typeProject._id,
+                  : 'UNKNOWN',
               type: 'typeProject',
             },
           },

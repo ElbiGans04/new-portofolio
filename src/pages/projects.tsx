@@ -105,7 +105,8 @@ function Projects({ projects }: { projects: string }) {
                 </Heading>
                 <Heading minSize={1} size={1}>
                   {upperFirstWord(
-                    typeof value.typeProject !== 'string'
+                    typeof value.typeProject === 'object' &&
+                      value.typeProject !== null
                       ? value.typeProject.name
                       : 'Unkown',
                   )}
@@ -171,9 +172,12 @@ function Projects({ projects }: { projects: string }) {
                           .map((tool) => {
                             return isTool(tool)
                               ? `${tool.name} as ${
-                                  typeof tool.as === 'string'
+                                  typeof tool.as === 'object' &&
+                                  tool.as !== null
+                                    ? tool.as.name
+                                    : tool.as
                                     ? tool.as
-                                    : tool.as.name
+                                    : 'unknown'
                                 }`
                               : tool.toString();
                           })
@@ -182,7 +186,8 @@ function Projects({ projects }: { projects: string }) {
                       <Heading minSize={1} size={1}>
                         :&nbsp;
                         {upperFirstWord(
-                          typeof matchProject.typeProject !== 'string'
+                          typeof matchProject.typeProject === 'object' &&
+                            matchProject.typeProject !== null
                             ? matchProject.typeProject.name
                             : 'Unkown',
                         )}
