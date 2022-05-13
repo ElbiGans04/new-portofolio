@@ -478,7 +478,7 @@ class Projects {
       data: {
         id?: string;
         type: string;
-        attributes: DocProject['data']['attributes'];
+        attributes: NonNullable<DocProject['data']['attributes']>;
         relationships: {
           tools: {
             data: {

@@ -6,7 +6,6 @@ import runMiddleware from '@src/middleware/runMiddleware';
 import HttpError from '@src/utils/httpError';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
-import { DocTypeTool } from '@src/types/admin';
 import dbConnect from '@src/database/connection';
 
 const TypeToolSchemaValidation = Joi.object({
@@ -136,10 +135,15 @@ class typeTools {
   }
 
   validation(body: { [index: string]: OObject }) {
-    const validReqBody = Joi.attempt(
-      body,
-      TypeToolSchemaValidation,
-    ) as DocTypeTool;
+    const validReqBody = Joi.attempt(body, TypeToolSchemaValidation) as {
+      data: {
+        type: string;
+        id?: string;
+        attributes: {
+          name: string;
+        };
+      };
+    };
     return validReqBody;
   }
 }

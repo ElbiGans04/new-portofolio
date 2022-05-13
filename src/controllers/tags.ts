@@ -6,7 +6,6 @@ import runMiddleware from '@src/middleware/runMiddleware';
 import HttpError from '@src/utils/httpError';
 import Joi from 'joi';
 import { OObject } from '@src/types/jsonApi/object';
-import { DocTag } from '@src/types/admin';
 import dbConnect from '@src/database/connection';
 
 const TagsSchemaValidation = Joi.object({
@@ -133,7 +132,15 @@ class tags {
   }
 
   validation(body: { [index: string]: OObject }) {
-    const validReqBody = Joi.attempt(body, TagsSchemaValidation) as DocTag;
+    const validReqBody = Joi.attempt(body, TagsSchemaValidation) as {
+      data: {
+        type: string;
+        id?: string;
+        attributes: {
+          name: string;
+        };
+      };
+    };
     return validReqBody;
   }
 }
