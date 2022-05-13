@@ -38,6 +38,7 @@ import {
   useFormState,
   useController,
   Control,
+  FieldError,
 } from 'react-hook-form';
 import useSWR, { useSWRConfig } from 'swr';
 import {
@@ -168,10 +169,12 @@ function SwitchModal({
       reactForm.reset(
         {
           name: '',
-          as: {
-            label: data.data[0].attributes?.name || 'Unknown',
-            value: data.data[0].id || '',
-          },
+          as: (data.data[0]?.id && data.data[0]?.attributes?.name
+            ? {
+                label: data.data[0]?.attributes?.name || '',
+                value: data.data[0]?.id || '',
+              }
+            : '') as any as { label: string; value: string },
         },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
@@ -207,6 +210,8 @@ function SwitchModal({
 
   const onSubmitModalAdd = reactForm.handleSubmit(async (data) => {
     try {
+      console.log(data);
+      return;
       dispatch({ type: 'modal/request/start' });
 
       const request = await fetcherGeneric<DocMeta>('/api/tools', {
@@ -384,7 +389,7 @@ function ModalAddUpdate({
   const Handler = (e: React.BaseSyntheticEvent) => {
     handler(e).catch((err) => console.error(err));
   };
-
+  const errorsType = errors.as as FieldError;
   return (
     <ModalForm onSubmit={Handler}>
       <ModalFormContent>
@@ -422,6 +427,17 @@ function ModalAddUpdate({
             As:
           </Label>
           <ReactSelect options={data} control={control} />
+          {errorsType?.message && (
+            <p
+              style={{
+                fontSize: '.9rem',
+                color: 'var(--red)',
+                margin: '0.5rem 0',
+              }}
+            >
+              {errorsType?.message}
+            </p>
+          )}
         </ModalFormContentRow>
       </ModalFormContent>
       <ModalFormFooter>
@@ -446,7 +462,7 @@ function ReactSelect({
     rules: {
       required: {
         value: true,
-        message: 'PLEASE SELECT TOOL AT LEAST ONE',
+        message: 'PLEASE SELECT TYPE PROJECT AT LEAST ONE',
       },
     },
     defaultValue: undefined,
