@@ -1279,10 +1279,19 @@ async function deleteImages(
   images: projectSchema['images'],
   stroage: FirebaseStorage,
 ) {
-  for (let i = 0; i < images.length; i++) {
-    const image = images[i];
-    const imgRef = ref(stroage, image.ref);
-    await deleteObject(imgRef);
+  try {
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+      const imgRef = ref(stroage, image.ref);
+      await deleteObject(imgRef);
+    }
+  } catch (err) {
+    const error = err as { code?: string };
+    if (error && typeof error === 'object' && error?.code) {
+      if (error.code === 'storage/object-not-found') return false;
+    }
+
+    throw err;
   }
 }
 
