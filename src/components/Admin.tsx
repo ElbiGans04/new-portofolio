@@ -249,12 +249,18 @@ const Table = styled.table`
   }
 
   @media (max-width: 768px) {
-    & {
-      width: 200%;
-    }
-
     & th {
       font-size: 1rem;
+    }
+
+    & td {
+      text-align: start;
+    }
+  }
+
+  @media (max-width: 576px) {
+    & {
+      width: 200%;
     }
   }
 `;
