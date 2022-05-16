@@ -113,7 +113,7 @@ function TableHeadBody({
             tool.attributes !== undefined &&
             Array.isArray(data.included)
           ) {
-            const asRelationship = tool.relationships?.as.data;
+            const asRelationship = tool.relationships?.as?.data;
             const included =
               data.included as any as Array<RelationshipToolInterface>;
 
@@ -184,8 +184,8 @@ function SwitchModal({
       state.row.data.type === 'Tool' &&
       state.row.data.attributes &&
       state.row.data.relationships &&
-      !Array.isArray(state.row.data.relationships.as.data) &&
-      state.row.data.relationships.as.data &&
+      !Array.isArray(state.row.data.relationships.as?.data) &&
+      state.row.data.relationships.as?.data &&
       state.row.included
     ) {
       const included = state.row.included as RelationshipToolInterface[];
@@ -210,8 +210,6 @@ function SwitchModal({
 
   const onSubmitModalAdd = reactForm.handleSubmit(async (data) => {
     try {
-      console.log(data);
-      return;
       dispatch({ type: 'modal/request/start' });
 
       const request = await fetcherGeneric<DocMeta>('/api/tools', {

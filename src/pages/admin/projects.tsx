@@ -149,9 +149,12 @@ function TableHeadBody({
                 const relationshipTools = project.relationships.tools;
                 const relationshipType = project.relationships.typeProject;
                 const results: typeof included = [...prev];
-                if (Array.isArray(relationshipTools.data)) {
+                if (
+                  relationshipTools?.data &&
+                  Array.isArray(relationshipTools?.data)
+                ) {
                   const match =
-                    relationshipTools.data.findIndex(
+                    relationshipTools?.data.findIndex(
                       (tool) => tool.id === val.id,
                     ) > -1
                       ? true
@@ -159,7 +162,7 @@ function TableHeadBody({
                   if (match) {
                     const asData =
                       val.type === 'Tool'
-                        ? val.relationships?.as.data
+                        ? val.relationships?.as?.data
                         : undefined;
                     if (asData && asData && !Array.isArray(asData)) {
                       const matchAs = included.find(
@@ -172,12 +175,12 @@ function TableHeadBody({
                 }
 
                 if (
-                  !Array.isArray(relationshipType.data) &&
-                  typeof relationshipType.data === 'object' &&
-                  typeof relationshipType.data !== 'undefined' &&
+                  !Array.isArray(relationshipType?.data) &&
+                  typeof relationshipType?.data === 'object' &&
+                  typeof relationshipType?.data !== 'undefined' &&
                   relationshipType.data !== null
                 ) {
-                  const match = relationshipType.data.id === val.id;
+                  const match = relationshipType?.data.id === val.id;
                   if (match) results.push(val);
                 }
 
@@ -239,7 +242,7 @@ function TableBodyRow({
         const matchAs = project.included.find((candidateAs) => {
           if (candidate.type !== 'Tool') return false;
           if (
-            !candidate.relationships?.as.data ||
+            !candidate.relationships?.as?.data ||
             Array.isArray(candidate.relationships?.as.data)
           )
             return false;
@@ -722,7 +725,7 @@ function ModalAddUpdate({
   }[] = [];
   data.data.filter((data2) => {
     const attribute = data2.attributes;
-    const relationships = data2.relationships?.as.data;
+    const relationships = data2.relationships?.as?.data;
     const included = data.included;
 
     if (
