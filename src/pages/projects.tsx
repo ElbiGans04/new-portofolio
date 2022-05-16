@@ -546,11 +546,10 @@ const ModalContentContentList = styled.div`
   grid-template-columns: 1fr 1fr;
   margin: 1rem 0 2rem 0;
   gap: 0.5rem;
-  height: 100px;
 
   @media (max-width: 576px) {
     & {
-      height: 150px;
+      margin: 1rem 0;
     }
   }
 `;
