@@ -32,22 +32,20 @@ export interface ResourceObject<
   attributes?: {
     [Property in keyof T as Exclude<Property, '_id' | T3>]: T[Property];
   };
-  relationships?: Partial<
-    Record<
-      T3 extends string ? T3 : string,
-      {
-        links?: {
-          self: link;
-          related?: link;
-        };
-        data:
-          | ResourceIdentifierObject<T4>
-          | null
-          | ResourceIdentifierObject<T4>[]
-          | never[];
-        meta?: MetaObject;
-      }
-    >
+  relationships?: Record<
+    T3 extends string ? T3 : string,
+    {
+      links?: {
+        self: link;
+        related?: link;
+      };
+      data:
+        | ResourceIdentifierObject<T4>
+        | null
+        | ResourceIdentifierObject<T4>[]
+        | never[];
+      meta?: MetaObject;
+    }
   >;
   links?: {
     self?: link;
