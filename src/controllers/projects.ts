@@ -113,16 +113,14 @@ class Projects {
               })),
             },
             typeProject: {
-              data: {
-                id:
-                  typeof resultProjects.typeProject === 'object' &&
-                  resultProjects.typeProject !== null
-                    ? resultProjects.typeProject._id
-                    : resultProjects.typeProject
-                    ? resultProjects.typeProject
-                    : 'NULL',
-                type: 'typeProject',
-              },
+              data:
+                typeof resultProjects.typeProject === 'object' &&
+                resultProjects.typeProject !== null
+                  ? {
+                      id: resultProjects.typeProject._id,
+                      type: 'typeProject',
+                    }
+                  : null,
             },
           },
         },
@@ -299,16 +297,14 @@ class Projects {
                 })),
               },
               typeProject: {
-                data: {
-                  id:
-                    typeof result.typeProject === 'object' &&
-                    result.typeProject !== null
-                      ? result.typeProject._id
-                      : result.typeProject
-                      ? result.typeProject
-                      : 'UNKNOWN',
-                  type: 'typeProject',
-                },
+                data:
+                  typeof result.typeProject === 'object' &&
+                  result.typeProject !== null
+                    ? {
+                        id: result.typeProject._id,
+                        type: 'typeProject',
+                      }
+                    : null,
               },
             },
           };
@@ -369,16 +365,14 @@ class Projects {
             })),
           },
           typeProject: {
-            data: {
-              id:
-                typeof project.typeProject === 'object' &&
-                project.typeProject !== null
-                  ? project.typeProject._id
-                  : project.typeProject
-                  ? project.typeProject
-                  : 'UNKNOWN',
-              type: 'typeProject',
-            },
+            data:
+              typeof project.typeProject === 'object' &&
+              project.typeProject !== null
+                ? {
+                    id: project.typeProject._id,
+                    type: 'typeProject',
+                  }
+                : null,
           },
         },
       },
