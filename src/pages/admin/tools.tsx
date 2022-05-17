@@ -113,20 +113,32 @@ function TableHeadBody({
             tool.attributes !== undefined &&
             Array.isArray(data.included)
           ) {
-            const asRelationship = tool.relationships?.as?.data;
             const included =
               data.included as any as Array<RelationshipToolInterface>;
 
-            if (Array.isArray(asRelationship) || !asRelationship) return <></>;
+            const matchIncluded = included.find((data) => {
+              const asRelationship = tool.relationships?.as?.data;
 
-            const matchIncluded = included.find(
-              (data) => data.id === asRelationship.id,
-            );
+              if (Array.isArray(asRelationship) || !asRelationship)
+                return false;
+              return data.id === asRelationship.id;
+            });
 
             return (
               <tr key={tool.id}>
                 <td>{tool.attributes.name}</td>
-                <td>{matchIncluded?.attributes?.name || 'Unknown'}</td>
+                <td>
+                  {matchIncluded?.attributes?.name || (
+                    <span
+                      style={{
+                        textDecoration: 'underline',
+                        color: 'var(--pink)',
+                      }}
+                    >
+                      Unknown
+                    </span>
+                  )}
+                </td>
                 <TdButton
                   dispatch={dispatch}
                   payload={{
@@ -182,21 +194,33 @@ function SwitchModal({
       state.modal === 'update' &&
       state.row &&
       state.row.data.type === 'Tool' &&
-      state.row.data.attributes &&
-      state.row.data.relationships &&
-      !Array.isArray(state.row.data.relationships.as?.data) &&
-      state.row.data.relationships.as?.data &&
-      state.row.included
+      state.row.data.attributes
     ) {
+      if (
+        !state.row.included ||
+        (Array.isArray(state.row.included) &&
+          state.row.included[0]?.type !== 'typeTool') ||
+        Array.isArray(state.row.data.relationships?.as?.data) ||
+        !state.row.data.relationships?.as?.data
+      )
+        return reactForm.reset({
+          name: state.row.data.attributes.name,
+          as: null,
+        } as any as { name: string; as: { label: string; value: string } });
       const included = state.row.included as RelationshipToolInterface[];
+
       reactForm.reset(
         {
           name: state.row.data.attributes.name,
-          as: {
-            label: included[0].attributes?.name || 'Unknown',
-            value: state.row.data.relationships.as.data.id,
-          },
-        },
+          as:
+            included[0].attributes?.name &&
+            state.row.data.relationships?.as?.data.id
+              ? {
+                  label: included[0].attributes?.name,
+                  value: state.row.data.relationships?.as?.data.id,
+                }
+              : null,
+        } as any as { name: string; as: { label: string; value: string } },
         { keepErrors: false, keepDirty: false, keepValues: false },
       );
     }
