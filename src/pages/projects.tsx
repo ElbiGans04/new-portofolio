@@ -546,7 +546,7 @@ const ModalContentContentList = styled.div`
   grid-template-columns: 1fr 1fr;
   margin: 1rem 0 2rem 0;
   gap: 0.5rem;
-
+  height: 100%;
   @media (max-width: 576px) {
     & {
       margin: 1rem 0;
@@ -554,18 +554,25 @@ const ModalContentContentList = styled.div`
   }
 `;
 
-const ModalContentContentListTitle = styled.div`
+const ModalContentContentListValue = styled.div`
   display: grid;
   grid-template-rows: repeat(3, 1fr);
   align-items: center;
   justify-items: start;
-  text-weight: bold;
+  gap: 1rem;
+
+  @media (max-width: 576px) {
+    & {
+      gap: 0.5rem;
+    }
+  }
 `;
-const ModalContentContentListValue = styled.div`
+const ModalContentContentListTitle = styled(ModalContentContentListValue)`
   display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
-  justify-items: start;
+  grid-template-rows: repeat(3, 1fr);
   align-items: center;
+  justify-items: start;
+  font-weight: bold;
 `;
 
 const ModalContentText = styled.div`
